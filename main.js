@@ -46,7 +46,8 @@ class AudioCleaner {
     }
 
     handleMessage(msg) {
-        
+    	logger.info("\n" + "got message in '" + msg.chat.title + "' from  " + msg.author_signature)
+
         if (!msg.audio) {
             return logger.info("it's not audio - skiping")
         }
@@ -77,9 +78,6 @@ class AudioCleaner {
 
 let acleaner = new AudioCleaner()
 
-bot.on("channel_post", async msg => {
-    logger.info("\n" + "got message in '" + msg.chat.title + "' from  " + msg.author_signature)
-    acleaner.handleMessage(msg)
-})
+bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
 
 logger.info("stareted")
