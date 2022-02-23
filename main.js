@@ -80,5 +80,6 @@ class AudioCleaner {
 let acleaner = new AudioCleaner()
 
 bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
+bot.on("message", acleaner.handleMessage.bind(acleaner))
 
 logger.info("started")
