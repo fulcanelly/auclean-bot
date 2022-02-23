@@ -41,6 +41,7 @@ class AudioCleaner {
     async resendAudio(msg) {
         logger.info("resending audio: " + msg.audio.title + ":" + msg.audio.performer)
         await bot.deleteMessage(msg.chat.id, msg.message_id)
+            .catch(console.log)
         await bot.sendAudio(msg.chat.id, msg.audio.file_id)
         
     }
