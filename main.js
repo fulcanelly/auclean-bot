@@ -80,4 +80,4 @@ let acleaner = new AudioCleaner()
 
 bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
 
-logger.info("stareted")
+logger.info("started")
