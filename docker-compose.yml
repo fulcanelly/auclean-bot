@@ -1,0 +1,8 @@
+version: '3.3'
+
+services:
+  music_cleaner:
+    restart: always
+    build: .
+    stdin_open: true
+    tty: true
