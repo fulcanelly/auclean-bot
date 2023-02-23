@@ -1,19 +1,19 @@
 const TelegramBot = require('node-telegram-bot-api')
-const dateFormat = require('dateformat') 
+const dateFormat = require('dateformat')
 
 const token = 'API_TOKEN'
 
-const bot = new TelegramBot(token, {polling:true})
+const bot = new TelegramBot(token, { polling: true })
 
 
 class Logger {
-    
+
     getTimeString() {
         return dateFormat(new Date(), "[yyyy-mm-dd h:MM:ss]")
     }
 
     info(text) {
-        text.split("\n").forEach(string => console.log(this.getTimeString() + ": " + string));
+        text.split("\n").forEach(string => console.log(`${this.getTimeString()}: ${string}`));
     }
 
 }
@@ -26,10 +26,11 @@ class MessageCheker {
         this.msg = msg
     }
 
-    isHaveCaption() {
-        return this.msg.caption
+    isLinkInCaption() {
+        return this.msg.caption_entities &&
+            this.msg.caption_entities.some(obj => obj.type === 'text_link')
     }
-    
+
     isSentViaBot() {
         return this.msg.via_bot
     }
@@ -43,22 +44,23 @@ class AudioCleaner {
         await bot.deleteMessage(msg.chat.id, msg.message_id)
             .catch(console.log)
         await bot.sendAudio(msg.chat.id, msg.audio.file_id)
-        
+
     }
 
     handleMessage(msg) {
-    	logger.info("\n" + "got message in '" + msg.chat.title + "' from  " + msg.author_signature)
+        logger.info("\n" + "got message in '" + msg.chat.title + "' from  " + msg.author_signature)
 
         if (!msg.audio) {
             return logger.info("it's not audio - skiping")
         }
 
         let mcheker = new MessageCheker(msg)
-        
-        let caption = mcheker.isHaveCaption()
+        console.debug(msg)
 
-        if (caption) {
-            logger.info("removing caption: " + caption)
+        let linkInCaption = mcheker.isLinkInCaption()
+
+        if (linkInCaption) {
+            logger.info("removing caption: " + msg.caption)
         }
 
         let viaBot = mcheker.isSentViaBot()
@@ -67,11 +69,11 @@ class AudioCleaner {
             logger.info("removing bot refernce: " + msg.via_bot.username)
         }
 
-        if (caption || viaBot) {
+        if (linkInCaption || viaBot) {
             return this.resendAudio(msg)
         }
 
-	logger.info("it's clear audio, nothing to do")
+        logger.info("it's clear audio, nothing to do")
 
     }
 
