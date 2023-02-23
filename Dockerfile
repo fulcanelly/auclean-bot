@@ -1,7 +1,11 @@
-FROM node:16
+FROM node:16-alpine
 
-COPY . . 
+USER node
 
-RUN npm i 
+WORKDIR /home/node
+
+COPY --chown=node:node . .
+
+RUN npm --silent i
 
 CMD [ "node", "main.js" ]
