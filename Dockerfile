@@ -4,8 +4,8 @@ USER node
 
 WORKDIR /home/node
 
-COPY --chown=node:node . .
+COPY --chown=node:node ./package.json .
 
 RUN npm --silent i
 
-CMD [ "node", "main.js" ]
+CMD [ "node", "src/main.js" ]
