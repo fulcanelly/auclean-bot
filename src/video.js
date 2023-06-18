@@ -50,6 +50,28 @@ async function downloadVideo(url) {
   })
 }
 
+async function convertToMp4(inputFile) {
+  const outputFile = inputFile + '.mp4'
+  return new Promise((resolve, reject) => {
+    const command = `ffmpeg -i "${inputFile}" "${outputFile}"`;
+
+    const cmdProcess = exec(command, (error, stdout, stderr) => {
+      //TODO
+      console.log({error, stdout, stderr})
+      // if (error) {
+      //   return reject(error);
+      // }
+
+      // if (stderr) {
+      //   return reject(stderr);
+      // }
+
+      return resolve(outputFile);
+    });
+  });
+}
+
+
 async function handleUrlVideoMessage(bot, msg) {
   const urls = extractUrls(msg.text, msg.entities ?? [])
   console.log(`Got urls: ${JSON.stringify(urls)}`)
@@ -58,16 +80,23 @@ async function handleUrlVideoMessage(bot, msg) {
     for (const url of urls) {
       console.log("start loading")
       let outfile = await downloadVideo(url)
+      console.log('start converting')
+      let convertedFile = await convertToMp4(outfile)
 
       console.log(fs.readdirSync(process.cwd()))
 
       console.log(outfile)
 
-      const fileBuffer = fs.readFileSync(outfile)
+      const fileBuffer = fs.readFileSync(convertedFile)
+
+      console.log('sending file')
       await bot.sendVideo(msg.chat.id, fileBuffer, {
         reply_to_message_id: msg.message_id
       })
+
+      console.log('deleting files')
       fs.unlinkSync(outfile)
+      fs.unlinkSync(convertedFile)
     }
   } catch(e) {
     console.log(e)
