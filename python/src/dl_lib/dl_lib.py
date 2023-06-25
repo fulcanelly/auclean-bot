@@ -16,17 +16,17 @@ class UrlMap:
 
 # TODO: add method to remove downloaded files
 class DlLib:
+    YTDL_PARAMS = {
+        'outtmpl': {
+            'default': str(Path('%(id)s') / '%(title).250s.%(ext).5s'),
+        }
+    }
+
     def __init__(self, dl_dir: Union[Path, str] = 'dl_lib'):
         self.__dl_dir = Path(dl_dir)
         self.__dl_dir.mkdir(exist_ok=True)
 
-        self.__ytdl_params = {
-            'outtmpl': {
-                'default': str(Path('%(id)s') / '%(title).250s.%(ext).5s'),
-            }
-        }
-
-        if outtmpl := self.__ytdl_params.get('outtmpl'):
+        if outtmpl := self.YTDL_PARAMS.get('outtmpl'):
             for k, v in outtmpl.items():
                 if not Path(v).is_absolute():
                     outtmpl[k] = str(self.__dl_dir / v)
@@ -48,7 +48,7 @@ class DlLib:
         raise NotImplementedError
 
     def yt_dlp(self, url: str) -> Optional[Path]:
-        with YoutubeDL(self.__ytdl_params) as ytdl:
+        with YoutubeDL(self.YTDL_PARAMS) as ytdl:
             info = ytdl.extract_info(url, download=True)
             path = ytdl.prepare_filename(info)
             return Path(path) if path else None
