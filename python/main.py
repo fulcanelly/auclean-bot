@@ -109,8 +109,6 @@ async def async_handle_login(ch: BlockingChannel, method, properties, body):
                 phone_code_hash=login_data['sent_code'].phone_code_hash)
 
         except telethon.errors.rpcerrorlist.SessionPasswordNeededError as e:
-            print(e)
-            print("=====================66666^^")
             channel.basic_publish(exchange='',
                 routing_key= 'tg:login:answer',
                 body= json.dumps({
