@@ -132,7 +132,7 @@ async def async_handle_login(ch: BlockingChannel, method, properties, body):
         client = telethon.TelegramClient(session_name, api_id, api_hash)
         await client.connect()
 
-        code_ok = await client.sign_in(
+        await client.sign_in(
             phone=login_data['phone'],
             code=obsuscate_code(code), # code obsuscation idk why but we need it
             password=password,
