@@ -108,7 +108,7 @@ async def async_handle_login(ch: BlockingChannel, method, properties, body):
                 code=obsuscate_code(code), # code obsuscation idk why but we need it
                 phone_code_hash=login_data['sent_code'].phone_code_hash)
 
-        except telethon.errors.rpcerrorlist.SessionPasswordNeededError as e:
+        except telethon.errors.rpcerrorlist.SessionPasswordNeededError:
             channel.basic_publish(exchange='',
                 routing_key= 'tg:login:answer',
                 body= json.dumps({
