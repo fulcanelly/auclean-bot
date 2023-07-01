@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.4'
 
 services:
   music_cleaner:
@@ -8,3 +8,54 @@ services:
     tty: true
     volumes:
       - ./src:/home/node/src
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=$RMQ_USERNAME
+      - RABBITMQ_DEFAULT_PASS=$RMQ_PASSWORD
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    volumes:
+      - ./rmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  python-toolset:
+    build: python
+    restart: always
+    stdin_open: true
+    tty: true
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+
+      - TG_API_ID
+      - TG_API_HASH
+
+    volumes:
+      - ./python:/app
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+networks:
+  default:
+    driver: bridge
