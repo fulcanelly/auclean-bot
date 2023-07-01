@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api')
 const dateFormat = require('dateformat')
 const amqplib = require('amqplib')
 
-const token = '2094069209:AAGthpMa5FMojFNeJwrYm1Fdtevp4r9DfmY'
+const token = process.env.TG_BOT_API_TOKEN
 
 const bot = new TelegramBot(token, { polling: true })
 
@@ -112,12 +112,9 @@ async function main() {
     console.log("connecting to rmq")
     const connection = await amqplib.connect({
         hostname: 'rabbitmq',
-        password: 'gaw',
-        username: 'meow'
+        username: process.env.RMQ_USERNAME,
+        password: process.env.RMQ_PASSWORD,
     })
-    console.log("creating things")
-
-
 
     console.log("setting up bot")
 
@@ -126,16 +123,13 @@ async function main() {
     bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
     bot.on("message", acleaner.handleMessage.bind(acleaner))
 
-
-
     const channel = await connection.createConfirmChannel()
-    await channel.assertQueue('tg:login');
 
-    await channel.assertQueue('tg:login');
+    await channel.assertQueue('tg:login', { durable: true })
+    await channel.assertQueue('tg:login:answer',  { durable: true })
 
 
     channel.consume('tg:login:answer', async (msg) => {
-        channel.ack(msg)
 
         const data = JSON.parse(msg.content.toString())
 
@@ -185,9 +179,9 @@ async function main() {
                 })
             ))
         }
+
+        channel.ack(msg)
     })
-
-
 
     bot.on('text', async (msg) => {
         if (msg.text == '/login' && msg.chat.type == 'private') {

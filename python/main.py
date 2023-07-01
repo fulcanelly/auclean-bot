@@ -22,7 +22,8 @@ connection = pika.BlockingConnection(
 
 channel = connection.channel()
 
-channel.queue_declare(queue='tg:login:answer')
+channel.queue_declare(queue='tg:login:answer', durable=True)
+channel.queue_declare(queue='tg:login', durable=True)
 
 login_data_by_user_id = {}
 

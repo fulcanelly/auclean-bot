@@ -13,6 +13,8 @@ services:
       - RMQ_USERNAME
       - RMQ_PASSWORD
 
+      - TG_BOT_API_TOKEN
+
     depends_on:
       rabbitmq:
         condition: service_healthy
