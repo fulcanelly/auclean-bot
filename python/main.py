@@ -9,7 +9,7 @@ import telethon
 api_id = os.getenv('TG_API_ID')
 api_hash = os.getenv('TG_API_HASH')
 
-rmq_username = os.getenv('RMQ_USERNME')
+rmq_username = os.getenv('RMQ_USERNAME')
 rmq_password = os.getenv('RMQ_PASSWORD')
 
 connection = pika.BlockingConnection(
