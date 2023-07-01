@@ -8,4 +8,8 @@ COPY --chown=node:node ./package.json .
 
 RUN npm --silent i
 
-CMD [ "node", "src/main.js" ]
+USER root
+
+RUN npm install -g nodemon
+
+CMD [ "nodemon", "src/main.js" ]

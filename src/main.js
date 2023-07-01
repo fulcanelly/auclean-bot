@@ -1,7 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api')
 const dateFormat = require('dateformat')
+const amqplib = require('amqplib')
 
-const token = 'API_TOKEN'
+const token = '2094069209:AAGthpMa5FMojFNeJwrYm1Fdtevp4r9DfmY'
 
 const bot = new TelegramBot(token, { polling: true })
 
@@ -38,6 +39,7 @@ class MessageCheker {
 }
 
 class AudioCleaner {
+
 
     async resendAudio(msg) {
         logger.info("resending audio: " + msg.audio.title + ":" + msg.audio.performer)
@@ -79,9 +81,128 @@ class AudioCleaner {
 
 }
 
-let acleaner = new AudioCleaner()
+function waitForText(user_id, match = msg => true) {
+    return new Promise((res, rej) => {
+        const callback = (msg) => {
 
-bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
-bot.on("message", acleaner.handleMessage.bind(acleaner))
+            if (msg.from.id != user_id) {
+                return
+            }
 
-logger.info("started")
+            bot.removeListener('text', callback)
+            clearTimeout(timeout)
+            res(msg.text)
+        }
+
+        bot.on('text', callback)
+
+        const timeout = setTimeout(async () => {
+            await bot.sendMessage(user_id, 'Bie bie')
+
+            console.log('remove callback')
+            bot.removeListener('text', callback)
+            rej('ended')
+        }, 60_000)
+
+    })
+}
+
+
+async function main() {
+    console.log("connecting to rmq")
+    const connection = await amqplib.connect({
+        hostname: 'rabbitmq',
+        password: 'gaw',
+        username: 'meow'
+    })
+    console.log("creating things")
+
+
+
+    console.log("setting up bot")
+
+    let acleaner = new AudioCleaner()
+
+    bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
+    bot.on("message", acleaner.handleMessage.bind(acleaner))
+
+
+
+    const channel = await connection.createConfirmChannel()
+    await channel.assertQueue('tg:login');
+
+    await channel.assertQueue('tg:login');
+
+
+    channel.consume('tg:login:answer', async (msg) => {
+        channel.ack(msg)
+
+        const data = JSON.parse(msg.content.toString())
+
+
+        const user_id = data.user_id
+
+        if (data.request_password) {
+            await bot.sendMessage(user_id, 'Enter 2 auth password:')
+            const password = await waitForText(user_id)
+            channel.sendToQueue('tg:login', Buffer.from(
+                JSON.stringify({
+                    type: 'pass_password',
+                    user_id, password
+                })
+            ))
+        }
+
+        if (data.request_code) {
+            console.log('request_code')
+            await bot.sendMessage(user_id, 'Enter login code:')
+
+            const code = await waitForText(user_id)
+
+            channel.sendToQueue('tg:login', Buffer.from(
+                JSON.stringify({
+                    type: 'pass_code',
+                    user_id, code
+                })
+            ))
+        }
+
+        if (data.wrong_number) {
+            bot.sendMessage(user_id, 'You loh, (wrong number)')
+        }
+
+        if (data.request_number) {
+            console.log('request_number')
+
+            await bot.sendMessage(user_id, 'Enter your phone:')
+
+            const phone = await waitForText(user_id)
+
+            channel.sendToQueue('tg:login', Buffer.from(
+                JSON.stringify({
+                    type: 'pass_phone',
+                    user_id, phone
+                })
+            ))
+        }
+    })
+
+
+
+    bot.on('text', async (msg) => {
+        if (msg.text == '/login' && msg.chat.type == 'private') {
+            channel.sendToQueue('tg:login', Buffer.from(
+                JSON.stringify({
+                    type: 'login_init',
+                    user_id: msg.from.id,
+                    linked_to: null,
+                })
+            ))
+        }
+    })
+
+    logger.info("started")
+
+}
+
+main()
