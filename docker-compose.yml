@@ -6,3 +6,5 @@ services:
     build: .
     stdin_open: true
     tty: true
+    volumes:
+      - ./src:/home/node/src

@@ -5,6 +5,7 @@ const token = 'API_TOKEN'
 
 const bot = new TelegramBot(token, { polling: true })
 
+const { handleUrlVideoMessage } = require('./video');
 
 class Logger {
 
@@ -84,4 +85,11 @@ let acleaner = new AudioCleaner()
 bot.on("channel_post", acleaner.handleMessage.bind(acleaner))
 bot.on("message", acleaner.handleMessage.bind(acleaner))
 
+bot.on('message', handleUrlVideoMessage.bind(null, bot))
+bot.on("channel_post", handleUrlVideoMessage.bind(null, bot))
+
 logger.info("started")
+
+bot.on('error', (err) => {
+    console.log(err)
+})
