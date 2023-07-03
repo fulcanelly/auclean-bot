@@ -51,6 +51,14 @@ class tele_login_t:
                 'request_password': True
             }))
 
+    def notify_ok(self, user_id):
+        self.channel.basic_publish(exchange='',
+            routing_key= 'tg:login:answer',
+            body= json.dumps({
+                'user_id': user_id,
+                'login_ok': True
+            }))
+
 class user_loginer:
     def __init__(self, user_id: str, phone: str) -> None:
         self.user_id = user_id
@@ -78,17 +86,28 @@ class user_loginer:
     def login_user(self):
         asyncio.set_event_loop(asyncio.new_event_loop())
 
-        session_namee = sesion_by_phone_and_phone(self.user_id, self.phone)
-        client = TelegramClient(session_namee, api_id, api_hash)
+        session_name = sesion_by_phone_and_phone(self.user_id, self.phone)
+        client = TelegramClient(session_name, api_id, api_hash)
 
         async def login():
             self.rmq_tele = tele_login_t(get_new_channel())
-            await client.connect()
-            await client.start(
-                max_attempts=1,
-                phone=self.phone,
-                code_callback=self.obtain_code,
-                password=self.obtain_password)
+            try:
+                await client.connect()
+                await client.start(
+                    max_attempts=1,
+                    phone=self.phone,
+                    code_callback=self.obtain_code,
+                    password=self.obtain_password)
+
+                me = await client.get_me()
+
+                if me.id == self.user_id:
+                    self.rmq_tele.notify_ok(self.user_id)
+
+            finally:
+                await client.disconnect()
+                self.rmq_tele.channel.close()
+                client.loop.stop()
 
         print('loop')
 

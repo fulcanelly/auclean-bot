@@ -1,7 +1,4 @@
-import asyncio
 import json
-import os
-import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
 from rmq import get_new_channel
