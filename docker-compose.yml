@@ -72,6 +72,10 @@ services:
     ports:
       - "8080:8080"
 
+    depends_on:
+        postgres:
+          condition: service_healthy
+
   postgres:
     environment:
       - POSTGRES_USER
@@ -90,6 +94,11 @@ services:
     stdin_open: true
     tty: true
 
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 networks:
   default:
     driver: bridge
