@@ -64,10 +64,31 @@ services:
     volumes:
       - ./web:/app
 
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST=postgres
+
     ports:
       - "8080:8080"
 
+  postgres:
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
 
+    image: postgres
+
+    volumes:
+      - ./psql-data:/var/lib/postgresql/data
+
+    ports:
+      - 5432:5432
+
+    restart: always
+
+    stdin_open: true
+    tty: true
 
 networks:
   default:
