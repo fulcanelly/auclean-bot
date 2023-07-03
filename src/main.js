@@ -135,49 +135,52 @@ async function main() {
 
 
         const user_id = data.user_id
+        try {
+            if (data.request_password) {
+                await bot.sendMessage(user_id, 'Enter 2 auth password:')
+                const password = await waitForText(user_id)
+                channel.sendToQueue('tg:login', Buffer.from(
+                    JSON.stringify({
+                        type: 'pass_password',
+                        user_id, password
+                    })
+                ))
+            }
 
-        if (data.request_password) {
-            await bot.sendMessage(user_id, 'Enter 2 auth password:')
-            const password = await waitForText(user_id)
-            channel.sendToQueue('tg:login', Buffer.from(
-                JSON.stringify({
-                    type: 'pass_password',
-                    user_id, password
-                })
-            ))
-        }
+            if (data.request_code) {
+                console.log('request_code')
+                await bot.sendMessage(user_id, 'Enter login code(separate by space some of numbers):')
 
-        if (data.request_code) {
-            console.log('request_code')
-            await bot.sendMessage(user_id, 'Enter login code:')
+                const code = await waitForText(user_id)
 
-            const code = await waitForText(user_id)
+                channel.sendToQueue('tg:login', Buffer.from(
+                    JSON.stringify({
+                        type: 'pass_code',
+                        user_id, code
+                    })
+                ))
+            }
 
-            channel.sendToQueue('tg:login', Buffer.from(
-                JSON.stringify({
-                    type: 'pass_code',
-                    user_id, code
-                })
-            ))
-        }
+            if (data.wrong_number) {
+                bot.sendMessage(user_id, 'You loh, (wrong number)')
+            }
 
-        if (data.wrong_number) {
-            bot.sendMessage(user_id, 'You loh, (wrong number)')
-        }
+            if (data.request_number) {
+                console.log('request_number')
 
-        if (data.request_number) {
-            console.log('request_number')
+                await bot.sendMessage(user_id, 'Enter your phone:')
 
-            await bot.sendMessage(user_id, 'Enter your phone:')
+                const phone = await waitForText(user_id)
 
-            const phone = await waitForText(user_id)
-
-            channel.sendToQueue('tg:login', Buffer.from(
-                JSON.stringify({
-                    type: 'pass_phone',
-                    user_id, phone
-                })
-            ))
+                channel.sendToQueue('tg:login', Buffer.from(
+                    JSON.stringify({
+                        type: 'pass_phone',
+                        user_id, phone
+                    })
+                ))
+            }
+        } catch(e) {
+            bot.sendMessage(user_id, 'something went wrong')
         }
 
         channel.ack(msg)
