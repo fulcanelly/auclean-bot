@@ -111,7 +111,7 @@ function waitForText(user_id, match = msg => true) {
 async function main() {
     console.log("connecting to rmq")
     const connection = await amqplib.connect({
-        hostname: 'rabbitmq',
+        hostname: process.env.RMQ_HOST,
         username: process.env.RMQ_USERNAME,
         password: process.env.RMQ_PASSWORD,
     })

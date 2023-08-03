@@ -4,13 +4,13 @@ import pika
 
 rmq_username = os.getenv('RMQ_USERNAME')
 rmq_password = os.getenv('RMQ_PASSWORD')
-
+rmq_host = os.getenv('RMQ_HOST')
 
 def get_new_channel():
 
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
-            host='rabbitmq',
+            host=rmq_host,
             credentials=pika.PlainCredentials(
                 username=rmq_username,
                 password=rmq_password,

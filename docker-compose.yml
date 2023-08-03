@@ -12,6 +12,7 @@ services:
     environment:
       - RMQ_USERNAME
       - RMQ_PASSWORD
+      - RMQ_HOST
 
       - TG_BOT_API_TOKEN
 
@@ -47,6 +48,7 @@ services:
     environment:
       - RMQ_USERNAME
       - RMQ_PASSWORD
+      - RMQ_HOST
 
       - TG_API_ID
       - TG_API_HASH
@@ -57,6 +59,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
+  neo4j:
+    image: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - $HOME/neo4j/data:/data
+    restart: always
 
 networks:
   default:
