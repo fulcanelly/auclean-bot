@@ -58,7 +58,7 @@ class tele_login_t:
                 'user_id': user_id,
                 'login_ok': True
             }))
-gi
+
 class user_loginer:
     def __init__(self, user_id: str, phone: str) -> None:
         self.user_id = user_id
