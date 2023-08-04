@@ -131,11 +131,11 @@ async function main() {
 
     channel.consume('tg:login:answer', async (msg) => {
 
-        const data = JSON.parse(msg.content.toString())
-
-
-        const user_id = data.user_id
         try {
+            const data = JSON.parse(msg.content.toString())
+
+            const user_id = data.user_id
+
             if (data.request_password) {
                 await bot.sendMessage(user_id, 'Enter 2 auth password:')
                 const password = await waitForText(user_id)
@@ -179,8 +179,12 @@ async function main() {
                     })
                 ))
             }
+
+            if (data.login_ok) {
+                await bot.sendMessage(user_id, 'You are welcome!')
+            }
         } catch(e) {
-            bot.sendMessage(user_id, 'something went wrong')
+            // bot.sendMessage(user_id, 'something went wrong')
         }
 
         channel.ack(msg)
