@@ -1,4 +1,8 @@
 import json
+import pretty_traceback
+
+pretty_traceback.install()
+
 from pika.adapters.blocking_connection import BlockingChannel
 
 from rmq import get_new_channel

@@ -58,7 +58,7 @@ class tele_login_t:
                 'user_id': user_id,
                 'login_ok': True
             }))
-
+gi
 class user_loginer:
     def __init__(self, user_id: str, phone: str) -> None:
         self.user_id = user_id
@@ -87,6 +87,7 @@ class user_loginer:
         asyncio.set_event_loop(asyncio.new_event_loop())
 
         session_name = sesion_by_phone_and_phone(self.user_id, self.phone)
+
         client = TelegramClient(session_name, api_id, api_hash)
 
         async def login():
@@ -117,7 +118,7 @@ class user_loginer:
         Thread(target=self.login_user).start()
 
 def sesion_by_phone_and_phone(user_id, phone):
-    return f"sessions/{user_id}-{phone}"
+    return f"session-{user_id}-{phone}"
 
 
 
