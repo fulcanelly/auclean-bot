@@ -20,5 +20,7 @@ def get_new_channel():
 
     channel.queue_declare(queue='tg:login:answer', durable=True)
     channel.queue_declare(queue='tg:login', durable=True)
+    channel.queue_declare(queue='curator:event', durable=True)
+    channel.queue_declare(queue='curator:command', durable=True)
 
     return channel

@@ -14,6 +14,21 @@ api_hash = os.getenv('TG_API_HASH')
 
 channel = get_new_channel()
 
+class curator_notifier_t:
+    def __init__(self, channel) -> None:
+        self.channel: BlockingChannel = channel
+
+    def notify_success_login(self, user_id, session_name, linked_to = None) -> None:
+        self.channel.basic_publish(exchange='',
+            routing_key= 'curator:event',
+            body= json.dumps({
+                'event': 'login_success',
+                'login_success': {
+                    'user_id': user_id,
+                    'session_name': session_name,
+                    'linked_to': linked_to
+                }
+            }))
 
 class tele_login_t:
     def __init__(self, channel) -> None:
@@ -101,9 +116,12 @@ class user_loginer:
                     password=self.obtain_password)
 
                 me = await client.get_me()
-
+                #TODO: remove this check
                 if me.id == self.user_id:
                     self.rmq_tele.notify_ok(self.user_id)
+                    ch = get_new_channel()
+                    curator_notifier_t(ch).notify_success_login(self.user_id, session_name)
+                    ch.close()
 
             finally:
                 await client.disconnect()

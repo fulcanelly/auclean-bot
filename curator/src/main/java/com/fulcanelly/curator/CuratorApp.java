@@ -33,9 +33,9 @@ public class CuratorApp {
             System.out.println();
         }
 
-        while (true) {
-            Thread.sleep(2300);
-        }
+        // while (true) {
+        //     Thread.sleep(2300);
+        // }
     }
 
 

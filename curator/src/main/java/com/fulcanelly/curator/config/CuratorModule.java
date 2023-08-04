@@ -48,5 +48,5 @@ public class CuratorModule extends AbstractModule {
     String provideRabbitMQPassword() {
         return System.getenv("RMQ_PASSWORD");
     }
-    
+
 }

@@ -127,6 +127,7 @@ async function main() {
 
     await channel.assertQueue('tg:login', { durable: true })
     await channel.assertQueue('tg:login:answer',  { durable: true })
+    await channel.assertQueue('curator:event',  { durable: true })
 
 
     channel.consume('tg:login:answer', async (msg) => {
@@ -192,6 +193,15 @@ async function main() {
 
     bot.on('text', async (msg) => {
         if (msg.text == '/login' && msg.chat.type == 'private') {
+            channel.sendToQueue('curator:event', Buffer.from(
+                JSON.stringify({
+                    event: 'login_init',
+                    login_init: {
+                        user_id: msg.from.id,
+                        linked_to: null,
+                    }
+                })
+            ))
             channel.sendToQueue('tg:login', Buffer.from(
                 JSON.stringify({
                     type: 'login_init',
