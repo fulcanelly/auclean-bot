@@ -14,7 +14,7 @@ import com.google.inject.name.Named;
 
 import lombok.Data;
 import lombok.SneakyThrows;
-import org.neo4j.ogm.drivers.bolt.request.BoltRequest;;
+
 @Singleton @Data
 public class Neo4jClient {
 
@@ -33,7 +33,6 @@ public class Neo4jClient {
                 .credentials(username, password)
                 .build();
 
-                
         Logger.getLogger("org.neo4j.ogm.drivers.bolt.request.BoltRequest").setLevel(Level.ALL);
         Logger.getLogger("org.neo4j.ogm.drivers.bolt.request.EmbeddedRequest").setLevel(Level.ALL);
 

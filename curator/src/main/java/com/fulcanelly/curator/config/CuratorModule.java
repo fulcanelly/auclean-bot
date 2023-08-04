@@ -1,9 +1,13 @@
 package com.fulcanelly.curator.config;
 
+import com.fulcanelly.curator.listeners.LoginListener;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 public class CuratorModule extends AbstractModule {
 
@@ -47,6 +51,19 @@ public class CuratorModule extends AbstractModule {
     @Named("rmq.password")
     String provideRabbitMQPassword() {
         return System.getenv("RMQ_PASSWORD");
+    }
+
+    @Provides
+    @Singleton
+    @Named("all")
+    EventBus providEventBus() {
+        return new EventBus("all");
+    }
+
+    protected void configure() {
+        // TODO: scan root package to find listeners
+        var multibinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("all"));
+        multibinder.addBinding().to(LoginListener.class);
     }
 
 }

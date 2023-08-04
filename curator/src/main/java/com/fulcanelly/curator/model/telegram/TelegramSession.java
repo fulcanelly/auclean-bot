@@ -19,7 +19,8 @@ public class TelegramSession {
 
     @PostLoad
     void postLoad() {
-
+        
+        System.out.println("post load");
     }
 
     @Property(name="session_name")

@@ -12,18 +12,15 @@ public class CallbackLoggerListener implements EventListener {
     @Override
     public void onPostSave(Event event) {
         System.out.println("postsave ");
-
     }
 
     @Override
     public void onPreDelete(Event event) {
         System.out.println("predel");
-
     }
 
     @Override
     public void onPostDelete(Event event) {
         System.out.println("postdel");
-
     }
 }
