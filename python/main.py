@@ -1,5 +1,6 @@
 import json
 import pretty_traceback
+from tele_login import curator_notifier_t
 
 pretty_traceback.install()
 
@@ -16,6 +17,7 @@ login_data_by_user_id = {}
 tele_login = tele_login_t(channel)
 
 def async_handle_login(ch: BlockingChannel, method, properties, body):
+
 
     data = json.loads(body)
 
@@ -51,6 +53,25 @@ def handle_login(ch: BlockingChannel, method, properties, body):
 channel.basic_consume(
     queue='tg:login', on_message_callback=handle_login, auto_ack=True)
 
+curator_notifier = curator_notifier_t(channel)
+
+
+def handle_curator_command(ch: BlockingChannel, method, properties, body):
+    data = json.loads(body)
+
+    print('get someting')
+    print(data)
+
+    if not len(data):
+        # TODO, maybe somhow limit it for happening only once per runtime
+        print("requesting sessions")
+        curator_notifier.request_sessions()
+
+    ch.basic_ack(method.delivery_tag)
+
+channel.basic_consume(
+    queue='curator:command', on_message_callback=handle_curator_command
+)
 print('starting')
 
 channel.start_consuming()

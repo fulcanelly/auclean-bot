@@ -25,9 +25,10 @@ public abstract class RabbitMQSerializedSender {
     }
 
     @SneakyThrows
-    <T>void send(T object) {
+    public <T>void send(T object) {
         var json = objectMapper.writeValueAsString(object);
 
+        System.out.println(json);
         channel.basicPublish("", getQueueName(), null, json.getBytes());
     }
 }

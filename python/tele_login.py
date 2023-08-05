@@ -30,6 +30,13 @@ class curator_notifier_t:
                 }
             }))
 
+    def request_sessions(self) -> None:
+        self.channel.basic_publish(exchange='',
+            routing_key= 'curator:event',
+            body= json.dumps({
+                'event': 'request_session',
+            }))
+
 class tele_login_t:
     def __init__(self, channel) -> None:
         self.channel: BlockingChannel = channel

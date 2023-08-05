@@ -1,6 +1,9 @@
 package com.fulcanelly.curator.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fulcanelly.curator.listeners.LoginListener;
+import com.fulcanelly.curator.listeners.StartupListener;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -60,10 +63,19 @@ public class CuratorModule extends AbstractModule {
         return new EventBus("all");
     }
 
+    @Provides
+    @Singleton
+    ObjectMapper providMapper() {
+        var mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        return mapper;
+    }
+
     protected void configure() {
         // TODO: scan root package to find listeners
         var multibinder = Multibinder.newSetBinder(binder(), Object.class, Names.named("all"));
         multibinder.addBinding().to(LoginListener.class);
+        multibinder.addBinding().to(StartupListener.class);
     }
 
 }

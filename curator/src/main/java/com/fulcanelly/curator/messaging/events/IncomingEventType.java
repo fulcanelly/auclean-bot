@@ -1,6 +1,7 @@
 package com.fulcanelly.curator.messaging.events;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fulcanelly.curator.events.SessionsRequestEvent;
 
 public enum IncomingEventType implements EventExtractable<CuratorEvent> {
     @JsonProperty("login_success")
@@ -18,6 +19,14 @@ public enum IncomingEventType implements EventExtractable<CuratorEvent> {
         @Override
         public Object extractEvent(CuratorEvent event) {
             return event.getLoginInit();
+        }
+
+    },
+    @JsonProperty("request_session")
+    REQUEST_SESSION {
+        @Override
+        public Object extractEvent(CuratorEvent object) {
+            return new SessionsRequestEvent();
         }
 
     }
