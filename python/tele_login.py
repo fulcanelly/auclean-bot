@@ -4,6 +4,7 @@ import os
 from threading import Thread
 from pika.adapters.blocking_connection import BlockingChannel
 from telethon import TelegramClient
+from session_store import session_by_name
 
 from rmq import get_new_channel
 
@@ -110,7 +111,22 @@ class user_loginer:
 
         session_name = sesion_by_phone_and_phone(self.user_id, self.phone)
 
-        client = TelegramClient(session_name, api_id, api_hash)
+
+        old_client = session_by_name.get(session_name)
+
+
+        client = None
+
+        if old_client:
+            client = old_client.client
+            print("OLD CLIENT RUNNING")
+            # asyncio.set_event_loop(
+                #TODO
+            return
+        else:
+            client = TelegramClient(session_name, api_id, api_hash)
+
+
 
         async def login():
             self.rmq_tele = tele_login_t(get_new_channel())
@@ -143,7 +159,7 @@ class user_loginer:
         Thread(target=self.login_user).start()
 
 def sesion_by_phone_and_phone(user_id, phone):
-    return f"session-{user_id}-{phone}"
+    return f"session-{phone}"
 
 
 

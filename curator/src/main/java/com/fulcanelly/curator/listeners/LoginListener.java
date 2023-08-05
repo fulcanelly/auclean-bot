@@ -9,12 +9,16 @@ import com.fulcanelly.curator.messaging.events.LoginInitEvent;
 import com.fulcanelly.curator.messaging.events.LoginSuccessEvent;
 import com.fulcanelly.curator.model.Neo4jClient;
 import com.fulcanelly.curator.model.telegram.TelegramSession;
+import com.fulcanelly.curator.services.SessionConfirmationService;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
 public class LoginListener {
     @Inject
     Neo4jClient client;
+
+    @Inject
+    SessionConfirmationService service;
 
     @Subscribe
     void onLoginFinish(LoginSuccessEvent event) {
@@ -35,6 +39,7 @@ public class LoginListener {
             .withUserId(event.getUserId());
 
         client.getSession().save(telegramSession);
+        service.sendAllSessions();
     }
 
     @Subscribe

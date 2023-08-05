@@ -5,6 +5,7 @@ import java.util.Set;
 import com.fulcanelly.curator.config.CuratorModule;
 import com.fulcanelly.curator.events.StartupEvent;
 import com.fulcanelly.curator.messaging.RabbitMQRequestDispatcher;
+import com.fulcanelly.curator.services.SingletonService;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -20,6 +21,9 @@ public class CuratorApp {
 
     @Inject @Named("all")
     EventBus eventBus;
+
+    @Inject
+    SingletonService singletonService;
 
     public static void main(String[] args) throws Exception {
         new CuratorApp().run();

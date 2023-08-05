@@ -11,6 +11,7 @@ import com.fulcanelly.curator.events.StartupEvent;
 import com.fulcanelly.curator.messaging.CuratorCommander;
 import com.fulcanelly.curator.model.Neo4jClient;
 import com.fulcanelly.curator.model.telegram.TelegramSession;
+import com.fulcanelly.curator.services.SessionConfirmationService;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
@@ -21,6 +22,9 @@ public class StartupListener {
     @Inject
     Neo4jClient client;
 
+    @Inject
+    SessionConfirmationService sessionConfirmationService;
+
     @Subscribe
     void onStartup(StartupEvent event) {
         curatorCommander.send(event);
@@ -29,12 +33,6 @@ public class StartupListener {
 
     @Subscribe
     void onSessionRequest(SessionsRequestEvent event) {
-        var sessions = client.getSession().loadAll(
-                TelegramSession.class,
-                new Filter("user_id", ComparisonOperator.EXISTS)).stream()
-                .collect(Collectors.toList());
-
-        System.out.println(sessions);
-        curatorCommander.send(Map.of("sessions", sessions));
+        sessionConfirmationService.sendAllSessions();
     }
 }
