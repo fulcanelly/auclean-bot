@@ -20,4 +20,4 @@ RUN yarn
 
 # # USER node
 
-CMD [ "yarn", "run", "ts-node", "./src/main.ts" ]
+CMD [ "./node_modules/.bin/ts-node", "./src/main.ts" ]
