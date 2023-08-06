@@ -26,7 +26,7 @@ class curator_notifier_t:
                 'event': 'request_session',
             }))
 
-    def notify_online_status(self, online_of_user_id, reported_by_user_id, online) -> None:
+    def notify_online_status(self, online_of_user_id, reported_by_user_id, online, name) -> None:
         self.channel.basic_publish(exchange='',
             routing_key= 'curator:event',
             body= json.dumps({
@@ -35,6 +35,7 @@ class curator_notifier_t:
                     'subject_user_id': str(online_of_user_id),
                     'reporter_user_id': str(reported_by_user_id),
                     'online': online,
-                    'date': str(datetime.now())
+                    'date': str(datetime.now()),
+                    'name': name
                 }
             }))

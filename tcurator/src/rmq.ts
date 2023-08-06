@@ -42,7 +42,7 @@ export async function setupRmq() {
             await sendAllSessions(channel)
             channel.ack(msg as amqplib.Message, false)
         } else if (data.online_status) {
-            let { subject_user_id, reporter_user_id, online, date } = data.online_status
+            let { subject_user_id, reporter_user_id, online, date, name } = data.online_status
 
             subject_user_id = String(subject_user_id)
             reporter_user_id = String(reporter_user_id)
@@ -53,8 +53,8 @@ export async function setupRmq() {
                     return
                 }
 
-                await createUserIfNotExists(subject_user_id)
-                await createUserIfNotExists(reporter_user_id)
+                await createUserIfNotExists(subject_user_id, name)
+                await createUserIfNotExists(reporter_user_id, name)
 
                 const onlineLog = await OnlineLog.createOne({
                     time: date as string,
@@ -94,17 +94,21 @@ export async function setupRmq() {
 
 
 
-async function createUserIfNotExists(user_id: string): Promise<NeogmaInstance<UserProps, UserRelatedNodesI>>  {
+async function createUserIfNotExists(user_id: string, name: string): Promise<NeogmaInstance<UserProps, UserRelatedNodesI>>  {
     const user = await Users.findOne({ where: { user_id } })
 
     if (user) {
+        if (user.name != name) {
+            user.name = name
+            await user.save()
+        }
         return user
     }
 
 
     return await Users.createOne({
         user_id,
-        name: '',
+        name: name,
         uuid: uuidv4()
     })
 

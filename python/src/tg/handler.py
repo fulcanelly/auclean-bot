@@ -31,9 +31,11 @@ class session_handler:
             #TODO
             if event.online == None: return
 
-            self.curator_notifier.notify_online_status(event.user_id, self.user_id, event.online)
-
             user_details = await self.client.get_entity(event.user_id)
+
+
+            self.curator_notifier.notify_online_status(event.user_id, self.user_id, event.online, user_details.first_name)
+
             print(f" {user_details.first_name}, time: {datetime.datetime.now()}, online {event.online:}")
         except Exception as e:
             print(e)

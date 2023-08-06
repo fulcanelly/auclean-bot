@@ -20,7 +20,7 @@ export const Users = ModelFactory<UserProps, UserRelatedNodesI>(
         label: 'User',
         schema: {
             name: {
-                type: 'string',
+                type: ['string', 'null'],
             },
             user_id: {
                 type: 'string',
