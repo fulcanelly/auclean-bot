@@ -4,6 +4,8 @@ USER node
 
 WORKDIR /app
 
+RUN chown -R node:node /app/
+
 COPY --chown=node:node ./package.json .
 COPY --chown=node:node ./yarn.lock .
 
