@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import json
 import os
 from threading import Thread
@@ -25,7 +26,7 @@ class curator_notifier_t:
             body= json.dumps({
                 'event': 'login_success',
                 'login_success': {
-                    'user_id': user_id,
+                    'user_id': str(user_id),
                     'session_name': session_name,
                     'linked_to': linked_to
                 }
@@ -37,6 +38,20 @@ class curator_notifier_t:
             body= json.dumps({
                 'event': 'request_session',
             }))
+
+    def notify_online_status(self, online_of_user_id, reported_by_user_id, online) -> None:
+        self.channel.basic_publish(exchange='',
+            routing_key= 'curator:event',
+            body= json.dumps({
+                'event': 'online_status',
+                'online_status': {
+                    'subject_user_id': str(online_of_user_id),
+                    'reporter_user_id': str(reported_by_user_id),
+                    'online': online,
+                    'date': str(datetime.now())
+                }
+            }))
+
 
 class tele_login_t:
     def __init__(self, channel) -> None:

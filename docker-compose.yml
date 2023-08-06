@@ -75,15 +75,15 @@ services:
   #     retries: 20
   #     start_period: 3s
 
-  curator:
-    build: ./curator
+  tcurator:
+    build: ./tcurator/
     restart: always
     stdin_open: true
     tty: true
 
     volumes:
       - ~/.m2:/root/.m2
-      - ./curator:/app
+      - ./tcurator:/app
 
     environment:
       - RMQ_USERNAME
