@@ -1,16 +1,9 @@
 package com.fulcanelly.curator.listeners;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.neo4j.ogm.cypher.ComparisonOperator;
-import org.neo4j.ogm.cypher.Filter;
-
 import com.fulcanelly.curator.events.SessionsRequestEvent;
 import com.fulcanelly.curator.events.StartupEvent;
 import com.fulcanelly.curator.messaging.CuratorCommander;
 import com.fulcanelly.curator.model.Neo4jClient;
-import com.fulcanelly.curator.model.telegram.TelegramSession;
 import com.fulcanelly.curator.services.SessionConfirmationService;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;

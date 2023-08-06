@@ -68,6 +68,7 @@ public class CuratorModule extends AbstractModule {
     ObjectMapper providMapper() {
         var mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         return mapper;
     }
 
