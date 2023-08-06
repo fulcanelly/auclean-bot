@@ -12,4 +12,4 @@ USER root
 
 RUN npm install -g nodemon
 
-CMD [ "nodemon", "src/main.js" ]
+CMD [ "node", "src/main.js" ]

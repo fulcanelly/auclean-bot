@@ -26,5 +26,5 @@ RUN pip install -r ./requirements.txt
 
 
 # Set the default command to run when the container starts
-CMD nodemon --exec python3 src/main.py
+CMD python3 src/main.py
 

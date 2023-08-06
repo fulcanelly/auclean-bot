@@ -15,4 +15,4 @@ WORKDIR /app
 
 # # USER node
 
-CMD [ "yarn", "run", "nodemon", "--exec", "ts-node", "./src/main.ts" ]
+CMD [ "yarn", "run", "ts-node", "./src/main.ts" ]
