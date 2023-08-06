@@ -15,13 +15,12 @@ RUN apt-get update && \
 RUN npm install -g nodemon
 
 # Copy the setup.cfg file into the container
-COPY setup.cfg .
-COPY setup.py .
-COPY . .
+
+COPY requirements.txt .
 
 
 # Install project dependencies
-RUN pip install -e .
+RUN pip install -r ./requirements.txt
 
 # Copy the rest of your project files into the conta
 

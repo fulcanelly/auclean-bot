@@ -7,7 +7,7 @@ from telethon import TelegramClient, events
 
 from rmq.rmq import get_new_channel
 from rmq.send.curator import curator_notifier_t
-from ..util.vars import api_hash, api_id
+from util.vars import get_api_hash, get_api_id
 
 
 
@@ -59,7 +59,7 @@ class session_handler:
 
         asyncio.set_event_loop(asyncio.new_event_loop())
 
-        self.client = TelegramClient(self.session_name, api_id, api_hash)
+        self.client = TelegramClient(self.session_name, get_api_id(), get_api_hash())
         self.client.session
         # client.send_message('me', 'huedjwen')
         self.client.on(events.UserUpdate)(self.user_update_event_handler)
