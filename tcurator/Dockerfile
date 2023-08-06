@@ -4,10 +4,10 @@ USER node
 
 WORKDIR /app
 
-# COPY --chown=node:node ./package.json .
-# COPY --chown=node:node ./yarn.lock .
+COPY --chown=node:node ./package.json .
+COPY --chown=node:node ./yarn.lock .
 
-# RUN yarn
+RUN yarn
 
 # # USER root
 
