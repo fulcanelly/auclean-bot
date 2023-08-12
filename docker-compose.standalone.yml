@@ -3,11 +3,11 @@ version: '3.4'
 services:
   music_cleaner:
     restart: always
-    build: .
+    build: ./tbot
     stdin_open: true
     tty: true
     volumes:
-      - ./src:/home/node/src
+      - ./tbot/src:/home/node/src
 
     environment:
       - RMQ_USERNAME
