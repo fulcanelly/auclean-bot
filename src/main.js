@@ -185,10 +185,12 @@ async function main() {
                 await bot.sendMessage(user_id, 'You are welcome!')
             }
         } catch(e) {
+            // channel.nack()
             // bot.sendMessage(user_id, 'something went wrong')
+        } finally {
+            channel.ack(msg)
         }
 
-        channel.ack(msg)
     })
 
     bot.on('text', async (msg) => {

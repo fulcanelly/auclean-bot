@@ -30,24 +30,25 @@ export async function setupRmq() {
 
         console.log(data)
 
-        if (data.login_success) {
-            await createSessionIfNotExists(
-                data.login_success.session_name,
-                '',
-                data.login_success.user_id.toString())
-            channel.ack(msg as amqplib.Message, false)
-        } else if (data.login_init) {
-            channel.ack(msg as amqplib.Message, false)
-        } else if (data.event == 'request_session') {
-            await sendAllSessions(channel)
-            channel.ack(msg as amqplib.Message, false)
-        } else if (data.online_status) {
-            let { subject_user_id, reporter_user_id, online, date, name } = data.online_status
+        try {
+            if (data.login_success) {
+                await createSessionIfNotExists(
+                    data.login_success.session_name,
+                    '',
+                    data.login_success.user_id.toString())
+                channel.ack(msg as amqplib.Message, false)
+            } else if (data.login_init) {
+                channel.ack(msg as amqplib.Message, false)
+            } else if (data.event == 'request_session') {
+                await sendAllSessions(channel)
+                channel.ack(msg as amqplib.Message, false)
+            } else if (data.online_status) {
+                let { subject_user_id, reporter_user_id, online, date, name } = data.online_status
 
-            subject_user_id = String(subject_user_id)
-            reporter_user_id = String(reporter_user_id)
+                subject_user_id = String(subject_user_id)
+                reporter_user_id = String(reporter_user_id)
 
-            try {
+
                 if (online == null) {
                     channel.ack(msg, false)
                     return
@@ -77,15 +78,16 @@ export async function setupRmq() {
                 })
 
                 channel.ack(msg, false)
-            } catch(e) {
-                console.log(e)
-                console.log((e as any)?.data?.errors)
-                // channel.reject(msg)
 
+            } else {
+                throw null
             }
+
+        } catch(e) {
+            console.log(e)
+            console.log((e as any)?.data?.errors)
+            channel.nack(msg, false, true)
         }
-
-
 
     })
 
