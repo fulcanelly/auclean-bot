@@ -55,7 +55,7 @@ export async function setupRmq() {
                 }
 
                 await createUserIfNotExists(subject_user_id, name)
-                await createUserIfNotExists(reporter_user_id, name)
+                await createUserIfNotExists(reporter_user_id, '')
 
                 const onlineLog = await OnlineLog.createOne({
                     time: date as string,
