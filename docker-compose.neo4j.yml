@@ -4,6 +4,9 @@ services:
   neo4j:
     container_name: neo4j
 
+    networks:
+      - shared_network
+
     image: neo4j
     ports:
     - 7474:7474
@@ -14,5 +17,5 @@ services:
       #network_mode: "host"
 
 networks:
-  default:
-    driver: bridge
+  shared_network:
+    external: true

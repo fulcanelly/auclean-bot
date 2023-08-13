@@ -2,6 +2,10 @@ version: '3.4'
 
 services:
   tbot:
+
+    networks:
+      - shared_network
+
     restart: always
     build:
       context: ./tbot
@@ -21,6 +25,10 @@ services:
       - TG_BOT_API_TOKEN
 
   python-toolset:
+
+    networks:
+      - shared_network
+
     build:
         context: ./python
         dockerfile: Dockerfile.dev
@@ -42,6 +50,10 @@ services:
       # - ./python_modules:/usr/local/lib/python3.9/
 
   tcurator:
+
+    networks:
+      - shared_network
+
     build:
       context: ./tcurator
       dockerfile: Dockerfile.dev
@@ -65,5 +77,5 @@ services:
 
 
 networks:
-  default:
-    driver: bridge
+  shared_network:
+    external: true

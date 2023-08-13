@@ -7,6 +7,9 @@ services:
     image: rabbitmq:3-management
     restart: always
 
+    networks:
+      - shared_network
+
     container_name: rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=$RMQ_USERNAME
@@ -23,3 +26,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+
+networks:
+  shared_network:
+    external: true
