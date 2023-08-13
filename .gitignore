@@ -5,3 +5,4 @@ node_modules
 neo4j-data/
 psql-data/
 .vscode/
+shared_modules

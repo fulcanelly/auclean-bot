@@ -1,0 +1,24 @@
+FROM node:19-alpine
+
+USER node
+
+WORKDIR /app
+
+USER root
+RUN chown -R node:node /app/
+
+USER node
+
+COPY --chown=node:node ./package.json .
+COPY --chown=node:node ./yarn.lock .
+
+# Todo this dont work with volumes
+# RUN yarn
+
+# # USER root
+
+# RUN yarn add nodemon
+
+# # USER node
+
+CMD yarn && yarn run nodemon ./src/main.ts
