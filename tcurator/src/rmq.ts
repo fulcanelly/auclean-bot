@@ -100,7 +100,7 @@ async function createUserIfNotExists(user_id: string, name: string): Promise<Neo
     const user = await Users.findOne({ where: { user_id } })
 
     if (user) {
-        if (user.name != name) {
+        if (user.name != name && name != '') {
             user.name = name
             await user.save()
         }
