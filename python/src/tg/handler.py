@@ -5,7 +5,7 @@ from threading import Thread
 
 from telethon import TelegramClient, events
 
-from rmq.rmq import get_new_channel
+from rmq.rmq import EnsuredPikaChannel
 from rmq.send.curator import curator_notifier_t
 from util.vars import get_api_hash, get_api_id
 
@@ -16,16 +16,14 @@ class session_handler:
     def __init__(self, session_name, user_id) -> None:
         self.session_name = session_name
         self.client: TelegramClient
-        ramClient = None
-        self.curator_notifier = curator_notifier_t(get_new_channel())
+        self.ensured_channel = EnsuredPikaChannel()
         self.user_id = user_id
 
     def start(self):
         Thread(target=self.run).start()
 
-    async def user_update_event_handler(self, event):
+    async def user_update_event_handler(self, event: events.UserUpdate):
         print(f"EVENT from f{self.user_id}")
-
 
         try:
             #TODO
@@ -33,8 +31,8 @@ class session_handler:
 
             user_details = await self.client.get_entity(event.user_id)
 
-
-            self.curator_notifier.notify_online_status(event.user_id, self.user_id, event.online, user_details.first_name)
+            with self.ensured_channel as channel:
+                curator_notifier_t(channel).notify_online_status(event.user_id, self.user_id, event.online, user_details.first_name)
 
             print(f" {user_details.first_name}, time: {datetime.datetime.now()}, online {event.online:}")
         except Exception as e:
