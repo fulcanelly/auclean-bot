@@ -44,7 +44,10 @@ services:
 
       - TG_API_ID
       - TG_API_HASH
+      
       - SENTRY_DSN=$PROCSPACK_SENTRY_DSN
+
+      - ENV=$ENV
     volumes:
       - ./python:/app
       # - ./python_modules:/usr/local/lib/python3.9/
@@ -67,7 +70,6 @@ services:
       - ./shared_modules:/app/node_modules
 
     environment:
-      - SENTRY_DSN=$TCURATOR_SENTRY_DSN
       - RMQ_USERNAME
       - RMQ_PASSWORD
       - RMQ_HOST
@@ -76,6 +78,9 @@ services:
       - NEO4J_USERNAME
       - NEO4J_PASSWORD
 
+      - SENTRY_DSN=$TCURATOR_SENTRY_DSN
+
+      - ENV=$ENV
 
 networks:
   shared_network:

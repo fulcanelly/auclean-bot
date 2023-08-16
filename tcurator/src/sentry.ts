@@ -1,11 +1,8 @@
 import * as Sentry from '@sentry/node';
 
 
-console.log({
-    aaaa:  process.env.SENTRY_DSN
-})
-
 Sentry.init({
+    environment: process.env.ENV,
     dsn: process.env.SENTRY_DSN,
     tracesSampleRate: 1.0,
 })

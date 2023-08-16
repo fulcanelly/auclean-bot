@@ -13,6 +13,7 @@ from rmq.rmq import get_new_channel
 
 sentry_sdk.init(
     dsn=os.getenv('SENTRY_DSN'),
+    environment=os.getenv('ENV'),
     traces_sample_rate=1.0,
     integrations=[
         AsyncioIntegration(),
