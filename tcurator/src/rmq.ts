@@ -5,6 +5,7 @@ import { NeogmaInstance, QueryBuilder, QueryRunner } from 'neogma';
 import { UserProps, UserRelatedNodesI, Users } from './data/users';
 import { tg } from './data/telegram_session';
 import { neogma } from './neo4j';
+import { sentry } from './sentry';
 
 
 export async function setupRmq() {
@@ -84,6 +85,7 @@ export async function setupRmq() {
             }
 
         } catch(e) {
+            sentry.captureException(e)
             console.log(e)
             console.log((e as any)?.data?.errors)
             channel.nack(msg, false, true)

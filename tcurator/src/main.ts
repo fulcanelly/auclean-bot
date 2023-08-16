@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { OnlineLog, OnlineLogProps } from "./data/online_log";
 import { neogma } from "./neo4j";
 
+import { sentry } from "./sentry";
 
 import { UserProps, UserRelatedNodesI, Users } from "./data/users";
 import "./data/relations";
@@ -24,8 +25,12 @@ import { setupRmq } from "./rmq";
 // createOnlineLog()
 
 async function main() {
-    await setupConstraints()
-    await setupRmq()
+    try {
+        await setupConstraints()
+        await setupRmq()
+    } catch (e) {
+        sentry.captureException(e)
+    }
 }
 
 main()
