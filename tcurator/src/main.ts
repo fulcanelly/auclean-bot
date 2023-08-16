@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 import { OnlineLog, OnlineLogProps } from "./data/online_log";
-import { neogma } from "./neo4j";
+import { neogma, setupConstraints } from "./neo4j";
 
 import { sentry } from "./sentry";
 
