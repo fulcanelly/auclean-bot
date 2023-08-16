@@ -44,7 +44,7 @@ services:
 
       - TG_API_ID
       - TG_API_HASH
-
+      - SENTRY_DSN=$PROCSPACK_SENTRY_DSN
     volumes:
       - ./python:/app
       # - ./python_modules:/usr/local/lib/python3.9/

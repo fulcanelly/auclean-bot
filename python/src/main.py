@@ -1,10 +1,23 @@
 
+import os
 import pretty_traceback
 from rmq.recv.curator_handler import obtain_curator_handler
 from rmq.recv.login_handler import obtain_login_handler
 from rmq.send.curator import curator_notifier_t
+from sentry_sdk.integrations.asyncio import AsyncioIntegration
+import logging
+
+import sentry_sdk
 
 from rmq.rmq import get_new_channel
+
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_DSN'),
+    traces_sample_rate=1.0,
+    integrations=[
+        AsyncioIntegration(),
+    ],
+)
 
 pretty_traceback.install()
 
