@@ -22,6 +22,12 @@ import { setupRmq } from "./rmq";
 
 
 // createOnlineLog()
-setupRmq()
+
+async function main() {
+    await setupConstraints()
+    await setupRmq()
+}
+
+main()
 // test()
 // setTimeout(test, 1000)
