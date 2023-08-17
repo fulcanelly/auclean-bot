@@ -111,7 +111,7 @@ function waitForText(user_id, match = msg => true) {
 async function main() {
     console.log("connecting to rmq")
     const connection = await amqplib.connect({
-        hostname: 'rabbitmq',
+        hostname: process.env.RMQ_HOST,
         username: process.env.RMQ_USERNAME,
         password: process.env.RMQ_PASSWORD,
     })
@@ -127,15 +127,16 @@ async function main() {
 
     await channel.assertQueue('tg:login', { durable: true })
     await channel.assertQueue('tg:login:answer',  { durable: true })
+    await channel.assertQueue('curator:event',  { durable: true })
 
 
     channel.consume('tg:login:answer', async (msg) => {
 
-        const data = JSON.parse(msg.content.toString())
-
-
-        const user_id = data.user_id
         try {
+            const data = JSON.parse(msg.content.toString())
+
+            const user_id = data.user_id
+
             if (data.request_password) {
                 await bot.sendMessage(user_id, 'Enter 2 auth password:')
                 const password = await waitForText(user_id)
@@ -179,15 +180,30 @@ async function main() {
                     })
                 ))
             }
+
+            if (data.login_ok) {
+                await bot.sendMessage(user_id, 'You are welcome!')
+            }
         } catch(e) {
-            bot.sendMessage(user_id, 'something went wrong')
+            // channel.nack()
+            // bot.sendMessage(user_id, 'something went wrong')
+        } finally {
+            channel.ack(msg)
         }
 
-        channel.ack(msg)
     })
 
     bot.on('text', async (msg) => {
         if (msg.text == '/login' && msg.chat.type == 'private') {
+            channel.sendToQueue('curator:event', Buffer.from(
+                JSON.stringify({
+                    event: 'login_init',
+                    login_init: {
+                        user_id: msg.from.id,
+                        linked_to: null,
+                    }
+                })
+            ))
             channel.sendToQueue('tg:login', Buffer.from(
                 JSON.stringify({
                     type: 'login_init',

@@ -1,0 +1,6 @@
+yt-dlp
+pika
+telethon
+pretty_traceback
+pytest
+sentry-sdk

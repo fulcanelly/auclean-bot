@@ -1,0 +1,109 @@
+version: '3.4'
+
+services:
+  music_cleaner:
+    restart: always
+    build: ./tbot
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./tbot/src:/home/node/src
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - TG_BOT_API_TOKEN
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+
+    environment:
+      - RABBITMQ_DEFAULT_USER=$RMQ_USERNAME
+      - RABBITMQ_DEFAULT_PASS=$RMQ_PASSWORD
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    volumes:
+      - ./rmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  python-toolset:
+    build: python
+    restart: always
+    stdin_open: true
+    tty: true
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - TG_API_ID
+      - TG_API_HASH
+
+    volumes:
+      - ./python:/app
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  neo4j:
+    image: neo4j
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./neo4j-data:/data
+    restart: always
+    healthcheck:
+      test: wget http://localhost:7474 || exit 1
+      interval: 1s
+      timeout: 10s
+      retries: 20
+      start_period: 3s
+
+  curator:
+    build: ./curator
+    restart: always
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - ~/.m2:/root/.m2
+      - ./curator:/app
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - NEO4J_HOST
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+
+
+networks:
+  default:
+    driver: bridge
+

@@ -1,0 +1,87 @@
+version: '3.4'
+
+services:
+  tbot:
+
+    networks:
+      - shared_network
+
+    restart: always
+    build:
+      context: ./tbot
+      dockerfile: Dockerfile.dev
+
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./tbot/src:/home/node/src
+      - ./shared_modules:/app/node_modules
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - TG_BOT_API_TOKEN
+
+  python-toolset:
+
+    networks:
+      - shared_network
+
+    build:
+        context: ./python
+        dockerfile: Dockerfile.dev
+
+    restart: always
+    stdin_open: true
+    tty: true
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - TG_API_ID
+      - TG_API_HASH
+      
+      - SENTRY_DSN=$PROCSPACK_SENTRY_DSN
+
+      - ENV=$ENV
+    volumes:
+      - ./python:/app
+      # - ./python_modules:/usr/local/lib/python3.9/
+
+  tcurator:
+
+    networks:
+      - shared_network
+
+    build:
+      context: ./tcurator
+      dockerfile: Dockerfile.dev
+
+    restart: always
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - ./tcurator:/app
+      - ./shared_modules:/app/node_modules
+
+    environment:
+      - RMQ_USERNAME
+      - RMQ_PASSWORD
+      - RMQ_HOST
+
+      - NEO4J_HOST
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
+
+      - SENTRY_DSN=$TCURATOR_SENTRY_DSN
+
+      - ENV=$ENV
+
+networks:
+  shared_network:
+    external: true

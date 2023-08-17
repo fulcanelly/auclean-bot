@@ -15,17 +15,16 @@ RUN apt-get update && \
 RUN npm install -g nodemon
 
 # Copy the setup.cfg file into the container
-COPY setup.cfg .
-COPY setup.py .
-COPY . .
+
+COPY requirements.txt .
 
 
 # Install project dependencies
-RUN pip install -e .
+RUN pip install -r ./requirements.txt
 
 # Copy the rest of your project files into the conta
 
 
 # Set the default command to run when the container starts
-CMD nodemon --exec python3 main.py
+CMD python3 src/main.py
 

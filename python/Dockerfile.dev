@@ -1,0 +1,23 @@
+# syntax = docker/dockerfile:experimental
+
+FROM python:3.9
+
+WORKDIR /app
+
+
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs
+
+RUN apt-get install -y yarn
+
+
+RUN --mount=type=cache,target=/root/.npm npm install -g nodemon
+
+COPY requirements.txt .
+
+RUN --mount=type=cache,target=/root/.cache/pip  pip install -r ./requirements.txt
+
+
+CMD nodemon src/main.py
