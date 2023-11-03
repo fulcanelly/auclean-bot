@@ -20,6 +20,6 @@ Users.addRelationships({
     online_logs: {
         model: OnlineLog,
         direction: 'out',
-        name: 'ONLINE_LOGGED_BY'
+        name: 'ONLINE_BELONS_TO'
     }
 })
