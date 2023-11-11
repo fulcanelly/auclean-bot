@@ -35,3 +35,15 @@ export async function setupConstraints() {
     }
 
 }
+
+export async function setupIndexes() {
+
+    const queries = [
+        'CREATE TEXT INDEX online_log_uuid_index IF NOT EXISTS FOR (n:OnlineLog) ON (n.uuid)',
+        'CREATE TEXT INDEX user_id_index IF NOT EXISTS FOR (n:User) ON (n.user_id)'
+    ]
+
+    for await (const query of queries) {
+        await neogma.queryRunner.run(query)
+    }
+}
