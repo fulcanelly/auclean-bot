@@ -6,3 +6,4 @@ neo4j-data/
 psql-data/
 .vscode/
 shared_modules
+*.session-journal
