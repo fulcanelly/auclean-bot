@@ -1,11 +1,26 @@
 import { Neogma } from "neogma";
 
+import * as dotenv from 'dotenv';
+
+
+function neogmaConfig() {
+    const parsed = dotenv.config()?.parsed
+
+    if (parsed) {
+        const conn = {
+            url: 'bolt://' + process.env.NEO4J_HOST,
+            username: parsed.NEO4J_USERNAME as string,
+            password: process.env.NEO4J_PASSWORD as string,
+        }
+        console.log(conn)
+        return conn
+    } else {
+        throw new Error('neo4j db not configured')
+    }
+}
+
 export const neogma = new Neogma(
-    {
-        url: 'bolt://' + process.env.NEO4J_HOST,
-        username: process.env.NEO4J_USERNAME as string,
-        password: process.env.NEO4J_PASSWORD as string,
-    },
+    neogmaConfig(),
     {
         logger: console.log,
     },
