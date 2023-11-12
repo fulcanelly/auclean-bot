@@ -514,9 +514,9 @@ neo4j-driver@^5.11.0, neo4j-driver@^5.14.0:
     rxjs "^7.8.1"
 
 neogen@^1.0.17:
-  version "1.0.19"
-  resolved "https://registry.yarnpkg.com/neogen/-/neogen-1.0.19.tgz#f5ff5e8a4c36c807ccdb8e6b850f317ad4ad85f3"
-  integrity sha512-nXB+agSL9U5r2YgzkjyAY1gkdpAvDmN5/ZODgDix/eVuTuSFvToSnxGkZ88s3D698MH4jWFrUkQRBy0iIMXYIA==
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/neogen/-/neogen-1.0.21.tgz#ae76f84f232a0bb4abb6122de7d1ff02166b9bd6"
+  integrity sha512-4bP2wSsuv7db5EQj9CGvjJHvreytvg75zh83zpXlt2/Hjh+bo/DpsoPAz3+vmTRUAyrE8v7DZunFnezGKUWlQw==
   dependencies:
     "@types/jest" "^29.5.8"
     "@types/lodash" "^4.14.201"

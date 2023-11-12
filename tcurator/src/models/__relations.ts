@@ -1,6 +1,6 @@
 // GENERATED FILE, MAY CHANGE IN FUTURE, DO NOT EDIT IT MANUALLY
-import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user";
-import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log";
+import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user"
+import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log"
 User.addRelationships({
     reported: {
         model: OnlineLog,
