@@ -7,10 +7,10 @@ import { neogen } from "neogen";
 function neogmaConfig() {
     const parsed = dotenv.config()?.parsed
 
-    if (parsed) {
+    if (process.env.NEO4J_HOST) {
         const conn = {
             url: 'bolt://' + process.env.NEO4J_HOST,
-            username: parsed.NEO4J_USERNAME as string,
+            username: process.env.NEO4J_USERNAME as string,
             password: process.env.NEO4J_PASSWORD as string,
         }
         console.log(conn)
