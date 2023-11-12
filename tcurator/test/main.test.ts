@@ -3,7 +3,7 @@ import '../src/models/__relations'
 
 import { User } from '../src/models/user'
 import { OnlineLog } from '../src/models/online_log'
-import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner, Where } from "neogma";
+import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner, Where, getTransaction } from "neogma";
 import { neogma } from "../src/neo4j";
 import { QueryResult, RecordShape } from "neo4j-driver";
 
@@ -28,6 +28,32 @@ let i = 0
 
 function rangUUID() {
   return `test:${++i}`
+}
+
+async function testTransactionsWorking() {
+  await neogma.getTransaction(null, async (t) => {
+    await User.findOne({session: t})
+    const one = await User.createOne({
+      name: undefined,
+      user_id: undefined,
+      uuid: rangUUID()
+    }, {session: t})
+
+    await one.delete({session: t})
+
+    const count = await new QueryBuilder()
+      .match({
+        model: OnlineLog,
+        identifier: 'u'
+      })
+      // .where("u.uuid starts with 'test:'")
+      .return('count(u) as c')
+      .run(t)
+
+      const res = Number(count.records[0].get('c'))
+
+    console.log({res, n: Number(res)})
+  })
 }
 
 async function deleteAll() {
@@ -76,9 +102,7 @@ describe('models ::', () => {
 
   beforeAll(deleteAll)
 
-  // afterAll(neogma.driver.close)
-
-
+  it('check transactions is working', testTransactionsWorking)
 
   describe('relation ONLINE_REPORTED_BY', () => {
     it('.reported_by', async () => {
