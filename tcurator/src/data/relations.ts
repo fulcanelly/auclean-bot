@@ -21,5 +21,11 @@ Users.addRelationships({
         model: OnlineLog,
         direction: 'out',
         name: 'ONLINE_BELONS_TO'
+    },
+
+    reported: {
+        model: OnlineLog,
+        direction: 'out',
+        name: 'ONLINE_REPORTED_BY'
     }
 })

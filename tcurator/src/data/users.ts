@@ -10,6 +10,7 @@ export type UserProps = {
 
 export interface UserRelatedNodesI {
     online_logs: ModelRelatedNodesI<typeof OnlineLog, OnlineLogInstance>
+    reported: ModelRelatedNodesI<typeof OnlineLog, OnlineLogInstance>
 }
 
 export type UserInstance = NeogmaInstance<UserProps, UserRelatedNodesI>
