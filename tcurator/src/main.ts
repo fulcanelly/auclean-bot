@@ -1,6 +1,6 @@
 import { setupConstraints, setupIndexes } from "./neo4j";
 import { sentry } from "./sentry";
-import "./data/relations";
+import "./models/__relations"
 import { setupRmq } from "./rmq";
 
 
