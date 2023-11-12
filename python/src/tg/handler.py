@@ -9,7 +9,7 @@ from rmq.rmq import EnsuredPikaChannel
 from rmq.send.curator import curator_notifier_t
 from util.vars import get_api_hash, get_api_id
 
-
+import datetime
 
 
 class session_handler:
@@ -50,7 +50,7 @@ class session_handler:
         while True:
             if self.client.is_connected():
                 me = await self.client.get_me()
-                print(f" [-] heartbeat of {me.first_name} ({self.user_id}) ")
+                print(f" [-] heartbeat of {me.username} ({self.user_id}) ")
 
             await asyncio.sleep(3)
 

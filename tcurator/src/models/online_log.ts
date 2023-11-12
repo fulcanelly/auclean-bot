@@ -7,7 +7,7 @@ export type OnlineLogInstance = NeogmaInstance<OnlineLogProps, OnlineLogRelatedN
 
 export type OnlineLogProps = {
     online: boolean
-    time: string
+    time: number
     uuid: string
 }
 
@@ -22,7 +22,7 @@ export const OnlineLog = ModelFactory<OnlineLogProps, OnlineLogRelatedNodesI, ty
     label: "OnlineLog",
     schema: {
         online: { type: "boolean" },
-        time: { type: "string" },
+        time: { type: "number" },
         uuid: { type: "string" }
     },
     primaryKeyField: "uuid"

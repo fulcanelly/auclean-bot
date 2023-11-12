@@ -33,7 +33,7 @@ neogen.generateAll({ // settings
         label: 'OnlineLog',
         schema: {
             online: 'boolean',
-            time: 'string',
+            time: 'number',
             uuid: 'string',
         },
         primaryKeyField: 'uuid'

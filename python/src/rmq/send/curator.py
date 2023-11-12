@@ -35,7 +35,8 @@ class curator_notifier_t:
                     'subject_user_id': str(online_of_user_id),
                     'reporter_user_id': str(reported_by_user_id),
                     'online': online,
-                    'date': str(datetime.now()),
+                    'date': datetime.utcnow().timestamp(),
                     'name': name
                 }
             }))
+
