@@ -14,7 +14,7 @@
     "@types/ramda": "^0.29.8",
     "lodash": "^4.17.21",
     "neo4j-driver": "^5.14.0",
-    "neogen": "^1.0.2",
+    "neogen": "^1.0.17",
     "neogma": "^1.12.3",
     "ramda": "^0.29.1",
     "ts-jest": "^29.1.1"

@@ -1,9 +1,12 @@
-import "../src/data/relations";
-import { Users } from '../src/data/users'
-import { OnlineLog } from '../src/data/online_log'
+import '../src/neo4j'
+import '../src/models/__relations'
+
+import { User } from '../src/models/user'
+import { OnlineLog } from '../src/models/online_log'
 import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner, Where } from "neogma";
 import { neogma } from "../src/neo4j";
 import { QueryResult, RecordShape } from "neo4j-driver";
+
 
 type AnyObj = Record<string, any>
 
@@ -32,7 +35,7 @@ async function deleteAll() {
     .match({
       related: [
         {
-          model: Users,
+          model: User,
           identifier: 'u'
         },
         {
@@ -51,7 +54,7 @@ async function deleteAll() {
 
   await new QueryBuilder()
     .match({
-      model: Users,
+      model: User,
       identifier: 'u'
     })
     .where("u.uuid starts with 'test:'")
@@ -74,13 +77,13 @@ describe('models ::', () => {
   beforeAll(deleteAll)
 
   // afterAll(neogma.driver.close)
-  //ONLINE_REPORTED_BY reported_by reported
-  // ONLINE_BELONS_TO belong_to online_logs
+
+
 
   describe('relation ONLINE_REPORTED_BY', () => {
     it('.reported_by', async () => {
       // Create a User
-      const user = await Users.createOne({
+      const user = await User.createOne({
         uuid: rangUUID(),
         name: 'Test User',
         user_id: undefined
@@ -106,13 +109,13 @@ describe('models ::', () => {
         .match({
           related: [
             {
-              model: Users,
+              model: User,
               where: {
                 uuid: user.uuid
               }
             },
             {
-              ...Users.getRelationshipByAlias('reported'),
+              ...User.getRelationshipByAlias('reported'),
               direction: 'out'
             },
             {
@@ -128,7 +131,7 @@ describe('models ::', () => {
       expect(obtainResult(OnlineLog, 'reportedLogs', result).length).toEqual(1);
     });
     it('.reported :: User relates to OnlineLog', async () => {
-      const user = await Users.createOne({
+      const user = await User.createOne({
         uuid: rangUUID(),
         name: 'Test User',
         user_id: undefined
@@ -161,7 +164,7 @@ describe('models ::', () => {
               direction: 'in'
             },
             {
-              model: Users,
+              model: User,
               identifier: 'reportingUsers',
             }
           ]
@@ -169,14 +172,14 @@ describe('models ::', () => {
         .return('reportingUsers')
         .run(neogma.queryRunner);
 
-      expect(obtainResult(Users, 'reportingUsers', result).length).toEqual(1);
+      expect(obtainResult(User, 'reportingUsers', result).length).toEqual(1);
     });
 
   })
 
   describe('relation ONLINE_BELONS_TO', () => {
     it('User relates to OnlineLog as online_logs', async () => {
-      const user = await Users.createOne({
+      const user = await User.createOne({
         uuid: rangUUID(),
         name: '',
         user_id: undefined
@@ -209,7 +212,7 @@ describe('models ::', () => {
               direction: 'in'
             },
             {
-              model: Users,
+              model: User,
               identifier: 'users',
             }
           ]
@@ -217,7 +220,7 @@ describe('models ::', () => {
         .return('users')
         .run(neogma.queryRunner);
 
-      expect(obtainResult(Users, 'users', result).length).toEqual(1);
+      expect(obtainResult(User, 'users', result).length).toEqual(1);
     });
 
     it('.belong_to', async () => {
@@ -227,7 +230,7 @@ describe('models ::', () => {
         uuid: rangUUID()
       })
 
-      const user = await Users.createOne({
+      const user = await User.createOne({
         uuid: rangUUID(),
         name: undefined,
         user_id: undefined
@@ -244,13 +247,13 @@ describe('models ::', () => {
         .match({
           related: [
             {
-              model: Users,
+              model: User,
               where: {
                 uuid: user.uuid
               }
             },
             {
-              ...Users.getRelationshipByAlias('online_logs'),
+              ...User.getRelationshipByAlias('online_logs'),
               direction: 'out'
             },
             {

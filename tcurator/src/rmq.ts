@@ -1,12 +1,11 @@
 import amqplib from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
-import { OnlineLog } from './data/online_log';
 import { NeogmaInstance, QueryBuilder, QueryRunner } from 'neogma';
-import { UserProps, UserRelatedNodesI, Users } from './data/users';
-import { tg } from './data/telegram_session';
 import { neogma } from './neo4j';
 import { sentry } from './sentry';
-
+import { OnlineLog } from './models/online_log';
+import { User, UserInstance, UserProps, UserRelatedNodesI } from './models/user';
+import { Session, SessionProps } from './models/session';
 
 export async function setupRmq() {
     console.log('connecting to rmq')
@@ -98,8 +97,8 @@ export async function setupRmq() {
 
 
 
-async function createUserIfNotExists(user_id: string, name: string): Promise<NeogmaInstance<UserProps, UserRelatedNodesI>>  {
-    const user = await Users.findOne({ where: { user_id } })
+async function createUserIfNotExists(user_id: string, name: string): Promise<UserInstance>  {
+    const user = await User.findOne({ where: { user_id } })
 
     if (user) {
         if (user.name != name && name != '') {
@@ -110,7 +109,7 @@ async function createUserIfNotExists(user_id: string, name: string): Promise<Neo
     }
 
 
-    return await Users.createOne({
+    return await User.createOne({
         user_id,
         name: name,
         uuid: uuidv4()
@@ -119,7 +118,7 @@ async function createUserIfNotExists(user_id: string, name: string): Promise<Neo
 }
 
 async function createSessionIfNotExists(session_name: string, phone: string, user_id: string) {
-    let session = await tg.Session.findOne({
+    let session = await Session.findOne({
         where: {
             session_name,
             user_id
@@ -130,7 +129,7 @@ async function createSessionIfNotExists(session_name: string, phone: string, use
         return session
     }
 
-    return await tg.Session.createOne({
+    return await Session.createOne({
         session_name,
         phone,
         user_id,
@@ -153,7 +152,7 @@ async function sendAllSessions(channel: amqplib.Channel) {
         const sessionsResult = await
             new QueryBuilder()
                 .match({
-                    model: tg.Session,
+                    model: Session,
                     identifier: 's'
                 })
                 .where('s.session_name is not null')
@@ -162,7 +161,7 @@ async function sendAllSessions(channel: amqplib.Channel) {
                 .limit(PAGE_SIZE)
                 .run(neogma.queryRunner)
 
-        const sessions = QueryRunner.getResultProperties<tg.SessionProps>(sessionsResult, 's')
+        const sessions = QueryRunner.getResultProperties<SessionProps>(sessionsResult, 's')
 
         console.log(sessions)
 

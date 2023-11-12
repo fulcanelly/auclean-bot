@@ -1,6 +1,7 @@
 import { Neogma } from "neogma";
 
 import * as dotenv from 'dotenv';
+import { neogen } from "neogen";
 
 
 function neogmaConfig() {
@@ -26,6 +27,7 @@ export const neogma = new Neogma(
     },
 );
 
+neogen.setInstance(neogma)
 
 export async function setupConstraints() {
     let constraints = await neogma.queryRunner.run("SHOW CONSTRAINTS")

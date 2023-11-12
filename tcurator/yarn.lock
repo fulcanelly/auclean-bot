@@ -513,10 +513,10 @@ neo4j-driver@^5.11.0, neo4j-driver@^5.14.0:
     neo4j-driver-core "5.14.0"
     rxjs "^7.8.1"
 
-neogen@^1.0.2:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/neogen/-/neogen-1.0.10.tgz#7f215a34409f9de3461fb69de290dcc399ba88ae"
-  integrity sha512-xiF056MvZwOXAqBNE47OrHFPmKLwjIUH0vuDennrQuG7rTxLkwXtPRTqLd/XJvV2YbKqK3edHe4h3+cjtaIkzA==
+neogen@^1.0.17:
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/neogen/-/neogen-1.0.19.tgz#f5ff5e8a4c36c807ccdb8e6b850f317ad4ad85f3"
+  integrity sha512-nXB+agSL9U5r2YgzkjyAY1gkdpAvDmN5/ZODgDix/eVuTuSFvToSnxGkZ88s3D698MH4jWFrUkQRBy0iIMXYIA==
   dependencies:
     "@types/jest" "^29.5.8"
     "@types/lodash" "^4.14.201"
