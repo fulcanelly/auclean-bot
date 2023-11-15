@@ -6,6 +6,49 @@ import { sentry } from './sentry';
 import { OnlineLog } from './models/online_log';
 import { User, UserInstance, UserProps, UserRelatedNodesI } from './models/user';
 import { Session, SessionProps } from './models/session';
+import EventEmitter from 'events';
+
+
+
+
+async function chanSpy(channel: amqplib.Channel) {
+
+    await channel.assertQueue('py:chanscan', { durable: true })
+    await channel.assertQueue('py:chanscan:reply', { durable: true })
+
+    channel.consume('tg:spy', async (msg: any) => {
+        channel.ack(msg, false)
+
+        const data = JSON.parse(msg!.content.toString())// ..content.toString()
+        console.log(data)
+        const props = msg!.properties
+        // Session.getPrimaryKeyField()
+        const session = await Session.findOne({
+            where: {
+                user_id: data.requested_by_user_id?.toString()
+            }
+        })
+
+        if (session) {
+
+            const dataToSpy = {
+                session: session.session_name,
+                identifier: data.identifier,
+            }
+
+            channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(dataToSpy)))
+        }
+
+
+        console.log(session)
+
+        channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify({
+            ...data, ...session?.dataValues
+        }, null, '  ')), {
+            correlationId: props.correlationId
+        })
+    })
+}
 
 export async function setupRmq() {
     console.log('connecting to rmq')
@@ -22,6 +65,10 @@ export async function setupRmq() {
     await channel.assertQueue('tg:login:answer', { durable: true })
     await channel.assertQueue('curator:event', { durable: true })
     await channel.assertQueue('curator:command', { durable: true })
+    await channel.assertQueue('tg:spy')
+    await channel.assertQueue('tg:reply')
+
+    chanSpy(await client.createChannel())
 
 
     channel.consume('curator:event', async (msg_) => {

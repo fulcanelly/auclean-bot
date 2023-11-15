@@ -23,6 +23,8 @@ def get_new_channel() -> pika.BlockingConnection:
     channel.queue_declare(queue='tg:login', durable=True)
     channel.queue_declare(queue='curator:event', durable=True)
     channel.queue_declare(queue='curator:command', durable=True)
+    channel.queue_declare(queue='py:chanscan', durable=True)
+    channel.queue_declare(queue='py:chanscan:reply', durable=True)
 
     return channel
 

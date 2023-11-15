@@ -7,3 +7,4 @@ psql-data/
 .vscode/
 shared_modules
 *.session-journal
+.venv

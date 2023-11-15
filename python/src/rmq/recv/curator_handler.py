@@ -4,7 +4,6 @@ from pika import BasicProperties, DeliveryMode
 from pika.adapters.blocking_connection import BlockingChannel
 from rmq.send.curator import curator_notifier_t
 
-
 from rmq.send.tg_login import tele_login_t
 from tg.handler import session_handler
 from tg.loginer import user_loginer

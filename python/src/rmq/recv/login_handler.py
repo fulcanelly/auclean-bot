@@ -1,5 +1,7 @@
 import json
+from pika import BasicProperties
 from pika.adapters.blocking_connection import BlockingChannel
+from pika.spec import Basic
 
 from rmq.send.tg_login import tele_login_t
 from tg.loginer import user_loginer
@@ -10,8 +12,7 @@ def obtain_login_handler(channel: BlockingChannel):
 
     login_data_by_user_id = {}
 
-    def handle_login(ch: BlockingChannel, method, properties, body):
-
+    def handle_login(ch: BlockingChannel, method: any, properties: BasicProperties, body):
 
         data = json.loads(body)
 

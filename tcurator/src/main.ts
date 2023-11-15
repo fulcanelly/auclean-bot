@@ -6,9 +6,16 @@ import { setupRmq } from "./rmq";
 
 async function main() {
     try {
+        console.log('main')
         await setupConstraints()
+        console.log('cstr')
+
         await setupIndexes()
+        console.log('indexes')
+
         await setupRmq()
+        console.log('rmq')
+
     } catch (e) {
         sentry.captureException(e)
     }

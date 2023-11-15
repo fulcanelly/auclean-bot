@@ -3,6 +3,7 @@ import { ModelFactory, ModelRelatedNodesI, NeogmaInstance } from "neogma"
 import { userInstanceMethods, userStaticMethods } from "./user_"
 import { neogen } from "neogen"
 import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log"
+import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
 export type UserInstance = NeogmaInstance<UserProps, UserRelatedNodesI, typeof userInstanceMethods>
 
 export type UserProps = {
@@ -14,6 +15,7 @@ export type UserProps = {
 export interface UserRelatedNodesI {
     reported: ModelRelatedNodesI<typeof OnlineLog, OnlineLogInstance>
     online_logs: ModelRelatedNodesI<typeof OnlineLog, OnlineLogInstance>
+    comments: ModelRelatedNodesI<typeof PostComment, PostCommentInstance>
 }
 
 export const User = ModelFactory<UserProps, UserRelatedNodesI, typeof userStaticMethods, typeof userInstanceMethods>({

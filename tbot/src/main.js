@@ -1,6 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api')
 const dateFormat = require('dateformat')
 const amqplib = require('amqplib')
+const EventEmitter = require('events')
+const uuid = require('uuid');
 
 const token = process.env.TG_BOT_API_TOKEN
 
@@ -126,8 +128,16 @@ async function main() {
     const channel = await connection.createConfirmChannel()
 
     await channel.assertQueue('tg:login', { durable: true })
-    await channel.assertQueue('tg:login:answer',  { durable: true })
-    await channel.assertQueue('curator:event',  { durable: true })
+    await channel.assertQueue('tg:login:answer', { durable: true })
+    await channel.assertQueue('curator:event', { durable: true })
+    await channel.assertQueue('tg:spy')
+    await channel.assertQueue('tg:reply')
+
+    const rpcViaSpyQueue = initRPC({
+        channel,
+        queue: 'tg:spy',
+        reply_queue: 'tg:reply'
+    })
 
 
     channel.consume('tg:login:answer', async (msg) => {
@@ -167,8 +177,6 @@ async function main() {
             }
 
             if (data.request_number) {
-                console.log('request_number')
-
                 await bot.sendMessage(user_id, 'Enter your phone:')
 
                 const phone = await waitForText(user_id)
@@ -184,7 +192,7 @@ async function main() {
             if (data.login_ok) {
                 await bot.sendMessage(user_id, 'You are welcome!')
             }
-        } catch(e) {
+        } catch (e) {
             // channel.nack()
             // bot.sendMessage(user_id, 'something went wrong')
         } finally {
@@ -193,8 +201,20 @@ async function main() {
 
     })
 
+
     bot.on('text', async (msg) => {
-        if (msg.text == '/login' && msg.chat.type == 'private') {
+        if (msg.text.startsWith('/spy')) {
+            bot.sendMessage(msg.chat.id, "SPYING ><")
+
+            const result = await rpcViaSpyQueue({
+                requested_by_user_id: msg.from.id,
+                identifier: msg.text.split(/\s+/).slice(1)?.[0]
+            })
+
+            bot.sendMessage(msg.chat.id, JSON.stringify(result))
+
+            /// curator:spy
+        } else if (msg.text == '/login' && msg.chat.type == 'private') {
             channel.sendToQueue('curator:event', Buffer.from(
                 JSON.stringify({
                     event: 'login_init',
@@ -219,3 +239,24 @@ async function main() {
 }
 
 main()
+
+
+function initRPC({ channel, queue, reply_queue }) {
+    const responseEmitter = new EventEmitter()
+    responseEmitter.setMaxListeners(0)
+
+    channel.consume(reply_queue, msg => {
+        responseEmitter.emit(msg.properties.correlationId, JSON.parse(msg.content.toString()));
+    }, { noAck: true });
+
+    const send = message => resolve => {
+        const correlationId = uuid.v4();
+        responseEmitter.once(correlationId, resolve);
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+            correlationId,
+            replyTo: reply_queue,
+        });
+    }
+
+    return message => new Promise(send(message));
+}

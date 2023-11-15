@@ -1,6 +1,10 @@
 // GENERATED FILE, MAY CHANGE IN FUTURE, DO NOT EDIT IT MANUALLY
 import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user"
 import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log"
+import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
+import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedNodesI } from "./channel_post"
+import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
 User.addRelationships({
     reported: {
         model: OnlineLog,
@@ -27,5 +31,75 @@ OnlineLog.addRelationships({
         model: User,
         direction: "in",
         name: "ONLINE_BELONS_TO"
+    }
+})
+Channel.addRelationships({
+    scan_logs: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "CHANNEL_SCAN_LOGS"
+    }
+})
+ChannelScanLog.addRelationships({
+    of_channel: {
+        model: Channel,
+        direction: "in",
+        name: "CHANNEL_SCAN_LOGS"
+    }
+})
+Channel.addRelationships({
+    posts: {
+        model: ChannelPost,
+        direction: "out",
+        name: "POST_OF"
+    }
+})
+ChannelPost.addRelationships({
+    of_channel: {
+        model: Channel,
+        direction: "in",
+        name: "POST_OF"
+    }
+})
+ChannelPost.addRelationships({
+    commented: {
+        model: PostComment,
+        direction: "out",
+        name: "POST_COMMENTED"
+    }
+})
+PostComment.addRelationships({
+    to_post: {
+        model: ChannelPost,
+        direction: "in",
+        name: "POST_COMMENTED"
+    }
+})
+PostComment.addRelationships({
+    authored_by: {
+        model: User,
+        direction: "out",
+        name: "COMMENT_AUTHORED_BY"
+    }
+})
+User.addRelationships({
+    comments: {
+        model: PostComment,
+        direction: "in",
+        name: "COMMENT_AUTHORED_BY"
+    }
+})
+PostComment.addRelationships({
+    replied_to: {
+        model: PostComment,
+        direction: "out",
+        name: "COMMENT_REPLIED_TO"
+    }
+})
+PostComment.addRelationships({
+    replies: {
+        model: PostComment,
+        direction: "in",
+        name: "COMMENT_REPLIED_TO"
     }
 })

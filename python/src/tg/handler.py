@@ -12,12 +12,26 @@ from util.vars import get_api_hash, get_api_id
 import datetime
 
 
+
+class enrolled_job:
+    def __init__(self, func, *args, **vargs):
+        self.func = func
+        self.args = args
+        self.vargs = vargs
+
+    async def async_exec(self, some):
+        await self.func(some, *self.args, **self.vargs)
+
+
 class session_handler:
     def __init__(self, session_name, user_id) -> None:
         self.session_name = session_name
         self.client: TelegramClient
         self.ensured_channel = EnsuredPikaChannel()
         self.user_id = user_id
+        #Use queue
+
+        self.job: enrolled_job = None
 
     def start(self):
         Thread(target=self.run).start()
@@ -51,6 +65,10 @@ class session_handler:
             if self.client.is_connected():
                 me = await self.client.get_me()
                 print(f" [-] heartbeat of {me.username} ({self.user_id}) ")
+                if self.job:
+                    try: self.job = await self.job.async_exec(self)
+                    except Exception as e: print(e)
+                    finally: self.job = None
 
             await asyncio.sleep(3)
 
@@ -61,10 +79,11 @@ class session_handler:
 
         self.client = TelegramClient(self.session_name, get_api_id(), get_api_hash())
         self.client.session
-        # client.send_message('me', 'huedjwen')
         self.client.on(events.UserUpdate)(self.user_update_event_handler)
 
         with self.client:
             self.client.loop.run_until_complete(self.test())
             self.client.run_until_disconnected()
         print("ENDED")
+
+
