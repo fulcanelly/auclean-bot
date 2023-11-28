@@ -1,53 +1,28 @@
 import amqplib from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
-import { NeogmaInstance, QueryBuilder, QueryRunner } from 'neogma';
+import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner } from 'neogma';
 import { neogma } from './neo4j';
 import { sentry } from './sentry';
 import { OnlineLog } from './models/online_log';
-import { User, UserInstance, UserProps, UserRelatedNodesI } from './models/user';
+import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
-import EventEmitter from 'events';
+import { setupChanSpy } from './chanscan';
 
+async function createIfNotExists
+    <T extends Neo4jSupportedProperties, K extends {}, J extends {}, M extends {}>(
+        model: NeogmaModel<T, K, J, M>, key: string, entry: T) {
+    model.getPrimaryKeyField
 
+    const where: { [l: string]: any } = {}
+    where[key] = entry[key]
 
+    const found = await model.findOne({ where })
 
-async function chanSpy(channel: amqplib.Channel) {
-
-    await channel.assertQueue('py:chanscan', { durable: true })
-    await channel.assertQueue('py:chanscan:reply', { durable: true })
-
-    channel.consume('tg:spy', async (msg: any) => {
-        channel.ack(msg, false)
-
-        const data = JSON.parse(msg!.content.toString())// ..content.toString()
-        console.log(data)
-        const props = msg!.properties
-        // Session.getPrimaryKeyField()
-        const session = await Session.findOne({
-            where: {
-                user_id: data.requested_by_user_id?.toString()
-            }
-        })
-
-        if (session) {
-
-            const dataToSpy = {
-                session: session.session_name,
-                identifier: data.identifier,
-            }
-
-            channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(dataToSpy)))
-        }
-
-
-        console.log(session)
-
-        channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify({
-            ...data, ...session?.dataValues
-        }, null, '  ')), {
-            correlationId: props.correlationId
-        })
-    })
+    if (found) {
+        return found
+    } else {
+        await model.createOne(entry as any)
+    }
 }
 
 export async function setupRmq() {
@@ -68,7 +43,7 @@ export async function setupRmq() {
     await channel.assertQueue('tg:spy')
     await channel.assertQueue('tg:reply')
 
-    chanSpy(await client.createChannel())
+    setupChanSpy(await client.createChannel())
 
 
     channel.consume('curator:event', async (msg_) => {
@@ -130,7 +105,7 @@ export async function setupRmq() {
                 throw null
             }
 
-        } catch(e) {
+        } catch (e) {
             sentry.captureException(e)
             console.log(e)
             console.log((e as any)?.data?.errors)
@@ -144,7 +119,7 @@ export async function setupRmq() {
 
 
 
-async function createUserIfNotExists(user_id: string, name: string): Promise<UserInstance>  {
+async function createUserIfNotExists(user_id: string, name: string): Promise<UserInstance> {
     const user = await User.findOne({ where: { user_id } })
 
     if (user) {
