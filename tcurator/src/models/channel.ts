@@ -7,11 +7,12 @@ import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedN
 export type ChannelInstance = NeogmaInstance<ChannelProps, ChannelRelatedNodesI, typeof channelInstanceMethods>
 
 export type ChannelProps = {
-    name: string | undefined
-    channel_link: string
+    id: number
+    title?: string | undefined
+    username?: string | undefined
+    created_at: number
+    channel_link?: string | undefined
     need_to_scan: boolean
-    uuid: string
-    channel_id: string
 }
 
 export interface ChannelRelatedNodesI {
@@ -24,15 +25,13 @@ export const Channel = ModelFactory<ChannelProps, ChannelRelatedNodesI, typeof c
     statics: channelStaticMethods,
     label: "Channel",
     schema: {
-        name: { type: ["string", "null"] },
-        channel_link: { type: ["string"] },
-        need_to_scan: { type: "boolean" },
-        uuid: {
-            type: "string",
-            required: true
-        },
-        channel_id: { type: "string" }
+        id: { type: "number" },
+        title: { type: ["string", "null"] },
+        username: { type: ["string", "null"] },
+        created_at: { type: "number" },
+        channel_link: { type: ["string", "null"] },
+        need_to_scan: { type: "boolean" }
     },
-    primaryKeyField: "uuid"
+    primaryKeyField: "id"
 }, neogen.get())
 ;

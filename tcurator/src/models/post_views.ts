@@ -6,6 +6,7 @@ export type PostViewsInstance = NeogmaInstance<PostViewsProps, PostViewsRelatedN
 
 export type PostViewsProps = {
     views: number
+    date: number
 }
 
 export interface PostViewsRelatedNodesI {
@@ -16,7 +17,8 @@ export const PostViews = ModelFactory<PostViewsProps, PostViewsRelatedNodesI, ty
     statics: postViewsStaticMethods,
     label: "PostViews",
     schema: {
-        views: { type: "number" }
+        views: { type: "number" },
+        date: { type: "number" }
     }
 }, neogen.get())
 ;

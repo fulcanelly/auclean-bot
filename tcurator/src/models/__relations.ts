@@ -1,10 +1,38 @@
 // GENERATED FILE, MAY CHANGE IN FUTURE, DO NOT EDIT IT MANUALLY
 import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user"
+import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedNodesI } from "./channel_post"
 import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log"
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
-import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedNodesI } from "./channel_post"
 import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
+User.addRelationships({
+    appears_in_posts: {
+        model: ChannelPost,
+        direction: "out",
+        name: "USER_QUOUTED"
+    }
+})
+ChannelPost.addRelationships({
+    forward_from_user: {
+        model: User,
+        direction: "in",
+        name: "USER_QUOUTED"
+    }
+})
+ChannelPost.addRelationships({
+    forwards: {
+        model: ChannelPost,
+        direction: "out",
+        name: "POST_FORWARD"
+    }
+})
+ChannelPost.addRelationships({
+    forwarded_from: {
+        model: ChannelPost,
+        direction: "in",
+        name: "POST_FORWARD"
+    }
+})
 User.addRelationships({
     reported: {
         model: OnlineLog,

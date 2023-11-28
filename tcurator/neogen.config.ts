@@ -14,33 +14,44 @@ neogen.generateAll({ // settings
                 required: true,
             },
         },
-        primaryKeyField: 'uuid'
+        primaryKeyField: 'user_id'
     },
     {
         label: 'Channel',
         schema: {
-            name: ['string', 'null'],
-            channel_link: ['string',],
+            id: 'number',
+            title: ['string', 'null'],
+            username: ['string', 'null'],
+            created_at: 'number',
+            channel_link: ['string', 'null'],
             need_to_scan: 'boolean',
-            uuid: {
-                type: 'string',
-                required: true,
-            },
-            channel_id: 'string'
         },
-        primaryKeyField: 'uuid'
+        primaryKeyField: 'id'
     },
     {
         label: 'ChannelPost',
         schema: {
-            message_id: 'string',
-            channel_id: 'string' // just in case
+            id: 'number',
+            channel_id: 'number', // just in case
+            grouped_id: ['number', 'null'],
+            post_author: ['string', 'null'],
+            uuid: 'string',
+            created_at: 'number',
+        },
+        primaryKeyField: 'uuid'
+    },
+    {
+        label: 'ChannelSubs',
+        schema: {
+            count: 'number',
+            date: 'number',
         }
     },
     {
         label: 'PostViews',
         schema: {
-            views: 'number'
+            views: 'number',
+            date: 'number',
         }
     },
     {
@@ -69,7 +80,7 @@ neogen.generateAll({ // settings
         primaryKeyField: 'uuid',
     },
     {
-        
+
         label: 'OnlineLog',
         schema: {
             online: 'boolean',
@@ -78,6 +89,15 @@ neogen.generateAll({ // settings
         },
         primaryKeyField: 'uuid'
     }], { // relations
+
+    USER_QUOUTED: {
+        User: 'appears_in_posts',
+        ChannelPost: 'forward_from_user',
+    },
+    POST_FORWARD: {
+        ChannelPost: [
+            'forwards', 'forwarded_from']
+    },
     ONLINE_REPORTED_BY: {
         User: 'reported',
         OnlineLog: 'reported_by',
