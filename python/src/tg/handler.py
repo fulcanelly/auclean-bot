@@ -66,8 +66,11 @@ class session_handler:
                 me = await self.client.get_me()
                 print(f" [-] heartbeat of {me.username} ({self.user_id}) ")
                 if self.job:
+                    # TODO add queue
                     try: self.job = await self.job.async_exec(self)
-                    except Exception as e: print(e)
+                    except Exception as e:
+                        sentry_sdk.capture_exception(e)
+                        print(e)
                     finally: self.job = None
 
             await asyncio.sleep(3)
