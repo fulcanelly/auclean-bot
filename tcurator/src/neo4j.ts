@@ -2,6 +2,8 @@ import { Neogma } from "neogma";
 
 import * as dotenv from 'dotenv';
 import { neogen } from "neogen";
+import { logging } from "neo4j-driver";
+import { processTransaction } from "./sentry";
 
 
 function neogmaConfig() {
@@ -23,9 +25,17 @@ function neogmaConfig() {
 export const neogma = new Neogma(
     neogmaConfig(),
     {
-        logger: console.log,
+        logger: (q: string) => {
+            const [_, query,] = q.split('**')
+            processTransaction(query)
+            console.log(q)
+        },
     },
 );
+
+
+//TODO
+// Object.entries(neogma.modelsByName)
 
 neogen.setInstance(neogma)
 
@@ -33,14 +43,16 @@ export async function setupConstraints() {
     let constraints = await neogma.queryRunner.run("SHOW CONSTRAINTS")
 
     if (!constraints.records.find(record => record.get('name') == 'uniq_user_id')) {
-        await neogma.queryRunner.run( "CREATE CONSTRAINT uniq_user_id FOR (u:User) REQUIRE u.user_id IS UNIQUE")
+        await neogma.queryRunner.run("CREATE CONSTRAINT uniq_user_id FOR (u:User) REQUIRE u.user_id IS UNIQUE")
     }
 
 }
 
 export async function setupIndexes() {
-
     const queries = [
+        "CREATE CONSTRAINT uniq_channel_id IF NOT EXISTS FOR (u:Channel) REQUIRE u.id IS UNIQUE",
+        "CREATE CONSTRAINT uniq_channel_post_id IF NOT EXISTS FOR (u:ChannelPost) REQUIRE (u.id, u.channel_id) IS UNIQUE",
+        "CREATE CONSTRAINT uniq_user_id IF NOT EXISTS FOR (u:User) REQUIRE u.user_id IS UNIQUE",
         'CREATE TEXT INDEX online_log_uuid_index IF NOT EXISTS FOR (n:OnlineLog) ON (n.uuid)',
         'CREATE TEXT INDEX user_id_index IF NOT EXISTS FOR (n:User) ON (n.user_id)'
     ]
