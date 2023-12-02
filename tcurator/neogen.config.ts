@@ -14,7 +14,7 @@ neogen.generateAll({ // settings
                 required: true,
             },
         },
-        primaryKeyField: 'user_id'
+        primaryKeyField: 'uuid'
     },
     {
         label: 'Channel',

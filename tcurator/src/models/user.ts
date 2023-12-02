@@ -32,6 +32,6 @@ export const User = ModelFactory<UserProps, UserRelatedNodesI, typeof userStatic
             required: true
         }
     },
-    primaryKeyField: "user_id"
+    primaryKeyField: "uuid"
 }, neogen.get())
 ;

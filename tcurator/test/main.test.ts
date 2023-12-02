@@ -57,45 +57,16 @@ async function testTransactionsWorking() {
 }
 
 async function deleteAll() {
-  await new QueryBuilder()
-    .match({
-      related: [
-        {
-          model: User,
-          identifier: 'u'
-        },
-        {
-          direction: 'none',
-          identifier: 'r'
-        },
-        {
-          model: OnlineLog,
-          identifier: 'l'
-        }
-      ]
-    })
-    .where("u.uuid starts with 'test:' and l.uuid starts with 'test:'")
-    .delete('r, u, l')
-    .run(neogma.queryRunner)
 
-  await new QueryBuilder()
-    .match({
-      model: User,
-      identifier: 'u'
-    })
-    .where("u.uuid starts with 'test:'")
-    .delete('u')
-    .run(neogma.queryRunner)
+  // MATCH (u:`User`)-[r]-(l:`OnlineLog`) WHERE u.uuid starts with 'test:' and l.uuid starts with 'test:' DELETE r, u, l
+  await neogma.queryRunner.run(
+    "MATCH (u:`User`) WHERE u.uuid starts with 'test:' DETACH DELETE u"
+  )
 
 
-  await new QueryBuilder()
-    .match({
-      model: OnlineLog,
-      identifier: 'u'
-    })
-    .where("u.uuid starts with 'test:'")
-    .delete('u')
-    .run(neogma.queryRunner)
+  await neogma.queryRunner.run(
+    "MATCH (u:`OnlineLog`) WHERE u.uuid starts with 'test:' DETACH DELETE u"
+  )
 }
 
 describe('models ::', () => {
