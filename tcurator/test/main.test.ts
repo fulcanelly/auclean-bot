@@ -116,7 +116,7 @@ describe('models ::', () => {
       // Create an OnlineLog entry reported by the created User
       const log = await OnlineLog.createOne({
         online: true,
-        time: new Date().toISOString(),
+        time: Number(new Date().toISOString()),
         uuid: rangUUID()
       });
 
@@ -163,7 +163,7 @@ describe('models ::', () => {
 
       const log = await OnlineLog.createOne({
         online: true,
-        time: new Date().toISOString(),
+        time: Number(new Date()),
         uuid: rangUUID()
       });
 
@@ -211,7 +211,7 @@ describe('models ::', () => {
 
       const log = await OnlineLog.createOne({
         online: true,
-        time: new Date().toISOString(),
+        time: Number(new Date()),
         uuid: rangUUID()
       });
 
@@ -250,7 +250,7 @@ describe('models ::', () => {
     it('.belong_to', async () => {
       const log = await OnlineLog.createOne({
         online: false,
-        time: "",
+        time: Number(new Date()),
         uuid: rangUUID()
       })
 
