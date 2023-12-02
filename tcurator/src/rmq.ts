@@ -1,6 +1,6 @@
 import amqplib from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
-import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner } from 'neogma';
+import { QueryBuilder, QueryRunner } from 'neogma';
 import { neogma } from './neo4j';
 import { sentry } from './sentry';
 import { OnlineLog } from './models/online_log';
@@ -8,22 +8,6 @@ import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './chanscan';
 
-async function createIfNotExists
-    <T extends Neo4jSupportedProperties, K extends {}, J extends {}, M extends {}>(
-        model: NeogmaModel<T, K, J, M>, key: string, entry: T) {
-    model.getPrimaryKeyField
-
-    const where: { [l: string]: any } = {}
-    where[key] = entry[key]
-
-    const found = await model.findOne({ where })
-
-    if (found) {
-        return found
-    } else {
-        await model.createOne(entry as any)
-    }
-}
 
 export async function setupRmq() {
     console.log('connecting to rmq')

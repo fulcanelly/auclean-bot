@@ -1,13 +1,13 @@
 import amqplib from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
 
-import { User, UserInstance, UserProps, UserRelatedNodesI } from './models/user';
-import { Session, SessionProps } from './models/session';
-import EventEmitter from 'events';
-import { ChannelScanLog } from './models/channel_scan_log';
+import { User } from './models/user';
+import { Session } from './models/session';
 import { Channel } from './models/channel';
 import { ChannelPost } from './models/channel_post';
 import * as R from 'ramda'
+import { createIfNotExists } from './lib';
+import { NeogmaInstance } from 'neogma';
 
 //TODO,
 // 1 log
@@ -17,10 +17,16 @@ import * as R from 'ramda'
 // 2 views
 // 3 updates
 // 4 comments
-
+// 5 subs
 
 namespace spy {
-	type Channel = {
+	enum LogKind {
+		FULL_SCAN,
+		VIEW_UPDATE,
+		FULL_RESCAN
+	}
+
+	export type Channel = {
 		id: number;
 		title: string;
 		username: string;
@@ -34,7 +40,7 @@ namespace spy {
 		// channel_id?: string;
 	};
 
-	type Post = {
+	export type Post = {
 		id: number;
 		grouped_id: undefined | number;
 		views: number;
@@ -66,165 +72,84 @@ export async function setupChanSpy(channel: amqplib.Channel) {
 	channel.consume('py:chanscan:reply', R.curry(schanChanHandle)(channel))
 
 	channel.consume('tg:spy', async (msg: any) => {
-			channel.ack(msg, false)
+		channel.ack(msg, false)
 
-			const data = JSON.parse(msg!.content.toString())// ..content.toString()
-			console.log(data)
-			const props = msg!.properties
-			// Session.getPrimaryKeyField()
-			const session = await Session.findOne({
-					where: {
-							user_id: data.requested_by_user_id?.toString()
-					}
-			})
+		const data = JSON.parse(msg!.content.toString())// ..content.toString()
+		console.log(data)
+		const props = msg!.properties
+		// Session.getPrimaryKeyField()
+		const session = await Session.findOne({
+			where: {
+				user_id: data.requested_by_user_id?.toString()
+			}
+		})
 
-			if (session) {
+		if (session) {
 
-					const dataToSpy = {
-							session: session.session_name,
-							identifier: data.identifier,
-					}
-
-					// TODO
-					// const log = await ChannelScanLog.createOne({
-					// })
-					channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(dataToSpy)))
+			const dataToSpy = {
+				session: session.session_name,
+				identifier: data.identifier,
 			}
 
+			// TODO
+			// const log = await ChannelScanLog.createOne({
+			// })
+			channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(dataToSpy)))
+		}
 
-			console.log(session)
 
-			channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify({
-					...data, ...session?.dataValues
-			}, null, '  ')), {
-					correlationId: props.correlationId
-			})
+		console.log(session)
+
+		channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify({
+			...data, ...session?.dataValues
+		}, null, '  ')), {
+			correlationId: props.correlationId
+		})
 	})
 }
 
+// match (c:ChannelPost) detach delete c
+// match (c: Channel)  detach delete c
 
 export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 	channel.ack(msg, false)
-	// console.log("AA")
 	const data = JSON.parse(msg!.content.toString()) as spy.Packet// ..content.toString()
 	console.log(data)
 
-	if (data.type == 'post') {
+	const createdByLog: NeogmaInstance<{}, {[k: string]: any}>[] = []
+	const addToCreated: (instance: NeogmaInstance<any, any>) => any = (instance: NeogmaInstance<any, any>) =>
+		R.tap((instance: NeogmaInstance<any, any>) => createdByLog.push(instance), instance)
 
-		//FIND CHANNEL
-		const chan = await Channel.findOne({
-			where: {
-				id: data.channel_id
-			}
-		})
-
-		if (!chan) {
-			//TODO
-			throw 'async borken, no channel'
-			// return void channel.nack(msg, false, true)
+	try {
+		if (data.type == 'post') {
+			await createChannelPost(data, addToCreated)
+		} else if (data.type == 'channel') {
+			await handleChannelEntry(data, addToCreated)
 		}
+	} finally {
 
-		//CHECk IF IT EXISTS
+		type c = ReturnType<typeof Channel.findOne>
+		 //;({ } as any)
+		//TODO connect createdByLog to scan log
+		for (let model of createdByLog) {
+			// model.relateTo({
+			// 	alias: '',
+			// 	where: {
 
-		if (await ChannelPost.findOne({
-			where: {
-				id: data.id,
-				channel_id: data.channel_id
-			},
-		})) {
-			return
+			// 	}
+			// })
 		}
+	}
 
-		const post = await ChannelPost.createOne({
-			uuid: uuidv4(),
-			id: data.id,
-			channel_id: data.channel_id,
-			grouped_id: data.grouped_id,
-			post_author: data.post_author,
-			created_at: data.date
-		})
+}
 
-		// CONNECT TO SOURSE IF IT's FORWAREDED
-		if (data.fwd_from_channel) {
-			const fwd = data.fwd_from_channel
-
-			const chan =
-				await Channel.findOne({
-					where: {
-						id: fwd.channel_id
-					}
-				}) ||
-				await Channel.createOne({
-					id: fwd.channel_id,
-					created_at: fwd.date,
-					need_to_scan: false,
-				})
-
-			await ChannelPost.findOne({
-				where: {
-					id: fwd.channel_post_id,
-					channel_id: fwd.channel_id
-				}
-			}) ||
-				await ChannelPost.createOne({
-					uuid: uuidv4(),
-					id: fwd.channel_post_id,
-					channel_id: fwd.channel_id,
-					created_at: fwd.date
-				})
-
-			await chan.relateTo({
-				alias: 'posts',
-				where: {
-					id: fwd.channel_post_id,
-					channel_id: fwd.channel_id
-				}
-			})
-
-			await post.relateTo({
-				alias: 'forwarded_from',
-				where: {
-					id: fwd.channel_post_id,
-					channel_id: fwd.channel_id
-				}
-			})
+async function handleChannelEntry(data: spy.Channel, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+	await Channel.findOne({
+		where: {
+			id: data.id
 		}
-
-		//CREATE OF FIND USER AND MARK AS POST IS QUOTE
-		if (data.fwd_from_user) {
-			const user_id = String(data.fwd_from_user.user_id)
-
-			const user =
-				await User.findOne({ where: { user_id } }) ||
-				await User.createOne({
-					uuid: uuidv4(),
-					user_id
-				})
-
-			await user.relateTo({
-				alias: 'appears_in_posts',
-				where: {
-					id: data.id,
-					channel_id: data.channel_id
-				}
-			})
-
-		}
-
-		await chan.relateTo({
-			alias: 'posts',
-			where: {
-				id: data.id,
-				channel_id: data.channel_id
-			},
-		})
-	} else if (data.type == 'channel') {
-
-		await Channel.findOne({
-			where: {
-				id: data.id
-			}
-		}) ||
+	}) ||
+		addToCreated(
 			await Channel.createOne({
 				id: data.id,
 				title: data.title,
@@ -232,8 +157,123 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 				created_at: data.date,
 				need_to_scan: false,
 			})
+		)
+}
 
-		// channel.nack(msg, false, true)
+async function createChannelPost(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+	const chan = await Channel.findOne({
+		where: {
+			id: data.channel_id
+		}
+	})
+
+	if (!chan) {
+		//TODO
+		throw 'async borken, no channel'
+		// return void channel.nack(msg, false, true)
+	}
+
+	//CHECk IF IT EXISTS
+
+	if (await ChannelPost.findOne({
+		where: {
+			id: data.id,
+			channel_id: data.channel_id
+		},
+	})) {
+		return
+	}
+
+	const post = addToCreated(
+		await ChannelPost.createOne({
+			uuid: uuidv4(),
+			id: data.id,
+			channel_id: data.channel_id,
+			grouped_id: data.grouped_id,
+			post_author: data.post_author,
+			created_at: data.date
+		})
+	);
+
+
+	// CONNECT TO SOURSE IF IT's FORWAREDED
+	if (data.fwd_from_channel) {
+		const fwd = data.fwd_from_channel
+
+		const chan =
+			await Channel.findOne({
+				where: {
+					id: fwd.channel_id
+				}
+			}) ||
+			addToCreated(
+				await Channel.createOne({
+					id: fwd.channel_id,
+					created_at: fwd.date,
+					need_to_scan: false,
+				})
+			)
+
+		await ChannelPost.findOne({
+			where: {
+				id: fwd.channel_post_id,
+				channel_id: fwd.channel_id
+			}
+		}) ||
+			addToCreated(
+				await ChannelPost.createOne({
+					uuid: uuidv4(),
+					id: fwd.channel_post_id,
+					channel_id: fwd.channel_id,
+					created_at: fwd.date
+				})
+			)
+
+		await chan.relateTo({
+			alias: 'posts',
+			where: {
+				id: fwd.channel_post_id,
+				channel_id: fwd.channel_id
+			}
+		})
+
+		await post.relateTo({
+			alias: 'forwarded_from',
+			where: {
+				id: fwd.channel_post_id,
+				channel_id: fwd.channel_id
+			}
+		})
+	}
+
+	//CREATE OF FIND USER AND MARK AS POST IS QUOTE
+	if (data.fwd_from_user) {
+		const user_id = String(data.fwd_from_user.user_id)
+
+		const user =
+			await User.findOne({ where: { user_id } }) ||
+			addToCreated(
+				await User.createOne({
+					uuid: uuidv4(),
+					user_id
+				})
+			)
+
+		await user.relateTo({
+			alias: 'appears_in_posts',
+			where: {
+				id: data.id,
+				channel_id: data.channel_id
+			}
+		})
 
 	}
+
+	await chan.relateTo({
+		alias: 'posts',
+		where: {
+			id: data.id,
+			channel_id: data.channel_id
+		},
+	})
 }
