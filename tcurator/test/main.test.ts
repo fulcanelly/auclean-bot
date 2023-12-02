@@ -41,8 +41,6 @@ async function testTransactionsWorking() {
   await neogma.getTransaction(null, async (t) => {
     await User.findOne({ session: t })
     const one = await User.createOne({
-      name: undefined,
-      user_id: undefined,
       uuid: rangUUID()
     }, { session: t })
 
@@ -106,7 +104,6 @@ describe('models ::', () => {
       const user = await User.createOne({
         uuid: rangUUID(),
         name: 'Test User',
-        user_id: undefined
       });
 
       // Create an OnlineLog entry reported by the created User
@@ -154,7 +151,6 @@ describe('models ::', () => {
       const user = await User.createOne({
         uuid: rangUUID(),
         name: 'Test User',
-        user_id: undefined
       });
 
       const log = await OnlineLog.createOne({
@@ -252,8 +248,6 @@ describe('models ::', () => {
 
       const user = await User.createOne({
         uuid: rangUUID(),
-        name: undefined,
-        user_id: undefined
       })
 
       await log.relateTo({
