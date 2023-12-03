@@ -5,6 +5,8 @@ import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } 
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
 import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
+import { PostViews, PostViewsInstance, PostViewsProps, PostViewsRelatedNodesI } from "./post_views"
+import { ChannelSubs, ChannelSubsInstance, ChannelSubsProps, ChannelSubsRelatedNodesI } from "./channel_subs"
 User.addRelationships({
     appears_in_posts: {
         model: ChannelPost,
@@ -129,5 +131,33 @@ PostComment.addRelationships({
         model: PostComment,
         direction: "in",
         name: "COMMENT_REPLIED_TO"
+    }
+})
+ChannelPost.addRelationships({
+    view_hisotry: {
+        model: PostViews,
+        direction: "out",
+        name: "HAD_VIEWS_AT"
+    }
+})
+PostViews.addRelationships({
+    of_post: {
+        model: ChannelPost,
+        direction: "in",
+        name: "HAD_VIEWS_AT"
+    }
+})
+Channel.addRelationships({
+    subs_history: {
+        model: ChannelSubs,
+        direction: "out",
+        name: "HAD_SUBS_AT"
+    }
+})
+ChannelSubs.addRelationships({
+    of_channel: {
+        model: Channel,
+        direction: "in",
+        name: "HAD_SUBS_AT"
     }
 })

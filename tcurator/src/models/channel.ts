@@ -4,6 +4,7 @@ import { channelInstanceMethods, channelStaticMethods } from "./channel_"
 import { neogen } from "neogen"
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
 import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedNodesI } from "./channel_post"
+import { ChannelSubs, ChannelSubsInstance, ChannelSubsProps, ChannelSubsRelatedNodesI } from "./channel_subs"
 export type ChannelInstance = NeogmaInstance<ChannelProps, ChannelRelatedNodesI, typeof channelInstanceMethods>
 
 export type ChannelProps = {
@@ -18,6 +19,7 @@ export type ChannelProps = {
 export interface ChannelRelatedNodesI {
     scan_logs: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
     posts: ModelRelatedNodesI<typeof ChannelPost, ChannelPostInstance>
+    subs_history: ModelRelatedNodesI<typeof ChannelSubs, ChannelSubsInstance>
 }
 
 export const Channel = ModelFactory<ChannelProps, ChannelRelatedNodesI, typeof channelStaticMethods, typeof channelInstanceMethods>({

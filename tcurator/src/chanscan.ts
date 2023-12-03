@@ -6,8 +6,11 @@ import { Session } from './models/session';
 import { Channel } from './models/channel';
 import { ChannelPost } from './models/channel_post';
 import * as R from 'ramda'
-import { createIfNotExists } from './lib';
+// import { createIfNotExists } from './lib';
 import { NeogmaInstance } from 'neogma';
+import { OnlineLog } from './models/online_log';
+import { PostViews } from './models/post_views';
+import { ChannelSubs } from './models/channel_subs';
 
 //TODO,
 // 1 log
@@ -19,7 +22,12 @@ import { NeogmaInstance } from 'neogma';
 // 4 comments
 // 5 subs
 
-namespace spy {
+// got to forward channel
+
+// differend scan modes -> recursive | aloone
+// match (c:ChannelPost) RETURN datetime({epochSeconds: toInteger(c.created_at)}) AS date limit 10;
+
+export namespace spy {
 	enum LogKind {
 		FULL_SCAN,
 		VIEW_UPDATE,
@@ -116,7 +124,7 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 	const data = JSON.parse(msg!.content.toString()) as spy.Packet// ..content.toString()
 	console.log(data)
 
-	const createdByLog: NeogmaInstance<{}, {[k: string]: any}>[] = []
+	const createdByLog: NeogmaInstance<{}, { [k: string]: any }>[] = []
 	const addToCreated: (instance: NeogmaInstance<any, any>) => any = (instance: NeogmaInstance<any, any>) =>
 		R.tap((instance: NeogmaInstance<any, any>) => createdByLog.push(instance), instance)
 
@@ -128,10 +136,11 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 		}
 	} finally {
 
-		type c = ReturnType<typeof Channel.findOne>
-		 //;({ } as any)
+		// type c = ReturnType<typeof Channel.findOne>
+		//;({ } as any)
 		//TODO connect createdByLog to scan log
 		for (let model of createdByLog) {
+			console.log(model.labels)
 			// model.relateTo({
 			// 	alias: '',
 			// 	where: {
@@ -158,6 +167,47 @@ async function handleChannelEntry(data: spy.Channel, addToCreated: (instance: Ne
 				need_to_scan: false,
 			})
 		)
+	await addSubsCount(data, addToCreated)
+}
+
+async function addSubsCount(data: spy.Channel, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+	if (!data.subs) {
+		return
+	}
+
+	const subs = addToCreated(
+		await ChannelSubs.createOne({
+			count: data.subs,
+			date: Date.now(),
+			uuid: uuidv4(),
+		}))
+
+
+	await subs.relateTo({
+		alias: 'of_channel',
+		where: {
+			id: data.id,
+		}
+	})
+}
+
+async function createViews(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+	// may be there is a need to restrict how often this need to be updated
+	const views = addToCreated(
+		await PostViews.createOne({
+			views: data.views,
+			date: Date.now(),
+			uuid: uuidv4(),
+		}))
+
+
+	await views.relateTo({
+		alias: 'of_post',
+		where: {
+			id: data.id,
+			channel_id: data.channel_id
+		}
+	})
 }
 
 async function createChannelPost(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
@@ -194,7 +244,6 @@ async function createChannelPost(data: spy.Post, addToCreated: (instance: Neogma
 			created_at: data.date
 		})
 	);
-
 
 	// CONNECT TO SOURSE IF IT's FORWAREDED
 	if (data.fwd_from_channel) {
@@ -276,4 +325,5 @@ async function createChannelPost(data: spy.Post, addToCreated: (instance: Neogma
 			channel_id: data.channel_id
 		},
 	})
+	await createViews(data, addToCreated)
 }

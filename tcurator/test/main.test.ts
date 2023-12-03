@@ -9,6 +9,8 @@ import { neogma } from "../src/neo4j";
 import { QueryResult, RecordShape } from "neo4j-driver";
 import { Channel, ChannelProps } from '../src/models/channel'
 import { ChannelPost } from '../src/models/channel_post'
+import { ChannelSubs, ChannelSubsProps } from '../src/models/channel_subs'
+import { PostViews, PostViewsProps } from '../src/models/post_views'
 
 
 type AnyObj = Record<string, any>
@@ -77,6 +79,14 @@ async function deleteAll() {
 
   await neogma.queryRunner.run(
     "MATCH (u:`ChannelPost`) WHERE u.post_author = 'test:00000000000000000000------------------------------00000000000000009000000000000:test' DETACH DELETE u"
+  )
+
+  await neogma.queryRunner.run(
+    "MATCH (a:PostViews) DETACH DELETE a"
+  )
+
+  await neogma.queryRunner.run(
+    "MATCH (a:ChannelSubs) DETACH DELETE a"
   )
 }
 
@@ -340,6 +350,50 @@ describe('schanChanHandle', () => {
       const results = await Channel.findMany({ where: { id: packet.id } });
       expect(results.length).toBe(1); // Ensure only one entry exists
     });
+
+    it('subs', async () => {
+      const packet: spy.Packet = {
+        type: 'channel',
+        id: -123,
+        title: 'Test Channel',
+        username: 'test:channel',
+        date: Date.now(),
+        subs: 132,
+        log_id: 1
+      }
+      const msg = makeMsg(packet);
+
+      await schanChanHandle(chan, msg);
+
+      const channel = await Channel.findOne({ where: { id: packet.id } });
+      expect(channel).toBeDefined();
+      expect(channel!.title).toBe(packet.title);
+      expect(channel!.username).toBe(packet.username);
+
+
+      const result = await new QueryBuilder()
+      .match({
+        related: [
+          {
+            model: Channel,
+            where: {
+              id: packet.id
+            }
+          },
+          Channel.getRelationshipByAlias('subs_history'),
+          {
+            model: ChannelSubs,
+            identifier: 'views'
+          }
+        ]
+      })
+      .return('views')
+      .run(neogma.queryRunner)
+
+    const res = QueryRunner.getResultProperties<ChannelSubsProps>(result, 'views')
+    expect(res.length).toBe(1)
+    expect(res[0].count).toBe(packet.subs)
+    })
   })
 
   describe('post pocket sent', () => {
@@ -557,7 +611,59 @@ describe('schanChanHandle', () => {
         expect(resultUser.length).toBe(1);
       })
     })
+
+    it('views', async () => {
+
+      const packet: spy.Packet = {
+        type: 'post',
+        id: 200,
+        grouped_id: undefined,
+        views: 12,
+        post_author,
+        date: Date.now(),
+        channel_id: 1, // Ensure this channel exists in the DB
+        log_id: 4
+      };
+      const msg = makeMsg(packet);
+
+      await schanChanHandle(chan, msg);
+
+      const post = await ChannelPost.findOne({ where: { id: packet.id, channel_id: packet.channel_id } });
+      expect(post).toBeDefined();
+      expect(post!.post_author).toBe(packet.post_author);
+
+      const result = await new QueryBuilder()
+        .match({
+          related: [
+            {
+              model: Channel,
+              where: {
+                id: packet.channel_id
+              }
+            },
+            Channel.getRelationshipByAlias('posts'),
+            { model: ChannelPost },
+            ChannelPost.getRelationshipByAlias('view_hisotry'),
+            {
+              model: PostViews,
+              identifier: 'views'
+            }
+          ]
+        })
+        .return('views')
+        .run(neogma.queryRunner)
+
+      const res = QueryRunner.getResultProperties<PostViewsProps>(result, 'views')
+      expect(res.length).toBe(1)
+      expect(res[0].views).toBe(packet.views)
+
+      // ChannelSubs.findOne()
+    })
   })
 
+
+  setInterval(() => {
+    // console.log(User.getRelationshipByAlias('appears_in_posts'))
+  }, 100)
 })
 

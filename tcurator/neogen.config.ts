@@ -45,14 +45,18 @@ neogen.generateAll({ // settings
         schema: {
             count: 'number',
             date: 'number',
-        }
+            uuid: 'string',
+        },
+        primaryKeyField: 'uuid'
     },
     {
         label: 'PostViews',
         schema: {
             views: 'number',
             date: 'number',
-        }
+            uuid: 'string',
+        },
+        primaryKeyField: 'uuid'
     },
     {
         label: 'PostComment',
@@ -124,7 +128,19 @@ neogen.generateAll({ // settings
     },
     COMMENT_REPLIED_TO: {
         PostComment: ['replied_to', 'replies']//TODO
+    },
+    HAD_VIEWS_AT: {
+        ChannelPost: 'view_hisotry',
+        PostViews: 'of_post'
+    },
+    HAD_SUBS_AT: {
+        Channel: 'subs_history',
+        ChannelSubs: 'of_channel',
     }
+    // HAD_SUBS_AT: {
+        // Post: 'subs_hisotry',
+    // }
+
 })
 //OnlineLog ONLINE_REPORTED_BY Users reported_by reported
 //OnlineLog ONLINE_BELONS_TO Users belong_to

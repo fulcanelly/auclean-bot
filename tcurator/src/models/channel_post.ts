@@ -5,6 +5,7 @@ import { neogen } from "neogen"
 import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user"
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
+import { PostViews, PostViewsInstance, PostViewsProps, PostViewsRelatedNodesI } from "./post_views"
 export type ChannelPostInstance = NeogmaInstance<ChannelPostProps, ChannelPostRelatedNodesI, typeof channelPostInstanceMethods>
 
 export type ChannelPostProps = {
@@ -22,6 +23,7 @@ export interface ChannelPostRelatedNodesI {
     forwarded_from: ModelRelatedNodesI<typeof ChannelPost, ChannelPostInstance>
     of_channel: ModelRelatedNodesI<typeof Channel, ChannelInstance>
     commented: ModelRelatedNodesI<typeof PostComment, PostCommentInstance>
+    view_hisotry: ModelRelatedNodesI<typeof PostViews, PostViewsInstance>
 }
 
 export const ChannelPost = ModelFactory<ChannelPostProps, ChannelPostRelatedNodesI, typeof channelPostStaticMethods, typeof channelPostInstanceMethods>({
