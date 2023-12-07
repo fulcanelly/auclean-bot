@@ -4,3 +4,5 @@ telethon
 pretty_traceback
 pytest
 sentry-sdk
+pyrogram
+tgcrypto

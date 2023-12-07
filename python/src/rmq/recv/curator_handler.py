@@ -11,6 +11,11 @@ from util.session_helpers import filename_from_session_name
 from util.session_store import get_session_store
 
 
+
+SESSION_HANDLER_TYPES = {
+    'tele': session_handler
+}
+
 def obtain_curator_handler(channel: BlockingChannel):
 
     curator_notifier = curator_notifier_t(channel)
@@ -29,6 +34,8 @@ def obtain_curator_handler(channel: BlockingChannel):
         if sessions:
             for entry in sessions:
                 session_name = entry.get('session_name')
+                type = entry.get('type')
+
                 if get_session_store().get(session_name): continue
 
 
@@ -38,8 +45,10 @@ def obtain_curator_handler(channel: BlockingChannel):
                     print("Ignoring session")
                     continue
 
-                else:
-                    get_session_store()[session_name] = session_handler(session_name, entry.get('user_id'))
+                elif type in SESSION_HANDLER_TYPES:
+
+                    handler = SESSION_HANDLER_TYPES[type]
+                    get_session_store()[session_name] = handler(session_name, entry.get('user_id'))
                     get_session_store()[session_name].start()
 
         ch.basic_ack(method.delivery_tag)

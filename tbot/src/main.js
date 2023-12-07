@@ -8,7 +8,6 @@ const token = process.env.TG_BOT_API_TOKEN
 
 const bot = new TelegramBot(token, { polling: true })
 
-
 class Logger {
 
     getTimeString() {
@@ -109,6 +108,25 @@ function waitForText(user_id, match = msg => true) {
     })
 }
 
+async function sendSelect(user_id, text, options) {
+    bot.sendMessage(user_id, text, {
+        reply_markup: {
+            keyboard: [
+                options,
+            ]
+        }
+    })
+
+    try {
+        const result = await waitForText(user_id)
+        if (options.includes(result)) {
+            return result
+        }
+    } catch(e) {
+        return false
+    }
+}
+
 
 async function main() {
     console.log("connecting to rmq")
@@ -177,6 +195,15 @@ async function main() {
             }
 
             if (data.request_number) {
+                const result = await sendSelect(user_id, 'Select method', [
+                    'Pyro',
+                    'Tele'
+                ])
+
+                if (!result) {
+                    return await bot.sendMessage(user_id, 'Unknown type')
+                }
+
                 await bot.sendMessage(user_id, 'Enter your phone:')
 
                 const phone = await waitForText(user_id)
@@ -184,7 +211,8 @@ async function main() {
                 channel.sendToQueue('tg:login', Buffer.from(
                     JSON.stringify({
                         type: 'pass_phone',
-                        user_id, phone
+                        user_id, phone,
+                        method: result
                     })
                 ))
             }

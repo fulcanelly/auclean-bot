@@ -4,7 +4,8 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 
 from rmq.send.tg_login import tele_login_t
-from tg.loginer import user_loginer
+from tg.loginer import telethon_user_loginer, user_loginer
+from tg.pyrogram_loginer import pyrogram_user_loginer
 
 
 def obtain_login_handler(channel: BlockingChannel):
@@ -27,11 +28,19 @@ def obtain_login_handler(channel: BlockingChannel):
             tele_login.request_number(user_id)
 
         elif action == 'pass_phone':
+
             phone = data['phone']
 
-            loginer = user_loginer(user_id, phone)
-            login_data_by_user_id[user_id] = loginer
-            loginer.start()
+            method = data['method']
+            if method == 'Pyro':
+                loginer = pyrogram_user_loginer(user_id, phone)
+                login_data_by_user_id[user_id] = loginer
+                loginer.start()
+
+            elif method == 'Tele':
+                loginer = telethon_user_loginer(user_id, phone)
+                login_data_by_user_id[user_id] = loginer
+                loginer.start()
 
         elif action == 'pass_code':
             loginer: user_loginer = login_data_by_user_id[user_id]

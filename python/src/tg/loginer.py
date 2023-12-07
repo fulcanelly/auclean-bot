@@ -27,20 +27,36 @@ class user_loginer:
         self.password_queue.set_data(password)
 
     async def obtain_code(self):
+        self.rmq_tele = tele_login_t(get_new_channel())
         self.rmq_tele.request_code(self.user_id)
 
         return await self.code_queue.get()
 
     async def obtain_password(self):
+        self.rmq_tele = tele_login_t(get_new_channel())
         self.rmq_tele.request_password(self.user_id)
 
         return await self.password_queue.get()
 
     def login_user(self):
+        raise 'not implemented'
+
+    def start(self):
+        Thread(target=self.login_user).start()
+
+    def notify_ok(self, session_name, type):
+        self.rmq_tele = tele_login_t(get_new_channel())
+        self.rmq_tele.notify_ok(self.user_id)
+        ch = get_new_channel()
+        curator_notifier_t(ch).notify_success_login(self.user_id, session_name, type)
+        ch.close()
+        self.rmq_tele.channel.close()
+
+class telethon_user_loginer(user_loginer):
+    def login_user(self):
         asyncio.set_event_loop(asyncio.new_event_loop())
 
         session_name = sesion_by_phone_and_phone(self.user_id, self.phone)
-
 
         old_client = get_session_store().get(session_name)
 
@@ -56,7 +72,6 @@ class user_loginer:
             client = TelegramClient(session_name, get_api_id(), get_api_hash())
 
         async def login():
-            self.rmq_tele = tele_login_t(get_new_channel())
             try:
                 await client.connect()
                 await client.start(
@@ -65,21 +80,10 @@ class user_loginer:
                     code_callback=self.obtain_code,
                     password=self.obtain_password)
 
-                me = await client.get_me()
-                #TODO: remove this check
-                if me.id == self.user_id:
-                    self.rmq_tele.notify_ok(self.user_id)
-                    ch = get_new_channel()
-                    curator_notifier_t(ch).notify_success_login(self.user_id, session_name)
-                    ch.close()
+                self.notify_ok(session_name, 'tele')
 
             finally:
                 await client.disconnect()
-                self.rmq_tele.channel.close()
                 client.loop.stop()
 
         client.loop.run_until_complete(login())
-
-    def start(self):
-        Thread(target=self.login_user).start()
-

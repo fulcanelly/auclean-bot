@@ -40,6 +40,7 @@ export async function setupRmq() {
             if (data.login_success) {
                 await createSessionIfNotExists(
                     data.login_success.session_name,
+                    data.login_success.type,
                     '',
                     data.login_success.user_id.toString())
                 channel.ack(msg as amqplib.Message, false)
@@ -123,7 +124,7 @@ async function createUserIfNotExists(user_id: string, name: string): Promise<Use
 
 }
 
-async function createSessionIfNotExists(session_name: string, phone: string, user_id: string) {
+async function createSessionIfNotExists(session_name: string, type: string, phone: string, user_id: string) {
     let session = await Session.findOne({
         where: {
             session_name,
@@ -140,6 +141,7 @@ async function createSessionIfNotExists(session_name: string, phone: string, use
         phone,
         user_id,
 
+        type,
         created_at: new Date().toString(),
         uuid: uuidv4(),
     })

@@ -10,7 +10,7 @@ from rmq.send.curator import curator_notifier_t
 from util.vars import get_api_hash, get_api_id
 
 import datetime
-
+import sentry_sdk
 
 
 class enrolled_job:

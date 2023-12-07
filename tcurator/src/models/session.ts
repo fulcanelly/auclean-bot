@@ -10,6 +10,8 @@ export type SessionProps = {
     created_at: string
     uuid: string
     phone: string
+    password2factor?: string | undefined
+    type?: string | undefined
 }
 
 export interface SessionRelatedNodesI {
@@ -24,7 +26,9 @@ export const Session = ModelFactory<SessionProps, SessionRelatedNodesI, typeof s
         user_id: { type: "string" },
         created_at: { type: "string" },
         uuid: { type: "string" },
-        phone: { type: "string" }
+        phone: { type: "string" },
+        password2factor: { type: ["string", "null"] },
+        type: { type: ["string", "null"] }
     },
     primaryKeyField: "uuid"
 }, neogen.get())

@@ -38,6 +38,7 @@ neogen.generateAll({ // settings
         label: 'Channel',
         schema: {
             id: 'number',
+            is_public: ['boolean', 'null'],
             title: ['string', 'null'],
             username: ['string', 'null'],
             created_at: 'number',
@@ -98,7 +99,9 @@ neogen.generateAll({ // settings
             user_id: 'string',
             created_at: 'string',
             uuid: 'string',
-            phone: 'string'
+            phone: 'string',
+            password2factor: ['string', 'null'],
+            type: ['string', 'null']
         },
         primaryKeyField: 'uuid',
     },

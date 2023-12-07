@@ -9,6 +9,7 @@ export type ChannelInstance = NeogmaInstance<ChannelProps, ChannelRelatedNodesI,
 
 export type ChannelProps = {
     id: number
+    is_public?: boolean | undefined
     title?: string | undefined
     username?: string | undefined
     created_at: number
@@ -29,6 +30,7 @@ export const Channel = ModelFactory<ChannelProps, ChannelRelatedNodesI, typeof c
     label: "Channel",
     schema: {
         id: { type: "number" },
+        is_public: { type: ["boolean", "null"] },
         title: { type: ["string", "null"] },
         username: { type: ["string", "null"] },
         created_at: { type: "number" },
