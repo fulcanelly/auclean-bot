@@ -157,7 +157,7 @@ neogen.generateAll({ // settings
         ChannelSubs: 'of_channel',
     }
     // HAD_SUBS_AT: {
-        // Post: 'subs_hisotry',
+    // Post: 'subs_hisotry',
     // }
 
 })

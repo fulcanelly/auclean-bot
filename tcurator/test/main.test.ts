@@ -11,7 +11,7 @@ import { Channel, ChannelProps } from '../src/models/channel'
 import { ChannelPost } from '../src/models/channel_post'
 import { ChannelSubs, ChannelSubsProps } from '../src/models/channel_subs'
 import { PostViews, PostViewsProps } from '../src/models/post_views'
-import { ChannelScanLog } from '../src/models/channel_scan_log'
+import { ChannelScanLog, ChannelScanLogProps } from '../src/models/channel_scan_log'
 
 
 type AnyObj = Record<string, any>
@@ -313,10 +313,51 @@ describe('schanChanHandle', () => {
       started_at: 0,
       finished_at: 0
     })
-
-
   })
 
+  it('scan log', async () => {
+    const packet: spy.Packet = {
+      type: 'channel',
+      id: -123,
+      title: 'Test Channel',
+      username: 'test:channel',
+      date: Date.now(),
+      log_id
+    }
+    const msg = makeMsg(packet);
+
+    await schanChanHandle(chan, msg);
+
+    const channel = await Channel.findOne({ where: { id: packet.id } });
+    expect(channel).toBeDefined();
+    expect(channel!.title).toBe(packet.title);
+    expect(channel!.username).toBe(packet.username);
+
+
+    const result = await new QueryBuilder()
+      .match({
+        related: [
+          {
+            model: Channel,
+            where: {
+              id: packet.id
+            }
+          },
+          Channel.getRelationshipByAlias('added_by_log'),
+          {
+            model: ChannelScanLog,
+            identifier: 'log'
+          }
+        ]
+      })
+      .return('log')
+      .run(neogma.queryRunner)
+
+    const log = QueryRunner.getResultProperties<ChannelScanLogProps>(result, 'log')
+
+    expect(log.length).toBe(1)
+
+  })
 
   describe('channel packet sent >', () => {
     describe('when no channel >', () => {
@@ -672,8 +713,10 @@ describe('schanChanHandle', () => {
       expect(res[0].views).toBe(packet.views)
 
       // ChannelSubs.findOne()
+
     })
   })
+
 
 
   setInterval(() => {
