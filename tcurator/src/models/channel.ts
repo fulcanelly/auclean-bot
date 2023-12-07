@@ -20,6 +20,7 @@ export interface ChannelRelatedNodesI {
     scan_logs: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
     posts: ModelRelatedNodesI<typeof ChannelPost, ChannelPostInstance>
     subs_history: ModelRelatedNodesI<typeof ChannelSubs, ChannelSubsInstance>
+    added_by_log: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
 }
 
 export const Channel = ModelFactory<ChannelProps, ChannelRelatedNodesI, typeof channelStaticMethods, typeof channelInstanceMethods>({

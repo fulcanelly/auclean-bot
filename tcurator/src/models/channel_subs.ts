@@ -3,6 +3,7 @@ import { ModelFactory, ModelRelatedNodesI, NeogmaInstance } from "neogma"
 import { channelSubsInstanceMethods, channelSubsStaticMethods } from "./channel_subs_"
 import { neogen } from "neogen"
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
 export type ChannelSubsInstance = NeogmaInstance<ChannelSubsProps, ChannelSubsRelatedNodesI, typeof channelSubsInstanceMethods>
 
 export type ChannelSubsProps = {
@@ -13,6 +14,7 @@ export type ChannelSubsProps = {
 
 export interface ChannelSubsRelatedNodesI {
     of_channel: ModelRelatedNodesI<typeof Channel, ChannelInstance>
+    added_by_log: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
 }
 
 export const ChannelSubs = ModelFactory<ChannelSubsProps, ChannelSubsRelatedNodesI, typeof channelSubsStaticMethods, typeof channelSubsInstanceMethods>({

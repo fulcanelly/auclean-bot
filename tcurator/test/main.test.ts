@@ -11,6 +11,7 @@ import { Channel, ChannelProps } from '../src/models/channel'
 import { ChannelPost } from '../src/models/channel_post'
 import { ChannelSubs, ChannelSubsProps } from '../src/models/channel_subs'
 import { PostViews, PostViewsProps } from '../src/models/post_views'
+import { ChannelScanLog } from '../src/models/channel_scan_log'
 
 
 type AnyObj = Record<string, any>
@@ -62,23 +63,20 @@ async function testTransactionsWorking() {
 }
 
 async function deleteAll() {
-
-  // MATCH (u:`User`)-[r]-(l:`OnlineLog`) WHERE u.uuid starts with 'test:' and l.uuid starts with 'test:' DELETE r, u, l
   await neogma.queryRunner.run(
-    "MATCH (u:`User`) WHERE u.uuid starts with 'test:' DETACH DELETE u"
-  )
-
-
-  await neogma.queryRunner.run(
-    "MATCH (u:`OnlineLog`) WHERE u.uuid starts with 'test:' DETACH DELETE u"
+    "MATCH (u:`User`) DETACH DELETE u"
   )
 
   await neogma.queryRunner.run(
-    "MATCH (u:`Channel`) WHERE u.username starts with 'test:' DETACH DELETE u"
+    "MATCH (u:`OnlineLog`) DETACH DELETE u"
   )
 
   await neogma.queryRunner.run(
-    "MATCH (u:`ChannelPost`) WHERE u.post_author = 'test:00000000000000000000------------------------------00000000000000009000000000000:test' DETACH DELETE u"
+    "MATCH (u:`Channel`)  DETACH DELETE u"
+  )
+
+  await neogma.queryRunner.run(
+    "MATCH (u:`ChannelPost`) DETACH DELETE u"
   )
 
   await neogma.queryRunner.run(
@@ -87,6 +85,10 @@ async function deleteAll() {
 
   await neogma.queryRunner.run(
     "MATCH (a:ChannelSubs) DETACH DELETE a"
+  )
+
+  await neogma.queryRunner.run(
+    "MATCH (a:ChannelScanLog) DETACH DELETE a"
   )
 }
 
@@ -302,7 +304,19 @@ const chan = {
 
 describe('schanChanHandle', () => {
 
-  beforeEach(deleteAll)
+  const log_id = rangUUID()
+
+  beforeEach(async () => {
+    await deleteAll()
+    await ChannelScanLog.createOne({
+      uuid: log_id,
+      started_at: 0,
+      finished_at: 0
+    })
+
+
+  })
+
 
   describe('channel packet sent >', () => {
     describe('when no channel >', () => {
@@ -313,7 +327,7 @@ describe('schanChanHandle', () => {
           title: 'Test Channel',
           username: 'test:channel',
           date: Date.now(),
-          log_id: 1
+          log_id
         }
         const msg = makeMsg(packet);
 
@@ -339,7 +353,7 @@ describe('schanChanHandle', () => {
         title: 'Duplicate Test Channel',
         username: 'test:channel',
         date: Date.now(),
-        log_id: 3
+        log_id
       };
 
       const msg = makeMsg(packet);
@@ -359,7 +373,7 @@ describe('schanChanHandle', () => {
         username: 'test:channel',
         date: Date.now(),
         subs: 132,
-        log_id: 1
+        log_id
       }
       const msg = makeMsg(packet);
 
@@ -372,27 +386,27 @@ describe('schanChanHandle', () => {
 
 
       const result = await new QueryBuilder()
-      .match({
-        related: [
-          {
-            model: Channel,
-            where: {
-              id: packet.id
+        .match({
+          related: [
+            {
+              model: Channel,
+              where: {
+                id: packet.id
+              }
+            },
+            Channel.getRelationshipByAlias('subs_history'),
+            {
+              model: ChannelSubs,
+              identifier: 'views'
             }
-          },
-          Channel.getRelationshipByAlias('subs_history'),
-          {
-            model: ChannelSubs,
-            identifier: 'views'
-          }
-        ]
-      })
-      .return('views')
-      .run(neogma.queryRunner)
+          ]
+        })
+        .return('views')
+        .run(neogma.queryRunner)
 
-    const res = QueryRunner.getResultProperties<ChannelSubsProps>(result, 'views')
-    expect(res.length).toBe(1)
-    expect(res[0].count).toBe(packet.subs)
+      const res = QueryRunner.getResultProperties<ChannelSubsProps>(result, 'views')
+      expect(res.length).toBe(1)
+      expect(res[0].count).toBe(packet.subs)
     })
   })
 
@@ -404,7 +418,7 @@ describe('schanChanHandle', () => {
         title: 'Duplicate Test Channel',
         username: 'test:channel',
         date: Date.now(),
-        log_id: 3
+        log_id
       });
 
       await schanChanHandle(chan, makeChan(1));
@@ -421,7 +435,7 @@ describe('schanChanHandle', () => {
           post_author,
           date: Date.now(),
           channel_id: 1, // Ensure this channel exists in the DB
-          log_id: 4
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -449,7 +463,7 @@ describe('schanChanHandle', () => {
             post_author,
             date: Date.now()
           },
-          log_id: 5
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -508,7 +522,7 @@ describe('schanChanHandle', () => {
             date: Date.now(),
             user_id: 3
           },
-          log_id: 6
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -535,7 +549,7 @@ describe('schanChanHandle', () => {
           post_author,
           date: Date.now(),
           channel_id: 1, // Ensure this channel exists in the DB
-          log_id: 4
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -564,7 +578,7 @@ describe('schanChanHandle', () => {
             post_author,
             date: Date.now()
           },
-          log_id: 5
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -593,7 +607,7 @@ describe('schanChanHandle', () => {
             date: Date.now(),
             user_id: 4
           },
-          log_id: 6
+          log_id
         };
         const msg = makeMsg(packet);
 
@@ -622,7 +636,7 @@ describe('schanChanHandle', () => {
         post_author,
         date: Date.now(),
         channel_id: 1, // Ensure this channel exists in the DB
-        log_id: 4
+        log_id
       };
       const msg = makeMsg(packet);
 

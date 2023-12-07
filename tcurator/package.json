@@ -12,6 +12,7 @@
     "@types/ramda": "^0.29.8",
     "@types/uuid": "^9.0.2",
     "amqplib": "^0.10.3",
+    "jest": "^29.7.0",
     "lodash": "^4.17.21",
     "neo4j-driver": "^5.14.0",
     "neogen": "^1.0.17",

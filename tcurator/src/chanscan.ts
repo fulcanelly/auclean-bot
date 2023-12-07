@@ -68,7 +68,7 @@ export namespace spy {
 		};
 	}
 
-	export type Packet = (Post | Channel) & { log_id: number }
+	export type Packet = (Post | Channel) & { log_id: string }
 }
 
 export async function setupChanSpy(channel: amqplib.Channel) {
@@ -135,19 +135,15 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 			await handleChannelEntry(data, addToCreated)
 		}
 	} finally {
-
-		// type c = ReturnType<typeof Channel.findOne>
-		//;({ } as any)
-		//TODO connect createdByLog to scan log
-		for (let model of createdByLog) {
-			console.log(model.labels)
-			// model.relateTo({
-			// 	alias: '',
-			// 	where: {
-
-			// 	}
-			// })
-		}
+		const result = createdByLog.map(model =>
+				model.relateTo({
+					alias: 'added_by_log',
+					where: {
+						uuid: data.log_id
+					}
+				})
+			)
+		await Promise.all(result)
 	}
 
 }

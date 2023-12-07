@@ -6,8 +6,9 @@ import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./
 export type ChannelScanLogInstance = NeogmaInstance<ChannelScanLogProps, ChannelScanLogRelatedNodesI, typeof channelScanLogInstanceMethods>
 
 export type ChannelScanLogProps = {
-    views_per_idk: number
-    scanned_at: number
+    uuid: string
+    started_at: number
+    finished_at: number
 }
 
 export interface ChannelScanLogRelatedNodesI {
@@ -19,8 +20,10 @@ export const ChannelScanLog = ModelFactory<ChannelScanLogProps, ChannelScanLogRe
     statics: channelScanLogStaticMethods,
     label: "ChannelScanLog",
     schema: {
-        views_per_idk: { type: "number" },
-        scanned_at: { type: "number" }
-    }
+        uuid: { type: "string" },
+        started_at: { type: "number" },
+        finished_at: { type: "number" }
+    },
+    primaryKeyField: "uuid"
 }, neogen.get())
 ;

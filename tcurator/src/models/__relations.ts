@@ -161,3 +161,38 @@ ChannelSubs.addRelationships({
         name: "HAD_SUBS_AT"
     }
 })
+Channel.addRelationships({
+    added_by_log: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "BELONGS_TO_LOG"
+    }
+})
+ChannelPost.addRelationships({
+    added_by_log: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "BELONGS_TO_LOG"
+    }
+})
+PostViews.addRelationships({
+    added_by_log: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "BELONGS_TO_LOG"
+    }
+})
+User.addRelationships({
+    added_by_log: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "BELONGS_TO_LOG"
+    }
+})
+ChannelSubs.addRelationships({
+    added_by_log: {
+        model: ChannelScanLog,
+        direction: "out",
+        name: "BELONGS_TO_LOG"
+    }
+})

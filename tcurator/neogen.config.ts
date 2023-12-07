@@ -1,8 +1,26 @@
 import { neogen } from "neogen";
 
+const scanLogRelations: neogen.Relation[]
+    = [
+        'Channel',
+        'ChannelPost',
+        'PostViews',
+        'User',
+        'ChannelSubs'
+    ].map(from => {
+        return {
+            from,
+            to: 'ChannelScanLog',
+            direction: 'out',
+            alias: 'added_by_log',
+            label: 'BELONGS_TO_LOG',
+        }
+    })
+
 neogen.generateAll({ // settings
     generateBase: true,
-    outputFolder: './src/models'
+    outputFolder: './src/models',
+    rawRelation: scanLogRelations
 }, [
     { // models
         label: 'User',
@@ -67,10 +85,11 @@ neogen.generateAll({ // settings
     {
         label: 'ChannelScanLog',
         schema: {
-            views_per_idk: 'number', //TODO
-
-            scanned_at: 'number'
-        }
+            uuid: 'string',
+            started_at: 'number',
+            finished_at: 'number',
+        },
+        primaryKeyField: 'uuid'
     },
     {
         label: 'Session',
