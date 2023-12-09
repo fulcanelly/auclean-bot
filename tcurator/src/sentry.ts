@@ -13,6 +13,7 @@ export async function processTransaction(customQuery: string) {
       name: "CHYPER",
     });
 
+    transaction.setContext('query', {query: customQuery})
     // Example of custom transaction data
     const transactionData = {
       query: customQuery,
@@ -29,7 +30,7 @@ export async function processTransaction(customQuery: string) {
     } else {
       transaction.setStatus("ok");
     }
-    
+
     transaction.finish(); // Finish the transaction
   }
 

@@ -6,3 +6,4 @@ pytest
 sentry-sdk
 pyrogram
 tgcrypto
+pytz

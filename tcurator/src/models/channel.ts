@@ -12,7 +12,7 @@ export type ChannelProps = {
     is_public?: boolean | undefined
     title?: string | undefined
     username?: string | undefined
-    created_at: number
+    created_at?: number | undefined
     channel_link?: string | undefined
     need_to_scan: boolean
 }
@@ -33,7 +33,7 @@ export const Channel = ModelFactory<ChannelProps, ChannelRelatedNodesI, typeof c
         is_public: { type: ["boolean", "null"] },
         title: { type: ["string", "null"] },
         username: { type: ["string", "null"] },
-        created_at: { type: "number" },
+        created_at: { type: ["number", "null"] },
         channel_link: { type: ["string", "null"] },
         need_to_scan: { type: "boolean" }
     },

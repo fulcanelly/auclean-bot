@@ -7,6 +7,7 @@ import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelSca
 import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
 import { PostViews, PostViewsInstance, PostViewsProps, PostViewsRelatedNodesI } from "./post_views"
 import { ChannelSubs, ChannelSubsInstance, ChannelSubsProps, ChannelSubsRelatedNodesI } from "./channel_subs"
+import { Session, SessionInstance, SessionProps, SessionRelatedNodesI } from "./session"
 User.addRelationships({
     appears_in_posts: {
         model: ChannelPost,
@@ -159,6 +160,20 @@ ChannelSubs.addRelationships({
         model: Channel,
         direction: "in",
         name: "HAD_SUBS_AT"
+    }
+})
+ChannelScanLog.addRelationships({
+    handled_by: {
+        model: Session,
+        direction: "out",
+        name: "HANDLED_BY"
+    }
+})
+Session.addRelationships({
+    scan_logs: {
+        model: ChannelScanLog,
+        direction: "in",
+        name: "HANDLED_BY"
     }
 })
 Channel.addRelationships({

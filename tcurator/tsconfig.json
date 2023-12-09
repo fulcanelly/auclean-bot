@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      "noImplicitAny": true,
       "target": "es2022",
       "module": "commonjs",
       "outDir": "./dist",

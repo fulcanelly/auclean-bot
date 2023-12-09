@@ -2,6 +2,7 @@
 import { ModelFactory, ModelRelatedNodesI, NeogmaInstance } from "neogma"
 import { sessionInstanceMethods, sessionStaticMethods } from "./session_"
 import { neogen } from "neogen"
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
 export type SessionInstance = NeogmaInstance<SessionProps, SessionRelatedNodesI, typeof sessionInstanceMethods>
 
 export type SessionProps = {
@@ -15,6 +16,7 @@ export type SessionProps = {
 }
 
 export interface SessionRelatedNodesI {
+    scan_logs: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
 }
 
 export const Session = ModelFactory<SessionProps, SessionRelatedNodesI, typeof sessionStaticMethods, typeof sessionInstanceMethods>({

@@ -8,6 +8,7 @@ from telethon.functions import channels
 from pika.adapters.blocking_connection import BlockingChannel
 from datetime import datetime
 #KNOWN FLAG
+import pyrogram
 
 pp = pprint.PrettyPrinter(indent=2)
 
@@ -47,7 +48,6 @@ class chanscan_notifier_t(rmq_json_notifier):
             **__class__.filter_by_kyes(obj, keep),
             'subs': subs,
             'date': obj.date.timestamp(),
-
             'type': 'channel'
         })
 
@@ -69,6 +69,7 @@ class chanscan_notifier_t(rmq_json_notifier):
 
     def send_done():
         pass
+
 
 def extract_fwd_from_msg(m):
     if m.fwd_from and m.fwd_from.channel_post:
@@ -95,6 +96,7 @@ def extract_fwd_from_msg(m):
 async def get_subs_count(client: TelegramClient, chan):
     result = await client(channels.GetFullChannelRequest(chan))
     return result.full_chat.participants_count
+
 
 
 

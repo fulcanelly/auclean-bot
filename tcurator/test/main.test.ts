@@ -1,6 +1,6 @@
 import '../src/neo4j'
 import '../src/models/__relations'
-import { schanChanHandle, spy } from '../src/chanscan'
+import { schanChanHandle } from '../src/chanscan'
 
 import { User } from '../src/models/user'
 import { OnlineLog } from '../src/models/online_log'
@@ -11,7 +11,8 @@ import { Channel, ChannelProps } from '../src/models/channel'
 import { ChannelPost } from '../src/models/channel_post'
 import { ChannelSubs, ChannelSubsProps } from '../src/models/channel_subs'
 import { PostViews, PostViewsProps } from '../src/models/post_views'
-import { ChannelScanLog, ChannelScanLogProps } from '../src/models/channel_scan_log'
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from '../src/models/channel_scan_log'
+import { spy } from '../src/types/spy_packet'
 
 
 type AnyObj = Record<string, any>
@@ -302,6 +303,7 @@ const chan = {
   nack() { },
 } as any
 
+
 describe('schanChanHandle', () => {
 
   const log_id = rangUUID()
@@ -311,9 +313,76 @@ describe('schanChanHandle', () => {
     await ChannelScanLog.createOne({
       uuid: log_id,
       started_at: 0,
-      finished_at: 0
+      finished_at: 0,
+      enrolled_at: 0
     })
   })
+
+  describe('schanChanHandle with two ChannelScanLog', () => {
+    let log1: ChannelScanLogInstance, log2: ChannelScanLogInstance;
+
+    beforeEach(async () => {
+      await deleteAll();
+      // Create two ChannelScanLog entries
+      log1 = await ChannelScanLog.createOne({
+        uuid: rangUUID(),
+        started_at: 0,
+        finished_at: 0,
+        enrolled_at: 0
+      });
+      log2 = await ChannelScanLog.createOne({
+        uuid: rangUUID(),
+        started_at: 0,
+        finished_at: 0,
+        enrolled_at: 0
+      });
+    });
+
+    it('should relate items to the correct ChannelScanLog', async () => {
+      // Sample packet data related to log1
+      const packetForLog1: spy.Packet = {
+        type: 'channel',
+        id: -123,
+        title: 'Test Channel',
+        username: 'test:channel',
+        date: Date.now(),
+        log_id: log1.uuid
+      };
+
+      const msgForLog1 = makeMsg(packetForLog1);
+
+      // Execute schanChanHandle for log1
+      await schanChanHandle(chan, msgForLog1);
+
+      // Verify that the channel is related to log1 and not to log2
+      const result = await new QueryBuilder()
+        .match({
+          related: [
+            {
+              model: Channel,
+              where: {
+                id: packetForLog1.id
+              }
+            },
+            Channel.getRelationshipByAlias('added_by_log'),
+            {
+              model: ChannelScanLog,
+              identifier: 'log'
+            }
+          ]
+        })
+        .return('log')
+        .run(neogma.queryRunner);
+
+      const relatedLogs = QueryRunner.getResultProperties<ChannelScanLogProps>(result, 'log');
+      expect(relatedLogs.length).toBe(1);
+      expect(relatedLogs[0].uuid).toBe(log1.uuid); // Check if related to log1
+      expect(relatedLogs[0].uuid).not.toBe(log2.uuid); // Check if not related to log2
+    });
+
+    // Additional tests to cover other scenarios
+  });
+
 
   it('scan log', async () => {
     const packet: spy.Packet = {

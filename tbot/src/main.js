@@ -220,7 +220,14 @@ async function main() {
             if (data.login_ok) {
                 await bot.sendMessage(user_id, 'You are welcome!')
             }
+
+            if (data.scan_summary) {
+                bot.sendMessage(user_id, JSON.stringify(data, null, ' '))
+            }
+
         } catch (e) {
+            console.error(e)
+
             // channel.nack()
             // bot.sendMessage(user_id, 'something went wrong')
         } finally {
@@ -231,18 +238,44 @@ async function main() {
 
 
     bot.on('text', async (msg) => {
-        if (msg.text.startsWith('/spy')) {
-            bot.sendMessage(msg.chat.id, "SPYING ><")
+        const user_id = msg.from.id
+        if (msg.chat.type != 'private') {
+            return
+        }
 
-            const result = await rpcViaSpyQueue({
-                requested_by_user_id: msg.from.id,
-                identifier: msg.text.split(/\s+/).slice(1)?.[0]
+        if (msg.text.startsWith('/spy')) {
+            await bot.sendMessage(user_id, "SPYING ><")
+
+
+            const sessions = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
             })
 
-            bot.sendMessage(msg.chat.id, JSON.stringify(result))
+            const selected = await sendSelect(user_id, 'Select session to use', sessions)
 
+            if (!selected) {
+                return await bot.sendMessage(user_id, 'Bie', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                })
+            }
+
+            await bot.sendMessage(user_id, 'Ok, now send tg channel link or username', {
+                reply_markup: {
+                    remove_keyboard: true
+                }
+            })
+            const identifier = await waitForText(user_id)
+
+            const result = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
+                session: selected,
+                identifier
+            })
+            await bot.sendMessage(msg.chat.id, JSON.stringify(result))
             /// curator:spy
-        } else if (msg.text == '/login' && msg.chat.type == 'private') {
+        } else if (msg.text == '/login') {
             channel.sendToQueue('curator:event', Buffer.from(
                 JSON.stringify({
                     event: 'login_init',

@@ -5,7 +5,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from rmq.send.curator import curator_notifier_t
 
 from rmq.send.tg_login import tele_login_t
-from tg.handler import session_handler
+from tg.handler import pyro_session_handler, session_handler, tele_session_handler
 from tg.loginer import user_loginer
 from util.session_helpers import filename_from_session_name
 from util.session_store import get_session_store
@@ -13,7 +13,8 @@ from util.session_store import get_session_store
 
 
 SESSION_HANDLER_TYPES = {
-    'tele': session_handler
+    'tele': tele_session_handler,
+    'pyro': pyro_session_handler,
 }
 
 def obtain_curator_handler(channel: BlockingChannel):

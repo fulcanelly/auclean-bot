@@ -41,7 +41,7 @@ neogen.generateAll({ // settings
             is_public: ['boolean', 'null'],
             title: ['string', 'null'],
             username: ['string', 'null'],
-            created_at: 'number',
+            created_at: ['number', 'null'],
             channel_link: ['string', 'null'],
             need_to_scan: 'boolean',
         },
@@ -87,8 +87,14 @@ neogen.generateAll({ // settings
         label: 'ChannelScanLog',
         schema: {
             uuid: 'string',
+            enrolled_at: 'number',
             started_at: 'number',
             finished_at: 'number',
+
+            //request
+
+            //scan
+            //successs
         },
         primaryKeyField: 'uuid'
     },
@@ -158,6 +164,10 @@ neogen.generateAll({ // settings
     HAD_SUBS_AT: {
         Channel: 'subs_history',
         ChannelSubs: 'of_channel',
+    },
+    HANDLED_BY: {
+        ChannelScanLog: 'handled_by',
+        Session: 'scan_logs'
     }
     // HAD_SUBS_AT: {
     // Post: 'subs_hisotry',
