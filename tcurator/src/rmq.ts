@@ -6,7 +6,7 @@ import { sentry } from './sentry';
 import { OnlineLog } from './models/online_log';
 import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
-import { setupChanSpy } from './chanscan';
+import { setupChanSpy } from './ampq/chanscan/setup';
 
 
 export async function setupRmq() {

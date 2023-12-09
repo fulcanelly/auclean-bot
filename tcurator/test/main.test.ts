@@ -1,6 +1,5 @@
 import '../src/neo4j'
 import '../src/models/__relations'
-import { schanChanHandle } from '../src/chanscan'
 
 import { User } from '../src/models/user'
 import { OnlineLog } from '../src/models/online_log'
@@ -14,6 +13,7 @@ import { PostViews, PostViewsProps } from '../src/models/post_views'
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from '../src/models/channel_scan_log'
 import { spy } from '../src/types/spy_packet'
 
+import { schanChanHandle } from '../src/ampq/chanscan/chan_handle';
 
 type AnyObj = Record<string, any>
 
