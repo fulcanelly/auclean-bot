@@ -8,3 +8,4 @@ psql-data/
 shared_modules
 *.session-journal
 .venv
+.DS_Store
