@@ -138,9 +138,9 @@ neogen.generateAll({ // settings
         User: 'online_logs',
         OnlineLog: 'belong_to'
     },
-    CHANNEL_SCAN_LOGS: {
+    SCANNED_FOR: {
+        ChannelScanLog: 'of_channel',
         Channel: 'scan_logs',
-        ChannelScanLog: 'of_channel'
     },
     POST_OF: {
         Channel: 'posts',

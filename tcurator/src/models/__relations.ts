@@ -2,8 +2,8 @@
 import { User, UserInstance, UserProps, UserRelatedNodesI } from "./user"
 import { ChannelPost, ChannelPostInstance, ChannelPostProps, ChannelPostRelatedNodesI } from "./channel_post"
 import { OnlineLog, OnlineLogInstance, OnlineLogProps, OnlineLogRelatedNodesI } from "./online_log"
-import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
+import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { PostComment, PostCommentInstance, PostCommentProps, PostCommentRelatedNodesI } from "./post_comment"
 import { PostViews, PostViewsInstance, PostViewsProps, PostViewsRelatedNodesI } from "./post_views"
 import { ChannelSubs, ChannelSubsInstance, ChannelSubsProps, ChannelSubsRelatedNodesI } from "./channel_subs"
@@ -64,18 +64,18 @@ OnlineLog.addRelationships({
         name: "ONLINE_BELONS_TO"
     }
 })
-Channel.addRelationships({
-    scan_logs: {
-        model: ChannelScanLog,
-        direction: "out",
-        name: "CHANNEL_SCAN_LOGS"
-    }
-})
 ChannelScanLog.addRelationships({
     of_channel: {
         model: Channel,
+        direction: "out",
+        name: "SCANNED_FOR"
+    }
+})
+Channel.addRelationships({
+    scan_logs: {
+        model: ChannelScanLog,
         direction: "in",
-        name: "CHANNEL_SCAN_LOGS"
+        name: "SCANNED_FOR"
     }
 })
 Channel.addRelationships({
