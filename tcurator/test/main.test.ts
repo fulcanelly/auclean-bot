@@ -311,6 +311,7 @@ describe('schanChanHandle', () => {
   beforeEach(async () => {
     await deleteAll()
     await ChannelScanLog.createOne({
+      status: '',
       uuid: log_id,
       started_at: 0,
       finished_at: 0,
@@ -326,12 +327,14 @@ describe('schanChanHandle', () => {
       // Create two ChannelScanLog entries
       log1 = await ChannelScanLog.createOne({
         uuid: rangUUID(),
+        status: '',
         started_at: 0,
         finished_at: 0,
         enrolled_at: 0
       });
       log2 = await ChannelScanLog.createOne({
         uuid: rangUUID(),
+        status: '',
         started_at: 0,
         finished_at: 0,
         enrolled_at: 0

@@ -91,6 +91,7 @@ neogen.generateAll({ // settings
             started_at: 'number',
             finished_at: 'number',
 
+            status: 'string',
             //request
 
             //scan

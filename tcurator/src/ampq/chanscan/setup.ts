@@ -6,6 +6,7 @@ import * as R from 'ramda'
 import { schanChanHandle } from './chan_handle';
 import { ChannelScanLog } from '../../models/channel_scan_log';
 import { Session } from '../../models/session';
+import { ChannelScanStatus } from '../../types/channel_scan_status';
 // import { createIfNotExists } from './lib';
 
 
@@ -56,6 +57,7 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 			const log = await ChannelScanLog.createOne({
 				uuid: uuidv4(),
 				enrolled_at: Date.now(),
+				status: 'INIT' as ChannelScanStatus,
 				started_at: 0,
 				finished_at: 0
 			})

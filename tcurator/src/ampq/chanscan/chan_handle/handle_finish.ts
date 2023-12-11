@@ -6,6 +6,7 @@ import { neogma } from '../../../neo4j';
 import { Session, SessionProps } from '../../../models/session';
 import { spy } from '../../../types/spy_packet';
 import { logSummary } from '../../../utils/log_summary';
+import { ChannelScanStatus } from '../../../types/channel_scan_status';
 
 export async function handleFinish(channel: amqplib.Channel, data: spy.Packet) {
 	const chanScanLog = await ChannelScanLog.findOne({
@@ -14,6 +15,7 @@ export async function handleFinish(channel: amqplib.Channel, data: spy.Packet) {
 		}
 	});
 	chanScanLog!.finished_at = Date.now();
+	(chanScanLog!.status as ChannelScanStatus) = 'DONE'
 	await chanScanLog?.save();
 
 	const queryResult = await new QueryBuilder()
