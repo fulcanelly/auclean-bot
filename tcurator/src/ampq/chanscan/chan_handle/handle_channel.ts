@@ -1,4 +1,4 @@
-import { NeogmaInstance, QueryBuilder, QueryRunner } from 'neogma';
+import { NeogmaInstance, NeogmaInstanceValidationError, QueryBuilder, QueryRunner } from 'neogma';
 import { Channel, ChannelInstance, ChannelProps } from '../../../models/channel';
 import { spy } from '../../../types/spy_packet';
 import { ChannelSubs } from '../../../models/channel_subs';

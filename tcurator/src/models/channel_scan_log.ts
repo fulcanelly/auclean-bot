@@ -11,6 +11,7 @@ export type ChannelScanLogProps = {
     enrolled_at: number
     started_at: number
     finished_at: number
+    request: string
     status: string
 }
 
@@ -28,6 +29,7 @@ export const ChannelScanLog = ModelFactory<ChannelScanLogProps, ChannelScanLogRe
         enrolled_at: { type: "number" },
         started_at: { type: "number" },
         finished_at: { type: "number" },
+        request: { type: "string" },
         status: { type: "string" }
     },
     primaryKeyField: "uuid"

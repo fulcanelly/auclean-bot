@@ -100,6 +100,7 @@ export async function setupRmq() {
     })
 
 
+    return client
 }
 
 

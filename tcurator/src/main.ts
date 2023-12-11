@@ -2,6 +2,7 @@ import { setupConstraints, setupIndexes } from "./neo4j";
 import { sentry } from "./sentry";
 import "./models/__relations"
 import { setupRmq } from "./rmq";
+import { setupScheduledJobs } from "./jobs";
 
 
 async function main() {
@@ -13,9 +14,12 @@ async function main() {
         await setupIndexes()
         console.log('indexes')
 
-        await setupRmq()
+        const rmq = await setupRmq()
         console.log('rmq')
 
+        await setupScheduledJobs(rmq)
+        console.log('jobs')
+        
     } catch (e) {
         sentry.captureException(e)
     }

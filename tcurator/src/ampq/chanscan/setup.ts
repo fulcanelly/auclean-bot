@@ -4,9 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as R from 'ramda'
 import { schanChanHandle } from './chan_handle';
-import { ChannelScanLog } from '../../models/channel_scan_log';
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from '../../models/channel_scan_log';
 import { Session } from '../../models/session';
 import { ChannelScanStatus } from '../../types/channel_scan_status';
+import { QueryBuilder, QueryRunner, neo4jDriver } from 'neogma';
+import { Channel } from '../../models/channel';
+import { neogma } from '../../neo4j';
+import { timeout } from '../../utils/retry';
 // import { createIfNotExists } from './lib';
 
 
@@ -54,19 +58,25 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 		})
 
 		if (data.session && data.identifier) {
-			const log = await ChannelScanLog.createOne({
-				uuid: uuidv4(),
-				enrolled_at: Date.now(),
-				status: 'INIT' as ChannelScanStatus,
-				started_at: 0,
-				finished_at: 0
-			})
-
 			const session = await Session.findOne({
 				where: {
 					user_id: user_id,
 					session_name: data.session
 				}
+			})
+
+			const request = {
+				session: session!.session_name,
+				identifier: data.identifier,
+			}
+
+			const log = await ChannelScanLog.createOne({
+				uuid: uuidv4(),
+				enrolled_at: Date.now(),
+				status: 'INIT' as ChannelScanStatus,
+				request: JSON.stringify(request),
+				started_at: 0,
+				finished_at: 0
 			})
 
 			await session?.relateTo({
@@ -77,8 +87,7 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 			})
 
 			const dataToSpy = {
-				session: session!.session_name,
-				identifier: data.identifier,
+				...request,
 				log_id: log.uuid
 			}
 
@@ -94,7 +103,6 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 
 			replyBack(sessions.map(s => s.session_name))
 		}
-		console.log(data)
-
-
+	console.log(data)
 }
+

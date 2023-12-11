@@ -90,7 +90,7 @@ neogen.generateAll({ // settings
             enrolled_at: 'number',
             started_at: 'number',
             finished_at: 'number',
-
+            request: 'string',
             status: 'string',
             //request
 
