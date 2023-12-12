@@ -19,7 +19,7 @@ async function main() {
 
         await setupScheduledJobs(rmq)
         console.log('jobs')
-        
+
     } catch (e) {
         sentry.captureException(e)
     }

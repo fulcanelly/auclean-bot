@@ -1,16 +1,15 @@
 import amqplib from 'amqplib';
-import { v4 as uuidv4 } from 'uuid';
 
 
 import * as R from 'ramda'
 import { schanChanHandle } from './chan_handle';
-import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from '../../models/channel_scan_log';
+import { ChannelScanLogProps } from '../../models/channel_scan_log';
 import { Session } from '../../models/session';
-import { ChannelScanStatus } from '../../types/channel_scan_status';
 import { QueryBuilder, QueryRunner, neo4jDriver } from 'neogma';
 import { Channel } from '../../models/channel';
 import { neogma } from '../../neo4j';
 import { timeout } from '../../utils/retry';
+import { initFirstScan } from '../../services/init_first_scan';
 // import { createIfNotExists } from './lib';
 
 
@@ -60,38 +59,12 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 		if (data.session && data.identifier) {
 			const session = await Session.findOne({
 				where: {
-					user_id: user_id,
+					user_id,
 					session_name: data.session
 				}
 			})
-
-			const request = {
-				session: session!.session_name,
-				identifier: data.identifier,
-			}
-
-			const log = await ChannelScanLog.createOne({
-				uuid: uuidv4(),
-				enrolled_at: Date.now(),
-				status: 'INIT' as ChannelScanStatus,
-				request: JSON.stringify(request),
-				started_at: 0,
-				finished_at: 0
-			})
-
-			await session?.relateTo({
-				alias: 'scan_logs',
-				where: {
-					uuid: log.uuid
-				}
-			})
-
-			const dataToSpy = {
-				...request,
-				log_id: log.uuid
-			}
-
-			channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(dataToSpy)))
+			
+			const log = await initFirstScan(channel, session!, data.identifier)
 
 			replyBack({ log_id: log.uuid })
 		} else {

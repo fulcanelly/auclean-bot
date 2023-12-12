@@ -8,11 +8,20 @@ import { User } from '../models/user';
 
 
 export async function logSummary(log: ChannelScanLogInstance) {
-	return {
-		enrolled_at: log.enrolled_at,
-		started_at: log.started_at,
-		finished_at: log.finished_at,
+	const channel = await log.getChannel()
 
+	return {
+		log_id: log.uuid,
+
+		channel: {
+			title: channel.title,
+			username: channel.username
+		},
+		time: {
+			enrolled_at: log.enrolled_at,
+			started_at: log.started_at,
+			finished_at: log.finished_at,
+		},
 		posts: await countRelatedToLog(log, ChannelPost as any),
 	 	views: await countRelatedToLog(log, PostViews as any),
 		channels: await countRelatedToLog(log, Channel as any),

@@ -23,11 +23,15 @@ async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelSca
 	}
 
 	console.log('retrying')
+	console.log({
+		queue: 'py:chanscan',
+		request
+	})
 
 	channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)))
 }
 
-export async function retryBrokenScanRequests(channel: amqplib.Channel) {
+export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise<boolean> {
 
 	try {
 		console.log('seeking for broken queries')
@@ -50,10 +54,14 @@ export async function retryBrokenScanRequests(channel: amqplib.Channel) {
 				}))
 				.map(R.curry(queueIfSessionAvailable)(channel))
 
-			return await Promise.all(result)
+			await Promise.all(result)
+			if (result.length) {
+				return true
+			}
 		}
 	} catch(e) {
 		sentry.captureException(e)
 		console.error(e)
 	}
+	return false
 }
