@@ -134,6 +134,9 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 }
 
 async function createViews(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+	if (!data.views) {
+		return
+	}
 	// may be there is a need to restrict how often this need to be updated
 	const views = addToCreated(
 		await PostViews.createOne({
