@@ -9,7 +9,7 @@ import { handleChannelEntry } from './handle_channel';
 import { handleStart } from './handle_start';
 
 
-const RETRY_ATTEMPTS = 10
+const RETRY_ATTEMPTS = 2
 
 export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 	const data = JSON.parse(msg!.content.toString()) as spy.Packet
