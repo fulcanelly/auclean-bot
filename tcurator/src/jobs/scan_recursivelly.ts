@@ -10,6 +10,7 @@ export async function scanRecursivellyNewChannels(achannel: amqplib.Channel): Pr
     const channel = await getPublicChannelNeverScanned()
 
     if (!channel) {
+        console.log('can\'t find any')
         return false
     }
 
@@ -17,10 +18,14 @@ export async function scanRecursivellyNewChannels(achannel: amqplib.Channel): Pr
     const session = await channel.getSessionAddedBy()
 
     if (!session) {
+        console.log(channel.title)
+        console.log('no session related to channel')
         return false
     }
 
     if (await session.isBussy()) {
+        console.log('session is bussy')
+
         return false
     }
 
@@ -37,6 +42,7 @@ async function getPublicChannelNeverScanned(): Promise<ChannelInstance | undefin
         })
         .where('NOT (a)-[:SCANNED_FOR]-(:ChannelScanLog) AND a.username IS NOT NULL')
         .return('a')
+        .raw('ORDER BY RAND()')
         .limit(1)
         .run(neogma.queryRunner);
 
