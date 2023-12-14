@@ -59,6 +59,9 @@ export async function setupIndexes() {
         "CREATE CONSTRAINT uniq_user_id IF NOT EXISTS FOR (u:User) REQUIRE u.user_id IS UNIQUE",
         'CREATE TEXT INDEX online_log_uuid_index IF NOT EXISTS FOR (n:OnlineLog) ON (n.uuid)',
         'CREATE TEXT INDEX user_id_index IF NOT EXISTS FOR (n:User) ON (n.user_id)',
+        'CREATE INDEX channel_id_index IF NOT EXISTS FOR (n:Channel) ON (n.id)',
+        'CREATE INDEX channel_post_ids_index IF NOT EXISTS FOR (n:ChannelPost) ON (n.id, n.channel_id)',
+        'CREATE INDEX post_views_uuid_index IF NOT EXISTS FOR (n:PostViews) ON (n.uuid)'
 
     ]
 
