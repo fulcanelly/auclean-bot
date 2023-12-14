@@ -8,6 +8,7 @@ import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
 
+const prefetch = 4
 
 export async function setupRmq() {
     console.log('connecting to rmq')
@@ -20,6 +21,7 @@ export async function setupRmq() {
 
     let channel = await client.createChannel()
 
+    await channel.prefetch(prefetch)
     await channel.assertQueue('tg:login', { durable: true })
     await channel.assertQueue('tg:login:answer', { durable: true })
     await channel.assertQueue('curator:event', { durable: true })
@@ -27,7 +29,9 @@ export async function setupRmq() {
     await channel.assertQueue('tg:spy')
     await channel.assertQueue('tg:reply')
 
-    setupChanSpy(await client.createChannel())
+    const chan = await client.createChannel()
+    await chan.prefetch(prefetch)
+    setupChanSpy(chan)
 
 
     channel.consume('curator:event', async (msg_) => {
