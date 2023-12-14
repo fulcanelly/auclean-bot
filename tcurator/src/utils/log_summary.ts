@@ -10,12 +10,18 @@ import { User } from '../models/user';
 export async function logSummary(log: ChannelScanLogInstance) {
 	const channel = await log.getChannel()
 
+	const addedBy = await channel.getChannelAddedBy()
+
 	return {
 		log_id: log.uuid,
 
 		channel: {
 			title: channel.title,
 			username: channel.username
+		},
+		added_by: {
+			title: addedBy?.title,
+			username: addedBy?.username
 		},
 		time: {
 			enrolled_at: log.enrolled_at,
