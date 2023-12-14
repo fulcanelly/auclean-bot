@@ -1,6 +1,7 @@
 import json
 import pyrogram
 from telethon import TelegramClient
+from util.auto_ensure import AutoChanEnsurer
 from tg.chanscan import chanscan_notifier_t, rmq_json_notifier
 from tg.handler import session_handler
 import pprint
@@ -11,8 +12,6 @@ from pika.adapters.blocking_connection import BlockingChannel
 from datetime import datetime
 from pyrogram import Client
 
-#KNOWN FLAG
-#
 
 def extract_fwd_from_msg(m: pyrogram.types.Message):
     if m.forward_from_chat and m.forward_from_chat.type == pyrogram.enums.ChatType.CHANNEL:
@@ -90,6 +89,7 @@ class chanscan_notifier_pyro_t(rmq_json_notifier):
             **self.shared_props()
         })
 
+src/tg/pyro_chansan.py
 
 async def get_chan_subs(app: Client, chat_id: str | int):
     await app.get_chat_members_count(chat_id)
@@ -97,17 +97,11 @@ async def get_chan_subs(app: Client, chat_id: str | int):
 async def pyro_scan_channel(handler: session_handler, identifier: str, log_id: str):
     chat = await handler.client.get_chat(identifier)
 
-    with handler.ensured_channel as ch:
-        chanscan_notifier_pyro_t(ch, log_id).send_start()
+    with AutoChanEnsurer(handler.ensured_channel, chanscan_notifier_pyro_t, log_id) as it:
+        it.send_start()
+        it.send_channel(chat)
 
-    with handler.ensured_channel as ch:
-        chanscan_notifier_pyro_t(ch, log_id).send_channel(chat)
+        async for message in handler.client.get_chat_history(chat.id):
+            it.send_post(message, chat.id)
 
-    async for message in handler.client.get_chat_history(chat.id):
-
-        with handler.ensured_channel as ch:
-            print({'log_id': log_id})
-            chanscan_notifier_pyro_t(ch, log_id).send_post(message, chat.id)
-
-    with handler.ensured_channel as ch:
-        chanscan_notifier_pyro_t(ch, log_id).send_finish()
+        it.send_finish()

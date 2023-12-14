@@ -4,8 +4,9 @@ import datetime
 from threading import Thread
 
 from telethon import TelegramClient, events
+from util.auto_ensure import EnsuredPikaChannel
 
-from rmq.rmq import EnsuredPikaChannel
+
 from rmq.send.curator import curator_notifier_t
 from util.vars import get_api_hash, get_api_id
 from pyrogram import Client
@@ -98,7 +99,7 @@ class tele_session_handler(session_handler):
 
         self.client = TelegramClient(self.session_name, get_api_id(), get_api_hash())
         self.client.session
-        self.client.on(events.UserUpdate)(self.user_update_event_handler)
+        # self.client.on(events.UserUpdate)(self.user_update_event_handler)
 
         with self.client:
             self.client.loop.run_until_complete(self.test())
