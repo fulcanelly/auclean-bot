@@ -42,6 +42,42 @@ export namespace spy {
 		};
 	}
 
+	export namespace comment {
+
+		export type Comment = {
+			id: number;
+			grouped_id?: number;
+			reply_to_message_id?: number;
+			author?: AuthorInfo;
+			sender_chat?: SenderChatInfo;
+			date: number;
+			discussion_chat: DiscussionChat;
+			type: 'comment';
+			comment_to: {
+				channel_id: number
+				message_id: number
+			}
+		};
+
+		export type AuthorInfo = {
+			id: number;
+			username: string;
+			first_name: string;
+			last_name: string;
+		};
+
+		export type SenderChatInfo = {
+			id: number;
+			title: string;
+			type: string; // Adjust the type as necessary
+		};
+
+		export type DiscussionChat = {
+			id: number;
+			title: string;
+		};
+	}
+
 	export type ScanStart = {
 		type: 'start_event'
 	}
@@ -50,5 +86,5 @@ export namespace spy {
 		type: 'finish_event'
 	}
 
-	export type Packet = (Post | Channel | ScanStart | ScanFinish) & { log_id: string }
+	export type Packet = (comment.Comment | Post | Channel | ScanStart | ScanFinish) & { log_id: string }
 }
