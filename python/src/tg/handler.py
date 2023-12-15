@@ -4,6 +4,7 @@ import datetime
 from threading import Thread
 
 from telethon import TelegramClient, events
+from util.session_store import get_session_store
 from util.auto_ensure import EnsuredPikaChannel
 
 
@@ -12,7 +13,6 @@ from util.vars import get_api_hash, get_api_id
 from pyrogram import Client
 
 import datetime
-import sentry_sdk
 
 
 class enrolled_job:
@@ -50,21 +50,34 @@ class session_handler:
     def run(self):
         raise 'not implemented'
 
+
+    async def stop(self):
+        raise 'not implemented'
+
+    async def restart(self):
+        self.job = None
+        del get_session_store()[self.session_name]
+        await self.stop()
+        with self.ensured_channel as ch:
+            curator_notifier_t(ch).request_sessions()
+
     async def test(self):
 
-        if self.is_connected():
-            me = await self.client.get_me()
-            while True:
-                print(f" [-] [{self.client_type()}] heartbeat of {me.username} ({me.id}) ")
-                if self.job:
-                    # TODO add queue
-                    try: self.job = await self.job.async_exec(self)
-                    except Exception as e:
-                        sentry_sdk.capture_exception(e)
-                        print(e)
-                    finally: self.job = None
+        if not self.is_connected(): return
 
-                await asyncio.sleep(3)
+        me = await self.client.get_me()
+
+        while True:
+            print(f" [-] [{self.client_type()}] heartbeat of {me.username} ({me.id}) ")
+            await asyncio.sleep(3)
+
+            if not self.job: continue
+
+            # TODO add queue
+            try: self.job = await self.job.async_exec(self)
+            finally: await self.restart()
+
+
 
 class tele_session_handler(session_handler):
     client: TelegramClient
@@ -120,6 +133,10 @@ class pyro_session_handler(session_handler):
     async def setup(self):
         await self.client.start()
         await self.test()
+
+
+    async def stop(self):
+        await self.client.stop()
 
     def run(self):
         print("starting session")
