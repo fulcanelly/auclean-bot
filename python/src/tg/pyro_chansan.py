@@ -89,8 +89,6 @@ class chanscan_notifier_pyro_t(rmq_json_notifier):
             **self.shared_props()
         })
 
-src/tg/pyro_chansan.py
-
 async def get_chan_subs(app: Client, chat_id: str | int):
     await app.get_chat_members_count(chat_id)
 
