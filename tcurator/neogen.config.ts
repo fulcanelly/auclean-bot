@@ -84,6 +84,15 @@ neogen.generateAll({ // settings
         }
     },
     {
+        label: 'Message',
+        schema: {
+            id: 'number',
+            date: 'number',
+            text: ['null', 'string'],
+
+        }
+    },
+    {
         label: 'ChannelScanLog',
         schema: {
             uuid: 'string',
