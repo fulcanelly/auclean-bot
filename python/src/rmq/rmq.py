@@ -23,24 +23,7 @@ def get_new_channel() -> pika.BlockingConnection:
     channel.queue_declare(queue='tg:login', durable=True)
     channel.queue_declare(queue='curator:event', durable=True)
     channel.queue_declare(queue='curator:command', durable=True)
+    channel.queue_declare(queue='py:chanscan', durable=True)
+    channel.queue_declare(queue='py:chanscan:reply', durable=True)
 
     return channel
-
-
-class EnsuredPikaChannel:
-    def __init__(self) -> None:
-        self.channel = get_new_channel()
-
-    def __enter__(self) -> pika.BlockingConnection:
-        print('ensuring connection')
-        if self.channel.is_open:
-            return self.channel
-        else:
-            sentry_sdk.capture_message('reopening connection')
-            print('reopening connection')
-            self.channel = get_new_channel()
-            return self.channel
-
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        print('done')

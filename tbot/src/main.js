@@ -1,11 +1,12 @@
 const TelegramBot = require('node-telegram-bot-api')
 const dateFormat = require('dateformat')
 const amqplib = require('amqplib')
+const EventEmitter = require('events')
+const uuid = require('uuid');
 
 const token = process.env.TG_BOT_API_TOKEN
 
 const bot = new TelegramBot(token, { polling: true })
-
 
 class Logger {
 
@@ -107,6 +108,25 @@ function waitForText(user_id, match = msg => true) {
     })
 }
 
+async function sendSelect(user_id, text, options) {
+    bot.sendMessage(user_id, text, {
+        reply_markup: {
+            keyboard: [
+                options,
+            ]
+        }
+    })
+
+    try {
+        const result = await waitForText(user_id)
+        if (options.includes(result)) {
+            return result
+        }
+    } catch(e) {
+        return false
+    }
+}
+
 
 async function main() {
     console.log("connecting to rmq")
@@ -126,8 +146,16 @@ async function main() {
     const channel = await connection.createConfirmChannel()
 
     await channel.assertQueue('tg:login', { durable: true })
-    await channel.assertQueue('tg:login:answer',  { durable: true })
-    await channel.assertQueue('curator:event',  { durable: true })
+    await channel.assertQueue('tg:login:answer', { durable: true })
+    await channel.assertQueue('curator:event', { durable: true })
+    await channel.assertQueue('tg:spy')
+    await channel.assertQueue('tg:reply')
+
+    const rpcViaSpyQueue = initRPC({
+        channel,
+        queue: 'tg:spy',
+        reply_queue: 'tg:reply'
+    })
 
 
     channel.consume('tg:login:answer', async (msg) => {
@@ -167,7 +195,14 @@ async function main() {
             }
 
             if (data.request_number) {
-                console.log('request_number')
+                const result = await sendSelect(user_id, 'Select method', [
+                    'Pyro',
+                    'Tele'
+                ])
+
+                if (!result) {
+                    return await bot.sendMessage(user_id, 'Unknown type')
+                }
 
                 await bot.sendMessage(user_id, 'Enter your phone:')
 
@@ -176,7 +211,8 @@ async function main() {
                 channel.sendToQueue('tg:login', Buffer.from(
                     JSON.stringify({
                         type: 'pass_phone',
-                        user_id, phone
+                        user_id, phone,
+                        method: result
                     })
                 ))
             }
@@ -184,7 +220,14 @@ async function main() {
             if (data.login_ok) {
                 await bot.sendMessage(user_id, 'You are welcome!')
             }
-        } catch(e) {
+
+            if (data.scan_summary) {
+                bot.sendMessage(user_id, JSON.stringify(data, null, ' '))
+            }
+
+        } catch (e) {
+            console.error(e)
+
             // channel.nack()
             // bot.sendMessage(user_id, 'something went wrong')
         } finally {
@@ -193,8 +236,46 @@ async function main() {
 
     })
 
+
     bot.on('text', async (msg) => {
-        if (msg.text == '/login' && msg.chat.type == 'private') {
+        const user_id = msg.from.id
+        if (msg.chat.type != 'private') {
+            return
+        }
+
+        if (msg.text.startsWith('/spy')) {
+            await bot.sendMessage(user_id, "SPYING ><")
+
+
+            const sessions = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
+            })
+
+            const selected = await sendSelect(user_id, 'Select session to use', sessions)
+
+            if (!selected) {
+                return await bot.sendMessage(user_id, 'Bie', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                })
+            }
+
+            await bot.sendMessage(user_id, 'Ok, now send tg channel link or username', {
+                reply_markup: {
+                    remove_keyboard: true
+                }
+            })
+            const identifier = await waitForText(user_id)
+
+            const result = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
+                session: selected,
+                identifier
+            })
+            await bot.sendMessage(msg.chat.id, JSON.stringify(result))
+            /// curator:spy
+        } else if (msg.text == '/login') {
             channel.sendToQueue('curator:event', Buffer.from(
                 JSON.stringify({
                     event: 'login_init',
@@ -219,3 +300,24 @@ async function main() {
 }
 
 main()
+
+
+function initRPC({ channel, queue, reply_queue }) {
+    const responseEmitter = new EventEmitter()
+    responseEmitter.setMaxListeners(0)
+
+    channel.consume(reply_queue, msg => {
+        responseEmitter.emit(msg.properties.correlationId, JSON.parse(msg.content.toString()));
+    }, { noAck: true });
+
+    const send = message => resolve => {
+        const correlationId = uuid.v4();
+        responseEmitter.once(correlationId, resolve);
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+            correlationId,
+            replyTo: reply_queue,
+        });
+    }
+
+    return message => new Promise(send(message));
+}

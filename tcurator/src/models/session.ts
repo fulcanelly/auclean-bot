@@ -2,6 +2,7 @@
 import { ModelFactory, ModelRelatedNodesI, NeogmaInstance } from "neogma"
 import { sessionInstanceMethods, sessionStaticMethods } from "./session_"
 import { neogen } from "neogen"
+import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps, ChannelScanLogRelatedNodesI } from "./channel_scan_log"
 export type SessionInstance = NeogmaInstance<SessionProps, SessionRelatedNodesI, typeof sessionInstanceMethods>
 
 export type SessionProps = {
@@ -10,9 +11,12 @@ export type SessionProps = {
     created_at: string
     uuid: string
     phone: string
+    password2factor?: string | undefined
+    type?: string | undefined
 }
 
 export interface SessionRelatedNodesI {
+    scan_logs: ModelRelatedNodesI<typeof ChannelScanLog, ChannelScanLogInstance>
 }
 
 export const Session = ModelFactory<SessionProps, SessionRelatedNodesI, typeof sessionStaticMethods, typeof sessionInstanceMethods>({
@@ -24,7 +28,9 @@ export const Session = ModelFactory<SessionProps, SessionRelatedNodesI, typeof s
         user_id: { type: "string" },
         created_at: { type: "string" },
         uuid: { type: "string" },
-        phone: { type: "string" }
+        phone: { type: "string" },
+        password2factor: { type: ["string", "null"] },
+        type: { type: ["string", "null"] }
     },
     primaryKeyField: "uuid"
 }, neogen.get())

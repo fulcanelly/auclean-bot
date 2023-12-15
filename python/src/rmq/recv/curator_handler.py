@@ -4,13 +4,18 @@ from pika import BasicProperties, DeliveryMode
 from pika.adapters.blocking_connection import BlockingChannel
 from rmq.send.curator import curator_notifier_t
 
-
 from rmq.send.tg_login import tele_login_t
-from tg.handler import session_handler
+from tg.handler import pyro_session_handler, session_handler, tele_session_handler
 from tg.loginer import user_loginer
 from util.session_helpers import filename_from_session_name
 from util.session_store import get_session_store
 
+
+
+SESSION_HANDLER_TYPES = {
+    'tele': tele_session_handler,
+    'pyro': pyro_session_handler,
+}
 
 def obtain_curator_handler(channel: BlockingChannel):
 
@@ -30,6 +35,8 @@ def obtain_curator_handler(channel: BlockingChannel):
         if sessions:
             for entry in sessions:
                 session_name = entry.get('session_name')
+                type = entry.get('type')
+
                 if get_session_store().get(session_name): continue
 
 
@@ -39,8 +46,10 @@ def obtain_curator_handler(channel: BlockingChannel):
                     print("Ignoring session")
                     continue
 
-                else:
-                    get_session_store()[session_name] = session_handler(session_name, entry.get('user_id'))
+                elif type in SESSION_HANDLER_TYPES:
+
+                    handler = SESSION_HANDLER_TYPES[type]
+                    get_session_store()[session_name] = handler(session_name, entry.get('user_id'))
                     get_session_store()[session_name].start()
 
         ch.basic_ack(method.delivery_tag)

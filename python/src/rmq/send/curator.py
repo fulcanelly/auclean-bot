@@ -7,7 +7,7 @@ class curator_notifier_t:
     def __init__(self, channel) -> None:
         self.channel: BlockingChannel = channel
 
-    def notify_success_login(self, user_id, session_name, linked_to = None) -> None:
+    def notify_success_login(self, user_id, session_name, type, linked_to = None) -> None:
         self.channel.basic_publish(exchange='',
             routing_key= 'curator:event',
             body= json.dumps({
@@ -15,7 +15,8 @@ class curator_notifier_t:
                 'login_success': {
                     'user_id': str(user_id),
                     'session_name': session_name,
-                    'linked_to': linked_to
+                    'linked_to': linked_to,
+                    'type': type
                 }
             }))
 

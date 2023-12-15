@@ -1,11 +1,14 @@
 import amqplib from 'amqplib';
 import { v4 as uuidv4 } from 'uuid';
-import { NeogmaInstance, QueryBuilder, QueryRunner } from 'neogma';
+import { QueryBuilder, QueryRunner } from 'neogma';
 import { neogma } from './neo4j';
 import { sentry } from './sentry';
 import { OnlineLog } from './models/online_log';
-import { User, UserInstance, UserProps, UserRelatedNodesI } from './models/user';
+import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
+import { setupChanSpy } from './ampq/chanscan/setup';
+
+const prefetch = 4
 
 export async function setupRmq() {
     console.log('connecting to rmq')
@@ -18,10 +21,17 @@ export async function setupRmq() {
 
     let channel = await client.createChannel()
 
+    await channel.prefetch(prefetch)
     await channel.assertQueue('tg:login', { durable: true })
     await channel.assertQueue('tg:login:answer', { durable: true })
     await channel.assertQueue('curator:event', { durable: true })
     await channel.assertQueue('curator:command', { durable: true })
+    await channel.assertQueue('tg:spy')
+    await channel.assertQueue('tg:reply')
+
+    const chan = await client.createChannel()
+    await chan.prefetch(prefetch)
+    setupChanSpy(chan)
 
 
     channel.consume('curator:event', async (msg_) => {
@@ -34,6 +44,7 @@ export async function setupRmq() {
             if (data.login_success) {
                 await createSessionIfNotExists(
                     data.login_success.session_name,
+                    data.login_success.type,
                     '',
                     data.login_success.user_id.toString())
                 channel.ack(msg as amqplib.Message, false)
@@ -83,7 +94,7 @@ export async function setupRmq() {
                 throw null
             }
 
-        } catch(e) {
+        } catch (e) {
             sentry.captureException(e)
             console.log(e)
             console.log((e as any)?.data?.errors)
@@ -93,11 +104,12 @@ export async function setupRmq() {
     })
 
 
+    return client
 }
 
 
 
-async function createUserIfNotExists(user_id: string, name: string): Promise<UserInstance>  {
+async function createUserIfNotExists(user_id: string, name: string): Promise<UserInstance> {
     const user = await User.findOne({ where: { user_id } })
 
     if (user) {
@@ -117,7 +129,7 @@ async function createUserIfNotExists(user_id: string, name: string): Promise<Use
 
 }
 
-async function createSessionIfNotExists(session_name: string, phone: string, user_id: string) {
+async function createSessionIfNotExists(session_name: string, type: string, phone: string, user_id: string) {
     let session = await Session.findOne({
         where: {
             session_name,
@@ -134,6 +146,7 @@ async function createSessionIfNotExists(session_name: string, phone: string, use
         phone,
         user_id,
 
+        type,
         created_at: new Date().toString(),
         uuid: uuidv4(),
     })
