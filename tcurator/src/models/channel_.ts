@@ -1,9 +1,12 @@
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { baseInstanceMethods, baseStaticMethods } from "./__base"
+import { FixedQueryBuilder } from "../utils/fixed_query_builder";
 import { neogma } from "../neo4j";
-import { QueryBuilder, QueryRunner } from "neogma";
+import { BindParam, QueryBuilder, QueryRunner } from "neogma";
 import { ChannelScanLog } from "../models/channel_scan_log";
 import { Session, SessionInstance, SessionProps } from "../models/session";
+import { ChannelPost } from "./channel_post";
+import { Date, Integer } from "neo4j-driver";
 
 export const channelStaticMethods = {
     ...baseStaticMethods
@@ -15,7 +18,7 @@ export const channelInstanceMethods = {
         return this as any as ChannelInstance
     },
 
-    async getChannelAddedBy()  {
+    async getChannelAddedBy() {
         const queryResult = await new QueryBuilder()
             .match({
                 related: [
@@ -34,7 +37,8 @@ export const channelInstanceMethods = {
                         model: Channel,
                         identifier: 'c'
                     }
-                ]}
+                ]
+            }
             )
             .return('c')
             .run(neogma.queryRunner);
@@ -51,6 +55,8 @@ export const channelInstanceMethods = {
             labels: [Session.getLabel()]
         })
     },
+
+
 
     async getSessionAddedBy(): Promise<SessionInstance | undefined> {
         const queryResult = await new QueryBuilder()
@@ -85,6 +91,77 @@ export const channelInstanceMethods = {
             properties: session[0],
             labels: [Session.getLabel()]
         })
-    }
+    },
+
+
+    /**
+     *
+     *
+     *
+     *
+     *
+     *
+     * Query example:
+
+
+        WITH range(0, 10) AS daysAgoList
+        UNWIND daysAgoList AS daysAgo
+        WITH date() - duration({days: daysAgo}) AS targetDay
+
+        MATCH (c:Channel {username: 'sadamekamusic'})
+        OPTIONAL MATCH (c)-[]-(p:ChannelPost)
+        WHERE date(datetime({epochSeconds:toInteger(p.created_at) })) >= targetDay
+        AND  date(datetime({epochSeconds:toInteger(p.created_at) })) < targetDay + duration({days: 1})
+
+        RETURN date(targetDay) AS Day,
+            count(p) AS PostCount
+        ORDER BY Day DESC
+
+     *
+     */
+
+
+    async getPostsPerLastDays(days: number = 30) {
+        const params = new BindParam({ days })
+        const result = await new FixedQueryBuilder(params)
+            .with(`range(0, $days) AS daysAgoList`)
+            .unwind({
+                value: 'daysAgoList',
+                as: 'daysAgo'
+            })
+            .with('date() - duration({days: daysAgo}) AS targetDay')
+            .match({
+                model: Channel,
+                where: {
+                    id: this.self().id,
+                },
+                identifier: 'c'
+            })
+            .match({
+                optional: true,
+                related: [
+                    { identifier: 'c' },
+                    Channel.getRelationshipByAlias('posts'),
+                    {
+                        model: ChannelPost,
+                        identifier: 'p'
+                    }
+                ]
+            })
+            .where('date(datetime({epochSeconds:toInteger(p.created_at) })) = targetDay')
+            .return(['date(targetDay) AS Day', 'count(p) AS PostCount'])
+            .orderBy({
+                direction: 'DESC',
+                identifier: 'Day'
+            })
+            .run(neogma.queryRunner)
+
+
+        type PostsPerDayResultT = { _fields: [Date, Integer] }
+        return result.records.map(it => it as any as PostsPerDayResultT).map(({ _fields: [date, count] }) => [
+            date.toStandardDate().toLocaleDateString(),
+            Integer.toNumber(count)
+        ]) as [string, number][]
+    },
 
 };

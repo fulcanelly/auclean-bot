@@ -1,16 +1,45 @@
 {
-    "compilerOptions": {
-      "noImplicitAny": true,
-      "target": "es2022",
-      "module": "commonjs",
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "moduleResolution": "node",
-      "types": ["jest"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "noImplicitAny": false,
+    "lib": [
+      "esnext"
+    ],
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "types": [
+      "jest"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
     },
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+, "src/next.ts"  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
 
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
-  }
+  ]
+}
