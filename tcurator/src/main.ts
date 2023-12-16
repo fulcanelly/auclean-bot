@@ -3,6 +3,7 @@ import { sentry } from "./sentry";
 import "./models/__relations"
 import { setupRmq } from "./rmq";
 import { setupScheduledJobs } from "./jobs";
+import { setupNextJs } from "./next";
 
 
 async function main() {
@@ -19,6 +20,8 @@ async function main() {
 
         await setupScheduledJobs(rmq)
         console.log('jobs')
+
+        await setupNextJs()
 
     } catch (e) {
         sentry.captureException(e)
