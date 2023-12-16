@@ -3,7 +3,8 @@
     "target": "ES2022",
     "noImplicitAny": false,
     "lib": [
-      "esnext"
+      "esnext",
+      "es2015"
     ],
     "skipLibCheck": true,
     "jsx": "preserve",
