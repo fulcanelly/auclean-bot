@@ -1,4 +1,5 @@
 MATCH (c:Channel {id: $id})-[:POST_OF]->(p:ChannelPost)
+WHERE p.created_at >= $startDate
 CALL {
     WITH p
     MATCH (p)-[:HAD_VIEWS_AT]->(v:PostViews)
@@ -10,7 +11,3 @@ CALL {
 RETURN post_id, views
 ORDER BY views DESC
 LIMIT $limit
-
-
-// Uncomment the following line to filter by date range
-// WHERE v.date >= startDate AND v.date <= endDate

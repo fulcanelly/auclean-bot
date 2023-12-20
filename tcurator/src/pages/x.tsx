@@ -65,7 +65,7 @@ export async function getServerSideProps(context: any): Promise<{ props: Props }
     const [postsPerDay, mostViewed]
         = await Promise.all([
             channel.getPostsPerLastDays(),
-            full ? channel.getMostViewedPosts() : undefined
+            full ? channel.getMostViewedPosts(10, 30) : undefined
         ])
 
     const channel_info = {

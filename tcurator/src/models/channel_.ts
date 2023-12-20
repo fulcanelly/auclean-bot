@@ -9,6 +9,7 @@ import { ChannelPost } from "./channel_post";
 import { Date, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
 import { recordToObject } from "../utils/record_to_object";
+import moment from 'moment';
 
 export const channelStaticMethods = {
     ...baseStaticMethods
@@ -166,10 +167,11 @@ export const channelInstanceMethods = {
         ]) as [string, number][]
     },
 
-    async getMostViewedPosts(limit: number = 10): Promise<{post_id: number, views: number}[]> {
+    async getMostViewedPosts(limit: number = 10, daysAgo: number | undefined): Promise<{post_id: number, views: number}[]> {
         const params = new BindParam({
             id: this.self().id,
-            limit: Integer.fromNumber(limit)
+            limit: Integer.fromNumber(limit),
+            startDate: daysAgo ? moment().subtract(daysAgo, 'days').valueOf() / 1000 : -1
         })
 
         const result = await new QueryBuilder(params)
