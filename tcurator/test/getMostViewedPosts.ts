@@ -29,7 +29,7 @@ export const getMostViewedPostsTests = () =>
           id: 101,
           channel_id: channel.id,
           uuid: '',
-          created_at: moment().subtract(31, 'days').toDate().getTime()
+          created_at: moment().subtract(31, 'days').toDate().getTime() / 1000
         });
 
         await channel.relateTo({
@@ -61,7 +61,7 @@ export const getMostViewedPostsTests = () =>
 
     describe('when multiple posts are created on the same day with different view counts', () => {
       beforeEach(async () => {
-        const today = Date.now()
+        const today = Date.now() / 1000
 
         const createPostsAndViews = Array.from({ length: 5 }, async (_, i) => {
           const post = await ChannelPost.createOne({
@@ -103,7 +103,7 @@ export const getMostViewedPostsTests = () =>
     describe('when valid posts and views are present', () => {
       beforeEach(async () => {
         const createPostsAndViews = Array.from({ length: 3 }, async (_, i) => {
-          const postDate = moment().subtract(i, 'days').toDate().getTime()
+          const postDate = moment().subtract(i, 'days').toDate().getTime() / 1000
           const post = await ChannelPost.createOne({
             id: 300 + i,
             channel_id: channel.id,
@@ -142,7 +142,7 @@ export const getMostViewedPostsTests = () =>
 
     describe('when posts have multiple views', () => {
       beforeEach(async () => {
-        const today = Date.now();
+        const today = Date.now() / 1000;
 
         const createPostsAndMultipleViews = Array.from({ length: 3 }, async (_, i) => {
           const post = await ChannelPost.createOne({
@@ -188,8 +188,8 @@ export const getMostViewedPostsTests = () =>
 
     describe('when some posts are older than the specified range', () => {
       beforeEach(async () => {
-        const today = Date.now();
-        const daysAgo = moment().subtract(15, 'days').toDate().getTime();
+        const today = Date.now() / 1000;
+        const daysAgo = moment().subtract(15, 'days').toDate().getTime() / 1000;
 
         const createMixedPosts = Array.from({ length: 5 }, async (_, i) => {
           const postDate = i < 3 ? today : daysAgo; // First 3 posts are recent, last 2 are older
