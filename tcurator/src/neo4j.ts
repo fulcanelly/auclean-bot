@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { neogen } from "neogen";
 import { logging } from "neo4j-driver";
 import { processTransaction } from "./sentry";
+import { logger } from "./utils/logger";
 
 
 function neogmaConfig() {
@@ -15,7 +16,7 @@ function neogmaConfig() {
             username: process.env.NEO4J_USERNAME as string,
             password: process.env.NEO4J_PASSWORD as string,
         }
-        console.log(conn)
+        logger.verbose(conn)
         return conn
     } else {
         throw new Error('neo4j db not configured')
@@ -28,7 +29,7 @@ export const neogma = new Neogma(
         logger: (q: string) => {
             const [_, query,] = q.split('**')
             processTransaction(query)
-            console.log(q)
+            logger.debug(q)
         },
     },
 );

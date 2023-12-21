@@ -1,12 +1,11 @@
 import next from 'next';
 import express from 'express'
+import { logger } from './utils/logger';
 
 
-console.log('starting')
 
 const nextconfig = {}
 
-console.log(nextconfig)
 
 // TODO add config
 const port = 3000;
@@ -16,7 +15,7 @@ const handle = app.getRequestHandler();
 
 
 export async function setupNextJs() {
-  console.log('starting nexjs')
+  logger.verbose('starting nexjs')
   app.prepare().then(() => {
     const server = express();
 
@@ -25,7 +24,7 @@ export async function setupNextJs() {
     });
 
     server.listen(port, async () => {
-      console.log('done setup')
+      logger.verbose('done nextjs setup')
     })
   })
 }

@@ -3,33 +3,32 @@ import { QueryBuilder, QueryRunner } from "neogma";
 import { Channel, ChannelInstance, ChannelProps } from "../models/channel";
 import { initFirstScan } from "../services/init_first_scan";
 import amqplib from 'amqplib';
+import { logger } from "../utils/logger";
 
 
 export async function scanRecursivellyNewChannels(achannel: amqplib.Channel): Promise<boolean> {
-    console.log('seeking for public channels without any scans')
+    logger.info('seeking for public channels without any scans')
     const channel = await getPublicChannelNeverScanned()
 
     if (!channel) {
-        console.log('can\'t find any')
+        logger.warn('can\'t find any')
         return false
     }
 
-    console.log('getting channel session')
+    logger.info('getting channel session')
     const session = await channel.getSessionAddedBy()
 
     if (!session) {
-        console.log(channel.title)
-        console.log('no session related to channel')
+        logger.warn('no session related to channel', channel.dataValues)
         return false
     }
 
     if (await session.isBussy()) {
-        console.log('session is bussy')
-
+        logger.warn('session is bussy')
         return false
     }
 
-    console.log('inititating scan')
+    logger.info('inititating scan')
     await initFirstScan(achannel, session, channel.username!)
     return true
 }

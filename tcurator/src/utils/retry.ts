@@ -1,4 +1,5 @@
 import { sentry } from "../sentry";
+import { logger } from "./logger";
 
 export async function timeout(timeMs: number) {
 	return new Promise(resolve => setTimeout(resolve, timeMs));
@@ -13,7 +14,7 @@ export async function retry<T>(func: () => Promise<T>, times: number) {
 		} catch (error) {
 			lastError = error;
 			console.error(error)
-			console.log("retrying")
+			logger.warn("retrying")
 			await timeout(1000) // Store the error in case we need to throw it later
 			// Optionally wait for a bit here before retrying
 		}
@@ -23,6 +24,6 @@ export async function retry<T>(func: () => Promise<T>, times: number) {
 		sentry.captureMessage(lastError?.data?.errors)
 	}
 
-	console.error(lastError)
+	logger.error(lastError)
 	sentry.captureException(lastError)  // Throw the last error after all retries have failed
 }
