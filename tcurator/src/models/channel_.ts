@@ -7,6 +7,10 @@ import { ChannelScanLog } from "../models/channel_scan_log";
 import { Session, SessionInstance, SessionProps } from "../models/session";
 import { ChannelPost } from "./channel_post";
 import { Date, Integer } from "neo4j-driver";
+import { queires } from "../queries/all";
+import { recordToObject } from "../utils/record_to_object";
+import moment from 'moment';
+
 
 export const channelStaticMethods = {
     ...baseStaticMethods
@@ -164,4 +168,18 @@ export const channelInstanceMethods = {
         ]) as [string, number][]
     },
 
-};
+    async getMostViewedPosts(limit: number = 10, daysAgo?: number | undefined): Promise<{ post_id: number, views: number }[]> {
+        const params = new BindParam({
+            id: this.self().id,
+            limit: Integer.fromNumber(limit),
+            startDate: Integer.fromNumber(daysAgo ? moment().subtract(daysAgo, 'days').toDate().getTime() / 1000 : -1)
+        })
+
+        const result = await new QueryBuilder(params)
+            .raw(await queires.topPopularPosts())
+            .run(neogma.queryRunner)
+
+        return result.records.map(recordToObject)
+    }
+
+}
