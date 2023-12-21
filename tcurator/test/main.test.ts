@@ -3,7 +3,7 @@ import '../src/models/__relations'
 
 import { User } from '../src/models/user'
 import { OnlineLog } from '../src/models/online_log'
-import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner, Where, getTransaction } from "neogma";
+import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner } from "neogma";
 import { neogma } from "../src/neo4j";
 import { QueryResult, RecordShape } from "neo4j-driver";
 import { Channel, ChannelProps } from '../src/models/channel'
@@ -14,6 +14,8 @@ import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from '../
 import { spy } from '../src/types/spy_packet'
 
 import { schanChanHandle } from '../src/ampq/chanscan/chan_handle';
+import { randUUID } from './randUUID';
+import { getMostViewedPostsTests } from './getMostViewedPosts';
 
 type AnyObj = Record<string, any>
 
@@ -31,17 +33,11 @@ function obtainResult<T extends Neo4jSupportedProperties, D extends AnyObj, K ex
     }))
 }
 
-let i = 0
-
-function rangUUID() {
-  return `test:${++i}`
-}
-
 async function testTransactionsWorking() {
   await neogma.getTransaction(null, async (t) => {
     await User.findOne({ session: t })
     const one = await User.createOne({
-      uuid: rangUUID()
+      uuid: randUUID()
     }, { session: t })
 
     await one.delete({ session: t })
@@ -63,31 +59,7 @@ async function testTransactionsWorking() {
 
 async function deleteAll() {
   await neogma.queryRunner.run(
-    "MATCH (u:`User`) DETACH DELETE u"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (u:`OnlineLog`) DETACH DELETE u"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (u:`Channel`)  DETACH DELETE u"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (u:`ChannelPost`) DETACH DELETE u"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (a:PostViews) DETACH DELETE a"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (a:ChannelSubs) DETACH DELETE a"
-  )
-
-  await neogma.queryRunner.run(
-    "MATCH (a:ChannelScanLog) DETACH DELETE a"
+    "MATCH (u) DETACH DELETE u"
   )
 }
 
@@ -102,7 +74,7 @@ describe('models ::', () => {
     it('.reported_by', async () => {
       // Create a User
       const user = await User.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
         name: 'Test User',
       });
 
@@ -110,7 +82,7 @@ describe('models ::', () => {
       const log = await OnlineLog.createOne({
         online: true,
         time: Number(new Date().toISOString()),
-        uuid: rangUUID()
+        uuid: randUUID()
       });
 
       // Relate the OnlineLog entry to the User
@@ -149,14 +121,14 @@ describe('models ::', () => {
     });
     it('.reported :: User relates to OnlineLog', async () => {
       const user = await User.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
         name: 'Test User',
       });
 
       const log = await OnlineLog.createOne({
         online: true,
         time: Number(new Date()),
-        uuid: rangUUID()
+        uuid: randUUID()
       });
 
       await user.relateTo({
@@ -196,7 +168,7 @@ describe('models ::', () => {
   describe('relation ONLINE_BELONS_TO', () => {
     it('User relates to OnlineLog as online_logs', async () => {
       const user = await User.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
         name: '',
         user_id: undefined
       });
@@ -204,7 +176,7 @@ describe('models ::', () => {
       const log = await OnlineLog.createOne({
         online: true,
         time: Number(new Date()),
-        uuid: rangUUID()
+        uuid: randUUID()
       });
 
       await user.relateTo({
@@ -243,11 +215,11 @@ describe('models ::', () => {
       const log = await OnlineLog.createOne({
         online: false,
         time: Number(new Date()),
-        uuid: rangUUID()
+        uuid: randUUID()
       })
 
       const user = await User.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
       })
 
       await log.relateTo({
@@ -300,7 +272,7 @@ const chan = {
 
 describe('schanChanHandle', () => {
 
-  const log_id = rangUUID()
+  const log_id = randUUID()
 
   beforeEach(async () => {
     await deleteAll()
@@ -321,7 +293,7 @@ describe('schanChanHandle', () => {
       await deleteAll();
       // Create two ChannelScanLog entries
       log1 = await ChannelScanLog.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
         status: '',
         request: '',
         started_at: 0,
@@ -329,7 +301,7 @@ describe('schanChanHandle', () => {
         enrolled_at: 0
       });
       log2 = await ChannelScanLog.createOne({
-        uuid: rangUUID(),
+        uuid: randUUID(),
         status: '',
         request: '',
         started_at: 0,
@@ -786,10 +758,7 @@ describe('schanChanHandle', () => {
     })
   })
 
+  getMostViewedPostsTests()
 
-
-  setInterval(() => {
-    // console.log(User.getRelationshipByAlias('appears_in_posts'))
-  }, 100)
 })
 

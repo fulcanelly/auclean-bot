@@ -167,11 +167,11 @@ export const channelInstanceMethods = {
         ]) as [string, number][]
     },
 
-    async getMostViewedPosts(limit: number = 10, daysAgo: number | undefined): Promise<{post_id: number, views: number}[]> {
+    async getMostViewedPosts(limit: number = 10, daysAgo?: number | undefined): Promise<{post_id: number, views: number}[]> {
         const params = new BindParam({
             id: this.self().id,
             limit: Integer.fromNumber(limit),
-            startDate: daysAgo ? moment().subtract(daysAgo, 'days').valueOf() / 1000 : -1
+            startDate: daysAgo ? moment().subtract(daysAgo, 'days').toDate().getTime() : -1
         })
 
         const result = await new QueryBuilder(params)
