@@ -7,11 +7,12 @@ import { OnlineLog } from './models/online_log';
 import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
+import { logger } from './utils/logger';
 
 const prefetch = 4
 
 export async function setupRmq() {
-    console.log('connecting to rmq')
+    logger.verbose('connecting to rmq')
 
     let client = await amqplib.connect({
         hostname: process.env.RMQ_HOST,
@@ -38,7 +39,7 @@ export async function setupRmq() {
         const msg = msg_ as amqplib.Message
         const data = JSON.parse(msg.content.toString())
 
-        console.log(data)
+        logger.verbose(data)
 
         try {
             if (data.login_success) {
@@ -96,8 +97,8 @@ export async function setupRmq() {
 
         } catch (e) {
             sentry.captureException(e)
-            console.log(e)
-            console.log((e as any)?.data?.errors)
+            logger.error(e)
+            logger.warn((e as any)?.data?.errors)
             channel.nack(msg, false, true)
         }
 
@@ -156,9 +157,8 @@ async function createSessionIfNotExists(session_name: string, type: string, phon
 async function sendAllSessions(channel: amqplib.Channel) {
     const PAGE_SIZE = 10
 
-    console.log("ALL SESSIONS")
+    logger.verbose("sending all sessions")
     for (let index = 0; ; index++) {
-        console.log("START")
 
         const shift = PAGE_SIZE * index
         console.log({ shift })

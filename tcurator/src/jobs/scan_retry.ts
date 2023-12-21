@@ -5,15 +5,16 @@ import * as R from 'ramda'
 import { QueryBuilder, QueryRunner } from 'neogma';
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from "../models/channel_scan_log";
 import { sentry } from "../sentry";
+import { logger } from "../utils/logger";
 
 
 
 async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelScanLogInstance) {
-	console.log('checking is busy')
+	logger.info('checking is busy')
 	const session = await log.getSession()
 
 	if (await session.isBussy()) {
-		console.log('session is bussy, will try later')
+		logger.warn('session is bussy, will try later')
 		return
 	}
 
@@ -22,8 +23,7 @@ async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelSca
 		log_id: log.uuid,
 	}
 
-	console.log('retrying')
-	console.log({
+	logger.info('retrying', {
 		queue: 'py:chanscan',
 		request
 	})
@@ -34,7 +34,7 @@ async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelSca
 export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise<boolean> {
 
 	try {
-		console.log('seeking for broken queries')
+		logger.info('seeking for broken queries')
 
 		const qb = () => new QueryBuilder()
 			.match({
@@ -61,7 +61,7 @@ export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise
 		}
 	} catch(e) {
 		sentry.captureException(e)
-		console.error(e)
+		logger.error(e)
 	}
 	return false
 }
