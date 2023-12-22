@@ -40,6 +40,8 @@ export default function (props: Props) {
 }
 
 export async function getServerSideProps(context: any): Promise<{ props: Props }> {
+    await import('@/models/__relations')
+
     const username = context.query.username
     const full: boolean = context.query.full
 
