@@ -22,6 +22,18 @@ neogen.generateAll({ // settings
     outputFolder: './src/models',
     rawRelation: scanLogRelations
 }, [
+    {
+        label: "ChatgptDialogue",
+        schema: {
+            id: 'number',
+            session_id: 'number',
+            text: 'string',
+            role: 'string',
+            date: 'number'
+        },
+        primaryKeyField: 'id',
+
+    },
     { // models
         label: 'User',
         schema: {
