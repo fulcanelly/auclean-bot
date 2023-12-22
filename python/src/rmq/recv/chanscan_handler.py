@@ -16,10 +16,16 @@ def obtain_chanscan_handler(channel: BlockingChannel):
         session = data.get('session')
         log_id = data.get('log_id')
 
-        if identifier and get_session_store().get(session):
+        if identifier and get_session_store().get(session) and not data.get('type'):
             handler: session_handler = get_session_store().get(session)
             job = dispatch_scan_job(handler.client_type())
             handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
+
+        request_type = data.get('type')
+        if request_type == 'remove_job':
+            handler: session_handler = get_session_store().get(session)
+            handler.job = None
+
 
         print(data)
 
