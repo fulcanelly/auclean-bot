@@ -1,6 +1,6 @@
 "use client";
 import { Chart } from 'react-google-charts';
-import { optionsBase } from '../app/page';
+import { optionsBase } from '@/components/optionsBase';
 
 export const EngagementChart: React.FC = () => {
   const data = [

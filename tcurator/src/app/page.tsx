@@ -3,20 +3,6 @@
 
 import { Dashboard, ui } from '../components/Dashboard';
 
-export const optionsBase = {
-  // ...
-  legend: { position: 'none' },
-  hAxis: {
-    // Remove gridlines or make them very subtle
-    gridlines: { color: 'transparent' },
-  },
-  vAxis: {
-    // ...
-    gridlines: { color: 'transparent' },
-  },
-  // ...
-};
-
 // TODO: REMOVE
 
 const fakePosts: ui.PostsPerDay = [
