@@ -1,0 +1,26 @@
+name: "tcurator ts build"
+
+
+on: [push]
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '19.x'
+      - name: Install dependencies
+        run: cd tcurator && yarn
+
+      - run: cd tcurator && yarn build
+        env:
+            NEO4J_HOST: ${{ secrets.NEO4J_HOST }}
+            NEO4J_USERNAME: 'neo4j'
+            NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+
