@@ -1,43 +1,63 @@
+import moment, { duration } from "moment"
 
 export namespace config {
+  export type Interval = number | moment.Duration
+
+  export function extractDurationFromInterval(i: Interval): moment.Duration {
+    if (typeof i == 'number') {
+      return duration(i, 'milliseconds')
+    } else {
+      return i
+    }
+  }
+
   export type DefaultModuleSettings = {
     enabled: boolean
     run_at_start: boolean
-    timeout: number
+    interval: Interval
     name: string
   }
 
-  export interface Modules {
+  export interface JobConfigs {
   }
 
+  export interface Modules {
+
+  }
 
   export interface Config {
+    jobs: JobConfigs
     modules: Modules
   }
-}
 
-export const appConfig: config.Config = {
-  modules: {
-    scan_retry: {
-      enabled: true,
-      run_at_start: true,
-      timeout: 10_000,
-      name: 'scan retry',
-      max_attempts: 10,
-      max_timout: 10_000
+  export const appConfig: config.Config = {
+    jobs: {
+      scan_retry: {
+        enabled: true,
+        run_at_start: true,
+        interval: 10000,
+        name: 'scan retry',
+        max_attempts: 10,
+        max_timout: 10000
+      },
+      scan_recursivelly: {
+        enabled: false,
+        run_at_start: false,
+        interval: duration(1, 'minute'),
+        name: 'recursive chan scan'
+      },
+      scan_timout_job: {
+        enabled: true,
+        run_at_start: true,
+        interval: duration(10, 'seconds'),
+        max_timeout: duration(3, 'minutes'),
+        name: 'find timout jobs',
+      }
     },
-    scan_recursivelly: {
-      enabled: false,
-      run_at_start: false,
-      timeout: 60_000,
-      name: 'recursive chan scan'
+    modules: {
+      rmq: {
+        prefetch: 10
+      }
     },
-    scan_timout_job: {
-      enabled: true,
-      run_at_start: true,
-      timeout: 10_000,
-      name: 'find timout jobs'
-    }
   }
 }
-

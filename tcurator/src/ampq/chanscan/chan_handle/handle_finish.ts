@@ -12,7 +12,13 @@ export async function handleFinish(channel: amqplib.Channel, data: spy.Packet) {
 		}
 	});
 	chanScanLog!.finished_at = Date.now();
-	(chanScanLog!.status as ChannelScanStatus) = 'DONE'
+
+	const status = chanScanLog!.status as ChannelScanStatus
+
+	if (!(status == 'TIMEOUT_FAIL' || status == 'FAIL')) {
+		(chanScanLog!.status as ChannelScanStatus) = 'DONE'
+	}
+
 
 	await chanScanLog?.save();
 

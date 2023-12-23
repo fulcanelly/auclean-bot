@@ -1,9 +1,7 @@
 import { sentry } from "../sentry";
 import { logger } from "./logger";
+import { timeout } from "./timeout";
 
-export async function timeout(timeMs: number) {
-	return new Promise(resolve => setTimeout(resolve, timeMs));
-}
 
 export async function retry<T>(func: () => Promise<T>, times: number) {
 	let lastError: any;

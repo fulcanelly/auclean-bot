@@ -8,7 +8,6 @@ import { Session } from '../../models/session';
 import { QueryBuilder, QueryRunner, neo4jDriver } from 'neogma';
 import { Channel } from '../../models/channel';
 import { neogma } from '../../neo4j';
-import { timeout } from '../../utils/retry';
 import { initFirstScan } from '../../services/init_first_scan';
 import { logger } from '@/utils/logger';
 // import { createIfNotExists } from './lib';

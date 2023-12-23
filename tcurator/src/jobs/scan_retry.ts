@@ -13,7 +13,7 @@ import { ChannelScanStatus } from "@/types/channel_scan_status";
 
 declare module '@/config' {
   namespace config {
-    interface Modules {
+    interface JobConfigs {
       scan_retry: DefaultModuleSettings & {
         max_attempts: number
         max_timout: number
@@ -24,7 +24,7 @@ declare module '@/config' {
 
 export namespace scan_retry {
   export const setup = (config: config.Config, channel: amqplib.Channel) => {
-    const retryConfig = config.modules.scan_retry
+    const retryConfig = config.jobs.scan_retry
 
     async function retryBrokenScanRequests(): Promise<boolean> {
       try {
@@ -76,7 +76,7 @@ export namespace scan_retry {
       } finally {
         await log.save()
       }
-      
+
       logger.info('checking is busy')
       const session = await log.getSession()
 
@@ -99,6 +99,6 @@ export namespace scan_retry {
     }
 
 
-    defaultSetup(retryBrokenScanRequests, config.modules.scan_retry, channel)
+    defaultSetup(retryBrokenScanRequests, config.jobs.scan_retry, channel)
   }
 }

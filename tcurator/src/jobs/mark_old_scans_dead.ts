@@ -13,21 +13,24 @@ import { defaultSetup } from ".";
 
 declare module "../config" {
   namespace config {
-    interface Modules {
-      scan_timout_job: DefaultModuleSettings
+    interface JobConfigs {
+      scan_timout_job: DefaultModuleSettings & {
+        max_timeout: number | moment.Duration
+      }
     }
   }
 }
 
 export namespace scan_timout {
-  export const setup = (config: config.Config, channel: amqplib.Channel) => {
+  export const setup = (allconfig: config.Config, channel: amqplib.Channel) => {
+    const myConfig = allconfig.jobs.scan_timout_job
 
     async function getCurrenltRunningScans(): Promise<void> {
       logger.warn('Seeking for long running stuck jobs')
 
       const params = new BindParam({
         now: Date.now(),
-        maxTimeout: duration(2, 'minutes').asMilliseconds()
+        maxTimeout: config.extractDurationFromInterval(myConfig.max_timeout).asMilliseconds()
       })
 
       const result = await new QueryBuilder(params)
@@ -74,7 +77,7 @@ export namespace scan_timout {
       await scanLog.save()
     }
 
-    defaultSetup(getCurrenltRunningScans, config.modules.scan_timout_job, channel)
+    defaultSetup(getCurrenltRunningScans, myConfig, channel)
   }
 }
 

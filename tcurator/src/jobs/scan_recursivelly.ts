@@ -9,7 +9,7 @@ import { defaultSetup } from ".";
 
 declare module "../config" {
     namespace config {
-        interface Modules {
+        interface JobConfigs {
             scan_recursivelly: DefaultModuleSettings
         }
     }
@@ -17,7 +17,7 @@ declare module "../config" {
 
 export namespace scan_rec {
     export const setup = (config: config.Config, achannel: amqplib.Channel) =>
-        defaultSetup(scanRecursivellyNewChannels, config.modules.scan_recursivelly, achannel)
+        defaultSetup(scanRecursivellyNewChannels, config.jobs.scan_recursivelly, achannel)
 }
 
 
