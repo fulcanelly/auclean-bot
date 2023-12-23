@@ -86,9 +86,9 @@ class session_handler:
 
             # TODO add queue
             try: self.job = await self.job.async_exec(self)
-            except Exception as e: print(e)
-            finally: await self.restart()
-
+            except Exception as e:
+                print(e)
+                await self.restart()
 
 
 class tele_session_handler(session_handler):
