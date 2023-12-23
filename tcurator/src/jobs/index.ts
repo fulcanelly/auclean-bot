@@ -1,15 +1,17 @@
 import amqplib from 'amqplib';
-import { retryBrokenScanRequests, scan_retry } from './scan_retry';
+import { scan_retry } from './scan_retry';
 import { scanRecursivellyNewChannels, scan_rec } from './scan_recursivelly';
 import { appConfig, config } from '@/config';
 import { logger } from '@/utils/logger';
+import { scan_timout } from './mark_old_scans_dead';
 
 type JobType<T = any> = (_: amqplib.Channel) => Promise<T>
 
 export async function setupScheduledJobs(client: amqplib.Connection) {
     const setups = [
         scan_rec,
-        scan_retry
+        scan_retry,
+        scan_timout,
     ].map(it => it.setup)
 
     const channel = await client.createChannel()

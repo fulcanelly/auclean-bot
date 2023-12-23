@@ -2,80 +2,103 @@
 import { iterateQueryBuilder } from "../utils/iterate"
 import amqplib from 'amqplib';
 import * as R from 'ramda'
-import { QueryBuilder, QueryRunner } from 'neogma';
+import { BindParam, QueryBuilder, QueryRunner } from 'neogma';
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from "../models/channel_scan_log";
 import { sentry } from "../sentry";
 import { logger } from "../utils/logger";
 import { config } from "@/config";
 import { defaultSetup } from ".";
+import { ChannelScanStatus } from "@/types/channel_scan_status";
 
 
-declare module "../config" {
-	namespace config {
-		interface Modules {
-			scan_retry: DefaultModuleSettings
-		}
-	}
+declare module '@/config' {
+  namespace config {
+    interface Modules {
+      scan_retry: DefaultModuleSettings & {
+        max_attempts: number
+        max_timout: number
+      }
+    }
+  }
 }
 
 export namespace scan_retry {
-	export const setup = (config: config.Config, achannel: amqplib.Channel) =>
-			defaultSetup(retryBrokenScanRequests, config.modules.scan_retry, achannel)
-}
+  export const setup = (config: config.Config, channel: amqplib.Channel) => {
+    const retryConfig = config.modules.scan_retry
 
-async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelScanLogInstance) {
-	logger.info('checking is busy')
-	const session = await log.getSession()
+    async function retryBrokenScanRequests(): Promise<boolean> {
+      try {
+        logger.info('seeking for broken queries')
 
-	if (await session.isBussy()) {
-		logger.warn('session is bussy, will try later')
-		return
-	}
+        const param = new BindParam({
+          max_timout: retryConfig.max_timout
+        })
 
-	const request = {
-		...JSON.parse(log.request),
-		log_id: log.uuid,
-	}
-
-	logger.info('retrying', {
-		queue: 'py:chanscan',
-		request
-	})
-
-	channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)))
-}
-
-export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise<boolean> {
-
-	try {
-		logger.info('seeking for broken queries')
-
-		const qb = () => new QueryBuilder()
-			.match({
-				model: ChannelScanLog,
-				identifier: 'c'
-			})
-			.where('(timestamp() - c.enrolled_at) > 10_000 AND c.enrolled_at <> 0 AND c.status IN ["INIT"] AND c.request IS NOT NULL')
-			.return('c')
+        const qb = () => new QueryBuilder(param)
+          .match({
+            model: ChannelScanLog,
+            identifier: 'c'
+          })
+          .where('(timestamp() - c.enrolled_at) > $max_timout AND c.enrolled_at <> 0 AND c.status IN ["INIT"] AND c.request IS NOT NULL')
+          .return('c')
 
 
-		for await (let queryResult of iterateQueryBuilder(qb, 1)) {
+        for await (let queryResult of iterateQueryBuilder(qb, 1)) {
 
-			const result = QueryRunner.getResultProperties<ChannelScanLogProps>(queryResult, 'c')
-				.map(it => ChannelScanLog.buildFromRecord({
-					properties: it,
-					labels: [ChannelScanLog.getLabel()]
-				}))
-				.map(R.curry(queueIfSessionAvailable)(channel))
+          const result = QueryRunner.getResultProperties<ChannelScanLogProps>(queryResult, 'c')
+            .map(it => ChannelScanLog.buildFromRecord({
+              properties: it,
+              labels: [ChannelScanLog.getLabel()]
+            }))
+            .map(queueIfSessionAvailable)
 
-			await Promise.all(result)
-			if (result.length) {
-				return true
-			}
-		}
-	} catch (e) {
-		sentry.captureException(e)
-		logger.error(e)
-	}
-	return false
+          await Promise.all(result)
+          if (result.length) {
+            return true
+          }
+        }
+      } catch (e) {
+        sentry.captureException(e)
+        logger.error(e)
+      }
+      return false
+    }
+
+
+    async function queueIfSessionAvailable(log: ChannelScanLogInstance) {
+      try {
+        log.attempts = (log.attempts ?? 1) + 1
+
+        if (log.attempts > retryConfig.max_attempts) {
+          (log.status as ChannelScanStatus) = 'FAIL'
+          return logger.error('Last attempt reached in scan retry, failing scan', log)
+        }
+      } finally {
+        await log.save()
+      }
+      
+      logger.info('checking is busy')
+      const session = await log.getSession()
+
+      if (await session.isBussy()) {
+        logger.warn('session is bussy, will try later')
+        return
+      }
+
+      const request = {
+        ...JSON.parse(log.request),
+        log_id: log.uuid,
+      }
+
+      logger.info('retrying', {
+        queue: 'py:chanscan',
+        request
+      })
+
+      channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)))
+    }
+
+
+    defaultSetup(retryBrokenScanRequests, config.modules.scan_retry, channel)
+  }
 }

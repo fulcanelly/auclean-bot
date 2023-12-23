@@ -92,6 +92,7 @@ neogen.generateAll({ // settings
             finished_at: 'number',
             request: 'string',
             status: 'string',
+            attempts: 'number'
             //request
 
             //scan
