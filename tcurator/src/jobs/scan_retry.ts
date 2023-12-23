@@ -6,8 +6,22 @@ import { QueryBuilder, QueryRunner } from 'neogma';
 import { ChannelScanLog, ChannelScanLogInstance, ChannelScanLogProps } from "../models/channel_scan_log";
 import { sentry } from "../sentry";
 import { logger } from "../utils/logger";
+import { config } from "@/config";
+import { defaultSetup } from ".";
 
 
+declare module "../config" {
+	namespace config {
+		interface Modules {
+			scan_retry: DefaultModuleSettings
+		}
+	}
+}
+
+export namespace scan_retry {
+	export const setup = (config: config.Config, achannel: amqplib.Channel) =>
+			defaultSetup(retryBrokenScanRequests, config.modules.scan_retry, achannel)
+}
 
 async function queueIfSessionAvailable(channel: amqplib.Channel, log: ChannelScanLogInstance) {
 	logger.info('checking is busy')
@@ -48,9 +62,9 @@ export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise
 		for await (let queryResult of iterateQueryBuilder(qb, 1)) {
 
 			const result = QueryRunner.getResultProperties<ChannelScanLogProps>(queryResult, 'c')
-				.map(it =>  ChannelScanLog.buildFromRecord({
+				.map(it => ChannelScanLog.buildFromRecord({
 					properties: it,
-					labels: [ ChannelScanLog.getLabel() ]
+					labels: [ChannelScanLog.getLabel()]
 				}))
 				.map(R.curry(queueIfSessionAvailable)(channel))
 
@@ -59,7 +73,7 @@ export async function retryBrokenScanRequests(channel: amqplib.Channel): Promise
 				return true
 			}
 		}
-	} catch(e) {
+	} catch (e) {
 		sentry.captureException(e)
 		logger.error(e)
 	}

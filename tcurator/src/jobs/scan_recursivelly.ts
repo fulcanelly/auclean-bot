@@ -4,6 +4,21 @@ import { Channel, ChannelInstance, ChannelProps } from "../models/channel";
 import { initFirstScan } from "../services/init_first_scan";
 import amqplib from 'amqplib';
 import { logger } from "../utils/logger";
+import { config } from "../config";
+import { defaultSetup } from ".";
+
+declare module "../config" {
+    namespace config {
+        interface Modules {
+            scan_recursivelly: DefaultModuleSettings
+        }
+    }
+}
+
+export namespace scan_rec {
+    export const setup = (config: config.Config, achannel: amqplib.Channel) =>
+        defaultSetup(scanRecursivellyNewChannels, config.modules.scan_recursivelly, achannel)
+}
 
 
 export async function scanRecursivellyNewChannels(achannel: amqplib.Channel): Promise<boolean> {
@@ -53,6 +68,6 @@ async function getPublicChannelNeverScanned(): Promise<ChannelInstance | undefin
 
     return Channel.buildFromRecord({
         properties: channels[0],
-            labels: [ Channel.getLabel() ]
-        })
+        labels: [Channel.getLabel()]
+    })
 }

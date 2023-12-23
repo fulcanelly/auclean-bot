@@ -1,24 +1,33 @@
 import amqplib from 'amqplib';
-import { retryBrokenScanRequests } from './scan_retry';
-import { scanRecursivellyNewChannels } from './scan_recursivelly';
+import { retryBrokenScanRequests, scan_retry } from './scan_retry';
+import { scanRecursivellyNewChannels, scan_rec } from './scan_recursivelly';
+import { appConfig, config } from '@/config';
+import { logger } from '@/utils/logger';
 
-type JobType = (_: amqplib.Channel) => Promise<Boolean>
+type JobType<T = any> = (_: amqplib.Channel) => Promise<T>
 
 export async function setupScheduledJobs(client: amqplib.Connection) {
+    const setups = [
+        scan_rec,
+        scan_retry
+    ].map(it => it.setup)
+
     const channel = await client.createChannel()
-    setInterval(handle, 10_000, channel)
+    await Promise.all(setups.map(it => it(appConfig, channel)))
 }
 
-async function handle(channel: amqplib.Channel) {
-    const jobs: JobType[] = [
-        retryBrokenScanRequests,
-        scanRecursivellyNewChannels,
-    ]
+export async function defaultSetup(job: JobType, defaultConfig: config.DefaultModuleSettings, channel: amqplib.Channel) {
 
-    for (const job of jobs) {
-        if (await job(channel)) {
-            return
-        }
+    if (!defaultConfig.enabled) {
+        logger.error('Not enabled, skipping', { name: defaultConfig.name })
+        return
     }
 
+    if (defaultConfig.run_at_start) {
+        logger.silly('Initial job run', { name: defaultConfig.name })
+        await job(channel)
+    }
+
+    logger.silly('Setup interval', { name: defaultConfig.name, timeout: defaultConfig.timeout })
+    setInterval(job, defaultConfig.timeout, channel)
 }
