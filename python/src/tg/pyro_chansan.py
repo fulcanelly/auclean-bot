@@ -103,3 +103,7 @@ async def pyro_scan_channel(handler: session_handler, identifier: str, log_id: s
             it.send_post(message, chat.id)
 
         it.send_finish()
+
+async def recent_scan_channel():
+    pass
+    #TODO
