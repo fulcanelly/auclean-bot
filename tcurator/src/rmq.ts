@@ -8,8 +8,19 @@ import { User, UserInstance } from './models/user';
 import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
 import { logger } from './utils/logger';
+import { config } from '@/config';
 
-const prefetch = 4
+declare module "./config" {
+    namespace config {
+        interface Modules {
+            rmq: {
+                prefetch: number
+            }
+        }
+    }
+}
+
+const prefetch = config.appConfig.modules.rmq.prefetch
 
 export async function setupRmq() {
     logger.verbose('connecting to rmq')

@@ -278,6 +278,7 @@ describe('schanChanHandle', () => {
     await deleteAll()
     await ChannelScanLog.createOne({
       status: '',
+      attempts: 0,
       request: '',
       uuid: log_id,
       started_at: 0,
@@ -294,6 +295,7 @@ describe('schanChanHandle', () => {
       // Create two ChannelScanLog entries
       log1 = await ChannelScanLog.createOne({
         uuid: randUUID(),
+        attempts: 0,
         status: '',
         request: '',
         started_at: 0,
@@ -302,6 +304,7 @@ describe('schanChanHandle', () => {
       });
       log2 = await ChannelScanLog.createOne({
         uuid: randUUID(),
+        attempts: 0,
         status: '',
         request: '',
         started_at: 0,

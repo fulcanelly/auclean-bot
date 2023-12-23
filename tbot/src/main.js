@@ -239,8 +239,56 @@ async function main() {
 
     bot.on('text', async (msg) => {
         const user_id = msg.from.id
+
         if (msg.chat.type != 'private') {
             return
+        }
+
+        if (msg.text.startsWith('/stop')) {
+            const sessions = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
+            })
+
+            const selected = await sendSelect(user_id, 'Select session to use', sessions)
+
+            if (!selected) {
+                return await bot.sendMessage(user_id, 'Bie', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                })
+            }
+
+            const test = await rpcViaSpyQueue({
+                stop: true,
+                session: selected,
+            })
+
+            return await bot.sendMessage(user_id, JSON.stringify(test))
+        }
+
+
+        if (msg.text.startsWith('/test')) {
+            const sessions = await rpcViaSpyQueue({
+                requested_by_user_id: user_id,
+            })
+
+            const selected = await sendSelect(user_id, 'Select session to use', sessions)
+
+            if (!selected) {
+                return await bot.sendMessage(user_id, 'Bie', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                })
+            }
+
+            const test = await rpcViaSpyQueue({
+                test: true,
+                session: selected,
+            })
+
+            return await bot.sendMessage(user_id, JSON.stringify(test))
         }
 
         if (msg.text.startsWith('/spy')) {

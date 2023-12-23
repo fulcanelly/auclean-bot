@@ -12,6 +12,7 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 	};
 
 	const log = await ChannelScanLog.createOne({
+		attempts: 0,
 		uuid: uuidv4(),
 		enrolled_at: Date.now(),
 		status: 'INIT' as ChannelScanStatus,

@@ -33,6 +33,8 @@ class session_handler:
         self.ensured_channel = EnsuredPikaChannel()
         self.user_id = user_id
         self.job: enrolled_job = None
+        self.stop_event = asyncio.Event()
+
 
     def start(self):
         Thread(target=self.run).start()
@@ -54,14 +56,23 @@ class session_handler:
     async def stop(self):
         raise 'not implemented'
 
+    def kill(self):
+        self.stop_event.set()
+
+    async def wait_for_stop_event(self):
+        await self.stop_event.wait()
+        await self.restart()
+
     async def restart(self):
         self.job = None
         del get_session_store()[self.session_name]
         await self.stop()
+        asyncio.get_event_loop().stop()
         with self.ensured_channel as ch:
             curator_notifier_t(ch).request_sessions()
 
     async def test(self):
+        asyncio.get_event_loop().create_task(self.wait_for_stop_event())
 
         if not self.is_connected(): return
 
@@ -75,8 +86,9 @@ class session_handler:
 
             # TODO add queue
             try: self.job = await self.job.async_exec(self)
-            finally: await self.restart()
-
+            except Exception as e:
+                print(e)
+                await self.restart()
 
 
 class tele_session_handler(session_handler):
@@ -108,7 +120,9 @@ class tele_session_handler(session_handler):
     def run(self):
         print("starting session")
 
-        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
 
         self.client = TelegramClient(self.session_name, get_api_id(), get_api_hash())
         self.client.session

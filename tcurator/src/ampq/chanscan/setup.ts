@@ -8,8 +8,8 @@ import { Session } from '../../models/session';
 import { QueryBuilder, QueryRunner, neo4jDriver } from 'neogma';
 import { Channel } from '../../models/channel';
 import { neogma } from '../../neo4j';
-import { timeout } from '../../utils/retry';
 import { initFirstScan } from '../../services/init_first_scan';
+import { logger } from '@/utils/logger';
 // import { createIfNotExists } from './lib';
 
 
@@ -40,42 +40,66 @@ export async function setupChanSpy(channel: amqplib.Channel) {
 
 
 type spy_request = {
-    requested_by_user_id: string,
-    session?: string,
-    identifier?: string
+	requested_by_user_id: string,
+	session?: string,
+	identifier?: string,
+	test?: boolean
+	stop?: boolean
 }
 
 async function processSpyRequest(channel: amqplib.Channel, msg: any) {
-    channel.ack(msg, false)
+	channel.ack(msg, false)
 
-		const data = JSON.parse(msg!.content.toString()) as spy_request
-		const user_id = data.requested_by_user_id?.toString()
-		const props = msg!.properties
+	const data = JSON.parse(msg!.content.toString()) as spy_request
+	const user_id = data.requested_by_user_id?.toString()
+	const props = msg!.properties
 
-		const replyBack = (data: any) => channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify(data, null, '  ')), {
-			correlationId: props.correlationId
+	const replyBack = (data: any) => channel.sendToQueue(props.replyTo, Buffer.from(JSON.stringify(data, null, '  ')), {
+		correlationId: props.correlationId
+	})
+
+	logger.error('got', data)
+
+	if (data.stop && data.session) {
+
+		const payload = {
+			type: 'remove_job',
+			session: data.session
+		}
+
+		channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(payload)));
+
+		replyBack(payload)
+
+	} else if (data.test && data.session) {
+		const payload = {
+			type: 'test_load',
+			session: data.session
+		}
+
+		channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(payload)));
+
+		replyBack(payload)
+	} else if (data.session && data.identifier) {
+		const session = await Session.findOne({
+			where: {
+				user_id,
+				session_name: data.session
+			}
 		})
 
-		if (data.session && data.identifier) {
-			const session = await Session.findOne({
-				where: {
-					user_id,
-					session_name: data.session
-				}
-			})
-			
-			const log = await initFirstScan(channel, session!, data.identifier)
+		const log = await initFirstScan(channel, session!, data.identifier)
 
-			replyBack({ log_id: log.uuid })
-		} else {
-			const sessions = await Session.findMany({
-				where: {
-					user_id
-				}
-			})
+		replyBack({ log_id: log.uuid })
+	} else {
+		const sessions = await Session.findMany({
+			where: {
+				user_id
+			}
+		})
 
-			replyBack(sessions.map(s => s.session_name))
-		}
+		replyBack(sessions.map(s => s.session_name))
+	}
 	console.log(data)
 }
 

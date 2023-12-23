@@ -13,6 +13,7 @@ export type ChannelScanLogProps = {
     finished_at: number
     request: string
     status: string
+    attempts: number
 }
 
 export interface ChannelScanLogRelatedNodesI {
@@ -30,7 +31,8 @@ export const ChannelScanLog = ModelFactory<ChannelScanLogProps, ChannelScanLogRe
         started_at: { type: "number" },
         finished_at: { type: "number" },
         request: { type: "string" },
-        status: { type: "string" }
+        status: { type: "string" },
+        attempts: { type: "number" }
     },
     primaryKeyField: "uuid"
 }, neogen.get())
