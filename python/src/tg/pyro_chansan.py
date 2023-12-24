@@ -9,7 +9,8 @@ from telethon.tl.types import Message
 from telethon.hints import Entity
 from telethon.functions import channels
 from pika.adapters.blocking_connection import BlockingChannel
-from datetime import datetime
+# from datetime import datetime as s
+import datetime
 from pyrogram import Client
 
 
@@ -104,6 +105,20 @@ async def pyro_scan_channel(handler: session_handler, identifier: str, log_id: s
 
         it.send_finish()
 
-async def recent_scan_channel():
-    pass
-    #TODO
+
+async def recent_scan_channel(handler: session_handler, identifier: str, log_id: str, days: int = 10):
+    chat = await handler.client.get_chat(identifier)
+    cutoff_date = datetime.datetime.now() - datetime.timedelta(days=days)
+
+    with AutoChanEnsurer(handler.ensured_channel, chanscan_notifier_pyro_t, log_id) as it:
+        it.send_start()
+        it.send_channel(chat)
+
+        async for message in handler.client.get_chat_history(chat.id):
+            message: pyrogram.types.Message = message
+            message_date = message.date
+            if message_date and message_date < cutoff_date:
+                break
+            it.send_post(message, chat.id)
+
+        it.send_finish()
