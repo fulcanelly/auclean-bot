@@ -25,13 +25,7 @@ function neogmaConfig() {
 
 export const neogma = new Neogma(
     neogmaConfig(),
-    {
-        logger: (q: string) => {
-            const [_, query,] = q.split('**')
-            processTransaction(query)
-            logger.debug(q)
-        },
-    },
+    {},
 );
 
 
@@ -62,7 +56,10 @@ export async function setupIndexes() {
         'CREATE TEXT INDEX user_id_index IF NOT EXISTS FOR (n:User) ON (n.user_id)',
         'CREATE INDEX channel_id_index IF NOT EXISTS FOR (n:Channel) ON (n.id)',
         'CREATE INDEX channel_post_ids_index IF NOT EXISTS FOR (n:ChannelPost) ON (n.id, n.channel_id)',
-        'CREATE INDEX post_views_uuid_index IF NOT EXISTS FOR (n:PostViews) ON (n.uuid)'
+        'CREATE INDEX post_views_uuid_index IF NOT EXISTS FOR (n:PostViews) ON (n.uuid)',
+
+        'CREATE INDEX channel_post_uuid_index IF NOT EXISTS FOR (n:ChannelPost) ON (n.uuid)',
+        'CREATE INDEX channel_scan_log_uuid_index IF NOT EXISTS FOR (n:ChannelScanLog) ON (n.uuid)',
 
     ]
 
