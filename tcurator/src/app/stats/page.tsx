@@ -13,11 +13,12 @@ export default function () {
     const username = searchParams?.get('username') as string
     const full = searchParams?.get('full')
 
-    const [state, setState] = useState({ state: 'loading' } as state)
 
     useEffect(() => {
         loadNededData(username, Boolean(full)).then(setState)
     }, [])
+
+    const [state, setState] = useState({ state: 'loading' } as state)
 
     if (state.state == 'done') {
         const props = state.data

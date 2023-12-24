@@ -1,8 +1,9 @@
 'use server';
 
 import { ui } from '@/components/Dashboard';
-import { Channel } from '@/models/channel';
+import { Channel, ChannelInstance } from '@/models/channel';
 import '@/models/__relations'
+import _ from 'lodash';
 
 export type Data = {
     most_viewed: { post_id: number, views: number }[] | undefined
@@ -38,9 +39,12 @@ export async function loadNededData(username: string, full: boolean): Promise<st
         return { state: 'not_found' }
     }
 
+    // console.log(await optimizedGetPostPerLastDays(channel))
+
     const [postsPerDay, mostViewed]
         = await Promise.all([
-            channel.getPostsPerLastDays(),
+            // channel.getPostsPerLastDays(),
+            optimizedGetPostPerLastDays(channel),
             full ? channel.getMostViewedPosts(10, 30) : undefined
         ])
 
@@ -63,4 +67,7 @@ export async function loadNededData(username: string, full: boolean): Promise<st
     }
 
 };
+
+
+const optimizedGetPostPerLastDays = (channel: ChannelInstance) => Promise.all(new Array(30).fill(null).map((_, i) => channel.getPostAtDayAgo(i)))
 
