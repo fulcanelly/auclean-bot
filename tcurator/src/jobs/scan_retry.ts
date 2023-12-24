@@ -9,6 +9,7 @@ import { logger } from "../utils/logger";
 import { config } from "@/config";
 import { defaultSetup } from ".";
 import { ChannelScanStatus } from "@/types/channel_scan_status";
+import { py_chanscan_request } from "@/types/py_chanscan_request";
 
 
 declare module '@/config' {
@@ -85,7 +86,7 @@ export namespace scan_retry {
         return
       }
 
-      const request = {
+      const request: py_chanscan_request = {
         ...JSON.parse(log.request),
         log_id: log.uuid,
       }

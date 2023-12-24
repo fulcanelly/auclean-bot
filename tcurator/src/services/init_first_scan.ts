@@ -3,12 +3,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChannelScanLog, ChannelScanLogInstance } from '../models/channel_scan_log';
 import { Session, SessionInstance } from '../models/session';
 import { ChannelScanStatus } from '../types/channel_scan_status';
+import { py_chanscan_request } from '../types/py_chanscan_request';
 
 
 export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string): Promise<ChannelScanLogInstance> {
-	const request = {
+	const request: py_chanscan_request = {
 		session: session!.session_name,
 		identifier,
+		type: 'full_scan'
 	};
 
 	const log = await ChannelScanLog.createOne({
@@ -18,8 +20,9 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 		status: 'INIT' as ChannelScanStatus,
 		request: JSON.stringify(request),
 		started_at: 0,
-		finished_at: 0
+		finished_at: 0,
 	});
+
 
 	await session?.relateTo({
 		alias: 'scan_logs',
@@ -28,7 +31,7 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 		}
 	});
 
-	const dataToSpy = {
+	const dataToSpy: py_chanscan_request = {
 		...request,
 		log_id: log.uuid
 	};

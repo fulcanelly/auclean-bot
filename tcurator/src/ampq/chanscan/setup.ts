@@ -10,6 +10,7 @@ import { Channel } from '../../models/channel';
 import { neogma } from '../../neo4j';
 import { initFirstScan } from '../../services/init_first_scan';
 import { logger } from '@/utils/logger';
+import { py_chanscan_request } from '@/types/py_chanscan_request';
 // import { createIfNotExists } from './lib';
 
 
@@ -62,7 +63,7 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 
 	if (data.stop && data.session) {
 
-		const payload = {
+		const payload: py_chanscan_request = {
 			type: 'remove_job',
 			session: data.session
 		}
@@ -70,9 +71,9 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 		channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(payload)));
 
 		replyBack(payload)
-
 	} else if (data.test && data.session) {
-		const payload = {
+
+		const payload: py_chanscan_request = {
 			type: 'test_load',
 			session: data.session
 		}

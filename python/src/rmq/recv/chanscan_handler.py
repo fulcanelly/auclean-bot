@@ -28,8 +28,7 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
         with EnsuredPikaChannel() as ch:
             return curator_notifier_t(ch).request_sessions()
 
-    # request_type == 'full_scan'
-    if identifier:
+    if request_type == 'full_scan':
         job = dispatch_scan_job(handler.client_type())
         handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
 
@@ -42,7 +41,7 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
 
     if request_type == 'recent_scan':
         recent_scan_channel
-        handler.job = enrolled_job(recent_scan_channel)
+        handler.job = enrolled_job(recent_scan_channel, identifier = identifier, log_id = log_id, days = data.get('days'))
 
     print("\n\n\n\n\n\n\n")
 
