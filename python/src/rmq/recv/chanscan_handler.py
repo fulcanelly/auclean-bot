@@ -11,38 +11,35 @@ from tg.pyro_chansan import pyro_scan_channel
 from util.session_helpers import filename_from_session_name
 from util.session_store import get_session_store
 
-def obtain_chanscan_handler(channel: BlockingChannel):
 
-    def handle(ch: BlockingChannel, method: DeliveryMode, properties: BasicProperties, body: bytes):
-        ch.basic_ack(method.delivery_tag)
-        data: dict = json.loads(body)
-        print(data)
+def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: BasicProperties, body: bytes):
+    ch.basic_ack(method.delivery_tag)
+    data: dict = json.loads(body)
+    print(data)
 
-        identifier = data.get('identifier')
-        session = data.get('session')
-        log_id = data.get('log_id')
-        request_type = data.get('type')
+    identifier = data.get('identifier')
+    session = data.get('session')
+    log_id = data.get('log_id')
+    request_type = data.get('type')
 
-        handler: session_handler = get_session_store().get(session)
+    handler: session_handler = get_session_store().get(session)
 
-        if identifier:
-            job = dispatch_scan_job(handler.client_type())
-            handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
+    if not handler:
+        with EnsuredPikaChannel() as ch:
+            return curator_notifier_t(ch).request_sessions()
 
-        if not handler:
-            with EnsuredPikaChannel() as ch:
-                return curator_notifier_t(ch).request_sessions()
+    if identifier:
+        job = dispatch_scan_job(handler.client_type())
+        handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
 
-        if request_type == 'remove_job':
-            handler.job = None
-            handler.kill()
+    if request_type == 'remove_job':
+        handler.job = None
+        handler.kill()
 
-        if request_type == 'test_load':
-            handler.job = enrolled_job(test_load)
+    if request_type == 'test_load':
+        handler.job = enrolled_job(test_load)
 
         print("\n\n\n\n\n\n\n")
-
-    return handle
 
 
 def dispatch_scan_job(name):

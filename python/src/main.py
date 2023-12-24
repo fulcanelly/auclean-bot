@@ -3,7 +3,7 @@ import os
 import pretty_traceback
 from rmq.recv.curator_handler import obtain_curator_handler
 from rmq.recv.login_handler import obtain_login_handler
-from rmq.recv.chanscan_handler import obtain_chanscan_handler
+from rmq.recv.chanscan_handler import hanscan_handler
 
 from rmq.send.curator import curator_notifier_t
 from sentry_sdk.integrations.asyncio import AsyncioIntegration
@@ -38,7 +38,7 @@ def start():
         queue='curator:command', on_message_callback=obtain_curator_handler(channel))
 
     channel.basic_consume(
-        queue='py:chanscan', on_message_callback=obtain_chanscan_handler(channel))
+        queue='py:chanscan', on_message_callback=hanscan_handler)
 
     curator_notifier_t(channel).request_sessions()
 
