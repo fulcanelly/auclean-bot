@@ -56,7 +56,10 @@ export namespace config {
     },
     modules: {
       rmq: {
-        prefetch: 10
+        prefetch: 50
+      },
+      sentry: {
+        slow_query_trashold: duration(0.5, 'second')
       }
     },
   }

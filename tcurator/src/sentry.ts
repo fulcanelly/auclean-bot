@@ -1,39 +1,49 @@
+import { config } from '@/config';
 import * as Sentry from '@sentry/node';
 
-
 Sentry.init({
-    environment: process.env.ENV,
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
+  environment: 'production',
+  dsn: process.env.SENTRY_DSN,
+  tracesSampleRate: 1.0,
 })
 
-export async function processTransaction(customQuery: string) {
-    const transaction = Sentry.startTransaction({
-      op: "transaction",
-      name: "CHYPER",
-    });
-
-    transaction.setContext('query', {query: customQuery})
-    // Example of custom transaction data
-    const transactionData = {
-      query: customQuery,
-      // Simulate a duration or obtain it from your transaction logic
-      duration: 1000, // Duration in milliseconds
-    };
-
-    // This is where you'd actually process your custom language transaction
-    // ...
-
-    if (false) { //isTransactionSlow(transactionData.duration, 5000)) { // 5000 ms threshold
-      Sentry.captureMessage(`Slow transaction detected: ${JSON.stringify(transactionData)}`, "warning");
-      transaction.setStatus("failure"); // Mark the transaction as a failure
-    } else {
-      transaction.setStatus("ok");
+declare module "./config" {
+  namespace config {
+    interface Modules {
+      sentry: {
+        slow_query_trashold: Interval
+      }
     }
-
-    transaction.finish(); // Finish the transaction
   }
+}
+
+export function processTransaction(query: Object, queryDurationMs: number, params: any) {
+  const transaction = Sentry.startTransaction({
+    op: "transaction",
+    name: "CHYPER",
+  });
+
+  transaction.setContext('query', { query, queryDurationMs })
+
+  const trashold = config.extractDurationFromInterval(config.appConfig.modules.sentry.slow_query_trashold)
+    .milliseconds()
+
+  if (queryDurationMs > trashold ) {
+    Sentry.captureMessage(`Slow query: ${JSON.stringify(query)}`, {
+      level: 'error',
+      extra: {
+        query,
+        queryDurationMs,
+        params,
+      },
+    });
+    transaction.setStatus('failure');
+  } else {
+    transaction.setStatus("ok");
+  }
+
+  transaction.finish();
+}
 
 
 export const sentry = Sentry
-

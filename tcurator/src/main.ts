@@ -1,3 +1,4 @@
+import '@/utils/patch'
 import { setupConstraints, setupIndexes } from "./neo4j";
 import { sentry } from "./sentry";
 import "./models/__relations"
