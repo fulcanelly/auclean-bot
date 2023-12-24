@@ -2,7 +2,7 @@ import { config } from '@/config';
 import * as Sentry from '@sentry/node';
 
 Sentry.init({
-  environment: 'production',
+  environment: process.env.ENV,
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 1.0,
 })
