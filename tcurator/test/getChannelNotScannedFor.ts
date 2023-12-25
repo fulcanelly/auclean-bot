@@ -29,7 +29,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
         ...deafultProps,
         uuid: randUUID(),
         status: 'COMPLETED',
-        finished_at: moment().subtract(2, 'days').milliseconds()
+        finished_at: moment().subtract(2, 'days').unix() * 1000
       })
       await scanLog.relateTo({
         alias: 'of_channel',
@@ -51,7 +51,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
         ...deafultProps,
         uuid: randUUID(),
         status: 'COMPLETED',
-        finished_at: moment().subtract(10, 'minutes').milliseconds(),
+        finished_at: moment().subtract(10, 'minutes').unix() * 1000,
       });
       await scanLog.relateTo({
         alias: 'of_channel',
