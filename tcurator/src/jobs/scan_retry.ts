@@ -10,6 +10,7 @@ import { config } from "@/config";
 import { defaultSetup } from ".";
 import { ChannelScanStatus } from "@/types/channel_scan_status";
 import { py_chanscan_request } from "@/types/py_chanscan_request";
+import moment from "moment";
 
 
 declare module '@/config' {
@@ -17,22 +18,23 @@ declare module '@/config' {
     interface JobConfigs {
       scan_retry: DefaultModuleSettings & {
         max_attempts: number
-        max_timout: number
+        max_timout: Interval
       }
     }
   }
 }
 
 export namespace scan_retry {
-  export const setup = (config: config.Config, channel: amqplib.Channel) => {
-    const retryConfig = config.jobs.scan_retry
+  export const setup = (totalConfig: config.Config, channel: amqplib.Channel) => {
+    const retryConfig = totalConfig.jobs.scan_retry
 
     async function retryBrokenScanRequests(): Promise<boolean> {
       try {
         logger.info('seeking for broken queries')
 
         const param = new BindParam({
-          max_timout: retryConfig.max_timout
+          max_timout: config.extractDurationFromInterval(retryConfig.max_timout).asSeconds(),
+          time_now: moment().unix()
         })
 
         const qb = () => new QueryBuilder(param)
@@ -40,7 +42,7 @@ export namespace scan_retry {
             model: ChannelScanLog,
             identifier: 'c'
           })
-          .where('(timestamp() - c.enrolled_at) > $max_timout AND c.enrolled_at <> 0 AND c.status IN ["INIT"] AND c.request IS NOT NULL')
+          .where('($time_now - c.enrolled_at) > $max_timout AND c.enrolled_at <> 0 AND c.status IN ["INIT"] AND c.request IS NOT NULL')
           .return('c')
 
 
@@ -106,6 +108,6 @@ export namespace scan_retry {
     }
 
 
-    defaultSetup(retryBrokenScanRequests, config.jobs.scan_retry, channel)
+    defaultSetup(retryBrokenScanRequests, totalConfig.jobs.scan_retry, channel)
   }
 }

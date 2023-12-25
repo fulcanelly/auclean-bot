@@ -4,6 +4,7 @@ import { ChannelScanLog } from '../../../models/channel_scan_log';
 import { spy } from '../../../types/spy_packet';
 import { logSummary } from '../../../utils/log_summary';
 import { ChannelScanStatus } from '../../../types/channel_scan_status';
+import moment from 'moment';
 
 export async function handleFinish(channel: amqplib.Channel, data: spy.Packet) {
 	const chanScanLog = await ChannelScanLog.findOne({
@@ -11,7 +12,7 @@ export async function handleFinish(channel: amqplib.Channel, data: spy.Packet) {
 			uuid: data.log_id
 		}
 	});
-	chanScanLog!.finished_at = Date.now();
+	chanScanLog!.finished_at = moment().unix();
 
 	const status = chanScanLog!.status as ChannelScanStatus
 

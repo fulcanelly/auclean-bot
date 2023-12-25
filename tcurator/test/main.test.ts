@@ -17,6 +17,7 @@ import { schanChanHandle } from '../src/ampq/chanscan/chan_handle';
 import { randUUID } from './randUUID';
 import { getMostViewedPostsTests } from './getMostViewedPosts';
 import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
+import moment from 'moment';
 
 type AnyObj = Record<string, any>
 
@@ -33,6 +34,10 @@ function obtainResult<T extends Neo4jSupportedProperties, D extends AnyObj, K ex
       ]
     }))
 }
+
+const now = () => moment().unix()
+
+afterAll(() => neogma.driver.close())
 
 async function testTransactionsWorking() {
   await neogma.getTransaction(null, async (t) => {
@@ -321,7 +326,7 @@ describe('schanChanHandle', () => {
         id: -123,
         title: 'Test Channel',
         username: 'test:channel',
-        date: Date.now(),
+        date: now(),
         log_id: log1.uuid
       };
 
@@ -366,7 +371,7 @@ describe('schanChanHandle', () => {
       id: -123,
       title: 'Test Channel',
       username: 'test:channel',
-      date: Date.now(),
+      date: now(),
       log_id
     }
     const msg = makeMsg(packet);
@@ -412,7 +417,7 @@ describe('schanChanHandle', () => {
           id: -123,
           title: 'Test Channel',
           username: 'test:channel',
-          date: Date.now(),
+          date: now(),
           log_id
         }
         const msg = makeMsg(packet);
@@ -438,7 +443,7 @@ describe('schanChanHandle', () => {
         id: 125,
         title: 'Duplicate Test Channel',
         username: 'test:channel',
-        date: Date.now(),
+        date: now(),
         log_id
       };
 
@@ -457,7 +462,7 @@ describe('schanChanHandle', () => {
         id: -123,
         title: 'Test Channel',
         username: 'test:channel',
-        date: Date.now(),
+        date: now(),
         subs: 132,
         log_id
       }
@@ -503,7 +508,7 @@ describe('schanChanHandle', () => {
         id,
         title: 'Duplicate Test Channel',
         username: 'test:channel',
-        date: Date.now(),
+        date: now(),
         log_id
       });
 
@@ -519,7 +524,7 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 10,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           log_id
         };
@@ -541,13 +546,13 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 15,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           fwd_from_channel: {
             channel_post_id: 301,
             channel_id: 2, // This should be a different channel ID
             post_author,
-            date: Date.now()
+            date: now()
           },
           log_id
         };
@@ -602,10 +607,10 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 20,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           fwd_from_user: {
-            date: Date.now(),
+            date: now(),
             user_id: 3
           },
           log_id
@@ -633,7 +638,7 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 10,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           log_id
         };
@@ -656,13 +661,13 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 15,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           fwd_from_channel: {
             channel_post_id: 301,
             channel_id: 2, // This should be a different channel ID
             post_author,
-            date: Date.now()
+            date: now()
           },
           log_id
         };
@@ -687,10 +692,10 @@ describe('schanChanHandle', () => {
           grouped_id: undefined,
           views: 20,
           post_author,
-          date: Date.now(),
+          date: now(),
           channel_id: 1, // Ensure this channel exists in the DB
           fwd_from_user: {
-            date: Date.now(),
+            date: now(),
             user_id: 4
           },
           log_id
@@ -720,7 +725,7 @@ describe('schanChanHandle', () => {
         grouped_id: undefined,
         views: 12,
         post_author,
-        date: Date.now(),
+        date: now(),
         channel_id: 1, // Ensure this channel exists in the DB
         log_id
       };

@@ -3,7 +3,7 @@ import '@/models/__relations'
 import { logger } from "@/utils/logger";
 import { ChannelScanLog, ChannelScanLogInstance } from "../models/channel_scan_log";
 import { Session } from "@/models/session";
-import { duration } from "moment";
+import moment, { duration } from "moment";
 import { BindParam, QueryBuilder } from "neogma";
 import { recordToObject } from "@/utils/record_to_object";
 import amqplib from 'amqplib';
@@ -30,7 +30,7 @@ export namespace scan_timout {
       logger.warn('Seeking for long running stuck jobs')
 
       const params = new BindParam({
-        now: Date.now(),
+        now: moment().unix(),
         maxTimeout: config.extractDurationFromInterval(myConfig.max_timeout).asMilliseconds()
       })
 
@@ -78,7 +78,7 @@ export namespace scan_timout {
         channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)));
       } finally {
         (scanLog.status as ChannelScanStatus) = 'TIMEOUT_FAIL'
-        scanLog.finished_at = Date.now()
+        scanLog.finished_at = moment().unix()
 
         await scanLog.save()
       }

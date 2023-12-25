@@ -17,8 +17,7 @@ export const channelStaticMethods = {
 
     async findNotScannedFor(time: moment.Duration): Promise<ChannelInstance | undefined> {
         const params = new BindParam({
-            // TODO remove 1000
-            noScansFrom: moment().subtract(time).unix() * 1000,
+            noScansFrom: moment().subtract(time).unix(),
             limit: Integer.fromNumber(1)
         })
 
@@ -188,7 +187,7 @@ export const channelInstanceMethods = {
         const params = new BindParam({
             id: this.self().id,
             limit: Integer.fromNumber(limit),
-            startDate: Integer.fromNumber(daysAgo ? moment().subtract(daysAgo, 'days').toDate().getTime() / 1000 : -1)
+            startDate: Integer.fromNumber(daysAgo ? moment().subtract(daysAgo, 'days').unix() : -1)
         })
 
         const result = await new QueryBuilder(params)

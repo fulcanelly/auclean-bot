@@ -35,10 +35,10 @@ export namespace config {
       scan_retry: {
         enabled: true,
         run_at_start: true,
-        interval: 10000,
+        interval: duration(10, 'seconds'),
         name: 'scan retry',
         max_attempts: 10,
-        max_timout: 10000
+        max_timout: duration(5, 'seconds'),  
       },
       scan_recursivelly: {
         enabled: false,

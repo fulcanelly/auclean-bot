@@ -6,11 +6,12 @@ import { SessionInstance } from '@/models/session';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/utils/logger';
 import { config } from '@/config';
+import moment from 'moment';
 
 export async function initRecentScan(channelToScan: ChannelInstance, session: SessionInstance, amqpChannel: amqplib.Channel) {
   const log = await ChannelScanLog.createOne({
     uuid: uuidv4(),
-    enrolled_at: Date.now(),
+    enrolled_at: moment().unix(),
     started_at: 0,
     finished_at: 0,
     request: '',
