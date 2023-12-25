@@ -2,6 +2,7 @@
 import asyncio
 import datetime
 from threading import Thread
+import traceback
 
 from telethon import TelegramClient, events
 from util.session_store import get_session_store
@@ -88,6 +89,8 @@ class session_handler:
             try: self.job = await self.job.async_exec(self)
             except Exception as e:
                 print(e)
+                print(traceback.format_exc())
+
                 await self.restart()
 
 
