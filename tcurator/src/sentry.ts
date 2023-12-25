@@ -6,6 +6,7 @@ Sentry.init({
   environment: process.env.ENV,
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
   integrations: [
     new ProfilingIntegration(),
   ],
