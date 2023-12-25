@@ -7,7 +7,7 @@ from rmq.send.curator import curator_notifier_t
 from util.auto_ensure import EnsuredPikaChannel
 from tg.handler import session_handler, enrolled_job
 from tg.chanscan import scan_channel
-from tg.pyro_chansan import pyro_scan_channel
+from tg.pyro_chansan import pyro_scan_channel, recent_scan_channel
 from util.session_helpers import filename_from_session_name
 from util.session_store import get_session_store
 
@@ -28,7 +28,7 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
         with EnsuredPikaChannel() as ch:
             return curator_notifier_t(ch).request_sessions()
 
-    if identifier:
+    if request_type == 'full_scan':
         job = dispatch_scan_job(handler.client_type())
         handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
 
@@ -39,7 +39,10 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
     if request_type == 'test_load':
         handler.job = enrolled_job(test_load)
 
-        print("\n\n\n\n\n\n\n")
+    if request_type == 'recent_scan':
+        handler.job = enrolled_job(recent_scan_channel, identifier = identifier, log_id = log_id, days = data.get('days'))
+
+    print("\n\n\n\n\n\n\n")
 
 
 def dispatch_scan_job(name):

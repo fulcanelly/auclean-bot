@@ -9,6 +9,7 @@ import { logger } from "../utils/logger";
 import { config } from "@/config";
 import { defaultSetup } from ".";
 import { ChannelScanStatus } from "@/types/channel_scan_status";
+import { py_chanscan_request } from "@/types/py_chanscan_request";
 
 
 declare module '@/config' {
@@ -80,17 +81,23 @@ export namespace scan_retry {
       logger.info('checking is busy')
       const session = await log.getSession()
 
+      if (!session) {
+        logger.error('No session');
+        (log.status as ChannelScanStatus) = 'FAIL'
+        await log.save()
+        return
+      }
       if (await session.isBussy()) {
         logger.warn('session is bussy, will try later')
         return
       }
 
-      const request = {
+      const request: py_chanscan_request = {
         ...JSON.parse(log.request),
         log_id: log.uuid,
       }
 
-      logger.info('retrying', {
+      logger.verbose('retrying', {
         queue: 'py:chanscan',
         request
       })

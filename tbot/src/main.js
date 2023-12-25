@@ -309,6 +309,9 @@ async function main() {
                 })
             }
 
+            const isRegular = await sendSelect(user_id, 'Is regular ?', ['Yes', 'No'])
+
+
             await bot.sendMessage(user_id, 'Ok, now send tg channel link or username', {
                 reply_markup: {
                     remove_keyboard: true
@@ -319,7 +322,8 @@ async function main() {
             const result = await rpcViaSpyQueue({
                 requested_by_user_id: user_id,
                 session: selected,
-                identifier
+                identifier,
+                is_regular: isRegular === 'Yes'
             })
             await bot.sendMessage(msg.chat.id, JSON.stringify(result))
             /// curator:spy

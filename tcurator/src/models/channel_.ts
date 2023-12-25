@@ -13,7 +13,23 @@ import moment from 'moment';
 
 
 export const channelStaticMethods = {
-    ...baseStaticMethods
+    ...baseStaticMethods,
+
+    async findNotScannedFor(time: moment.Duration): Promise<ChannelInstance | undefined> {
+        const params = new BindParam({
+            // TODO remove 1000
+            noScansFrom: moment().subtract(time).unix() * 1000,
+            limit: Integer.fromNumber(1)
+        })
+
+        const result = await new QueryBuilder(params)
+            .raw(await queires.notScanedFor())
+            .run(neogma.queryRunner)
+
+        return result.records.map(recordToObject)
+            .map(it => it.c)
+            .map(Channel.buildFromRecord)[0]
+    }
 }
 
 export const channelInstanceMethods = {

@@ -10,6 +10,7 @@ import amqplib from 'amqplib';
 import { ChannelScanStatus } from "@/types/channel_scan_status";
 import { config } from "@/config";
 import { defaultSetup } from ".";
+import { py_chanscan_request } from "@/types/py_chanscan_request";
 
 declare module "../config" {
   namespace config {
@@ -61,20 +62,27 @@ export namespace scan_timout {
     }
 
     async function disable(scanLog: ChannelScanLogInstance) {
-      logger.info("Found ")
-      let session = await scanLog.getSession()
+      try {
+        logger.info("Found ")
+        let session = await scanLog.getSession()
 
-      const request = {
-        session: session.session_name,
-        type: 'remove_job'
+        if (!session) {
+          return void logger.error('no session related to log')
+        }
+        const request: py_chanscan_request = {
+          session: session.session_name,
+          type: 'remove_job'
+        }
+
+        logger.verbose("sending to py:chanscan", request)
+        channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)));
+      } finally {
+        (scanLog.status as ChannelScanStatus) = 'TIMEOUT_FAIL'
+        scanLog.finished_at = Date.now()
+
+        await scanLog.save()
       }
 
-      channel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(request)));
-
-      (scanLog.status as ChannelScanStatus) = 'TIMEOUT_FAIL'
-      scanLog.finished_at = Date.now()
-
-      await scanLog.save()
     }
 
     defaultSetup(getCurrenltRunningScans, myConfig, channel)

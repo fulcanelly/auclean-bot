@@ -3,3 +3,7 @@ venv
 *.egg-info
 *.session
 *.session-journal
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
