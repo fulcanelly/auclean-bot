@@ -15,6 +15,7 @@ function neogmaConfig() {
             url: process.env.NEO4J_HOST,
             username: process.env.NEO4J_USERNAME as string,
             password: process.env.NEO4J_PASSWORD as string,
+            database: process.env.NEO4J_DATABASE as string,
         }
         logger.verbose(conn)
         return conn
