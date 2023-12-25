@@ -1,10 +1,14 @@
 import { config } from '@/config';
 import * as Sentry from '@sentry/node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 
 Sentry.init({
   environment: process.env.ENV,
   dsn: process.env.SENTRY_DSN,
   tracesSampleRate: 1.0,
+  integrations: [
+    new ProfilingIntegration(),
+  ],
 })
 
 declare module "./config" {
