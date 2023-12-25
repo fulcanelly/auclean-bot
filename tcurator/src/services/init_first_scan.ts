@@ -4,13 +4,15 @@ import { ChannelScanLog, ChannelScanLogInstance } from '../models/channel_scan_l
 import { Session, SessionInstance } from '../models/session';
 import { ChannelScanStatus } from '../types/channel_scan_status';
 import { py_chanscan_request } from '../types/py_chanscan_request';
+import { logger } from '@/utils/logger';
 
 
-export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string): Promise<ChannelScanLogInstance> {
+export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string, is_regular?: boolean): Promise<ChannelScanLogInstance> {
 	const request: py_chanscan_request = {
 		session: session!.session_name,
 		identifier,
-		type: 'full_scan'
+		type: 'full_scan',
+		is_regular
 	};
 
 	const log = await ChannelScanLog.createOne({
@@ -36,7 +38,7 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 		log_id: log.uuid
 	};
 
-	console.log({
+	logger.verbose({
 		queueu: 'py:chanscan',
 		dataToSpy
 	})

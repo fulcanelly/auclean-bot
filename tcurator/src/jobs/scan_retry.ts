@@ -81,6 +81,12 @@ export namespace scan_retry {
       logger.info('checking is busy')
       const session = await log.getSession()
 
+      if (!session) {
+        logger.error('No session');
+        (log.status as ChannelScanStatus) = 'FAIL'
+        await log.save()
+        return
+      }
       if (await session.isBussy()) {
         logger.warn('session is bussy, will try later')
         return
@@ -91,7 +97,7 @@ export namespace scan_retry {
         log_id: log.uuid,
       }
 
-      logger.info('retrying', {
+      logger.verbose('retrying', {
         queue: 'py:chanscan',
         request
       })

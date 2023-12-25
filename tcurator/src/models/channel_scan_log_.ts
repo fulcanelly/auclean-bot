@@ -62,8 +62,12 @@ export const channelScanLogInstanceMethods = {
             .return('s')
             .run(neogma.queryRunner);
 
+        const entry = QueryRunner.getResultProperties<SessionProps>(queryResult, 's')[0]
+        if (!entry) {
+            return
+        }
         return Session.buildFromRecord({
-            properties: QueryRunner.getResultProperties<SessionProps>(queryResult, 's')[0],
+            properties: entry,
             labels: [
                 Session.getLabel()
             ],

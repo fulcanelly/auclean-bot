@@ -6,10 +6,10 @@ export type Type<T> = { type: T }
 
 
 export type job_requests
-	= Type<'full_scan'> & needs_target
+	= Type<'full_scan'> & needs_target & { is_regular?: boolean }
 	| Type<'remove_job'>
 	| Type<'test_load'>
-	| Type<'recent_scan'> & needs_target
+	| Type<'recent_scan'> & needs_target & { days: number }
 
 
 export type py_chanscan_request

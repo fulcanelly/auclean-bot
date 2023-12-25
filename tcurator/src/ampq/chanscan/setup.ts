@@ -46,6 +46,7 @@ type spy_request = {
 	identifier?: string,
 	test?: boolean
 	stop?: boolean
+	is_regular?: boolean
 }
 
 async function processSpyRequest(channel: amqplib.Channel, msg: any) {
@@ -89,7 +90,7 @@ async function processSpyRequest(channel: amqplib.Channel, msg: any) {
 			}
 		})
 
-		const log = await initFirstScan(channel, session!, data.identifier)
+		const log = await initFirstScan(channel, session!, data.identifier, data.is_regular)
 
 		replyBack({ log_id: log.uuid })
 	} else {

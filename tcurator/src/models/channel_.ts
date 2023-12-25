@@ -17,7 +17,8 @@ export const channelStaticMethods = {
 
     async findNotScannedFor(time: moment.Duration): Promise<ChannelInstance | undefined> {
         const params = new BindParam({
-            noScansFrom: moment().subtract(time).unix(),
+            // TODO remove 1000
+            noScansFrom: moment().subtract(time).unix() * 1000,
             limit: Integer.fromNumber(1)
         })
 

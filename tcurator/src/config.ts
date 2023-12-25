@@ -52,6 +52,13 @@ export namespace config {
         interval: duration(10, 'seconds'),
         max_timeout: duration(3, 'minutes'),
         name: 'find timout jobs',
+      },
+      regular_channel_scan: {
+        enabled: true,
+        run_at_start: true,
+        interval: duration(10, 'seconds'),
+        name: 'regular scan',
+        rescan_interval: duration(6, 'hours')
       }
     },
     modules: {

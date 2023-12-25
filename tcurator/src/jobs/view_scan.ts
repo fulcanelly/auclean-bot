@@ -1,10 +1,10 @@
 import amqplib from 'amqplib';
 import { config } from "@/config"
 import { defaultSetup } from '.';
-import { py_chanscan_request } from '@/types/py_chanscan_request';
 import { Channel } from '@/models/channel';
 import { logger } from '@/utils/logger';
 
+import { initRecentScan } from '../services/init_recent_scan';
 
 
 declare module '@/config' {
@@ -49,14 +49,7 @@ export namespace regular_scan {
 
 
       logger.info(`Sending scan request for channel ${channelToScan.username}.`);
-
-      const scanRequest: py_chanscan_request = {
-        type: 'recent_scan',
-        session: session.session_name!,
-        identifier: channelToScan.username!
-      };
-
-      amqpChannel.sendToQueue('py:chanscan', Buffer.from(JSON.stringify(scanRequest)));
+      initRecentScan(channelToScan, session, amqpChannel)
     }
 
 
@@ -64,3 +57,5 @@ export namespace regular_scan {
 
   }
 }
+
+
