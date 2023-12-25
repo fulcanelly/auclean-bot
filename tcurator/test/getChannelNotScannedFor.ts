@@ -39,7 +39,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
 
     it('should return the channel', async () => {
       const timeToCheck = moment.duration(1, 'days');
-      const result = await Channel.getChannelNotScannedFor(timeToCheck);
+      const result = await Channel.findNotScannedFor(timeToCheck);
       expect(result).toBeDefined();
       expect(result!.id).toEqual(channel.id);
     });
@@ -62,7 +62,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
     it('should not return the channel', async () => {
       const timeToCheck = moment.duration(1, 'days');
       moment().subtract(moment.duration(1, 'days')).unix()
-      const result = await Channel.getChannelNotScannedFor(timeToCheck);
+      const result = await Channel.findNotScannedFor(timeToCheck);
       expect(result).toBeUndefined();
     });
   });
@@ -92,7 +92,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
 
     it('should not return the channel', async () => {
       const timeToCheck = moment.duration(1, 'days');
-      const result = await Channel.getChannelNotScannedFor(timeToCheck);
+      const result = await Channel.findNotScannedFor(timeToCheck);
       expect(result).toBeUndefined();
     });
   });
