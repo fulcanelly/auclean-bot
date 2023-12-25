@@ -5,6 +5,7 @@ import { ChannelSubs } from '../../../models/channel_subs';
 import { v4 as uuidv4 } from 'uuid';
 import { ChannelScanLog } from '../../../models/channel_scan_log';
 import { neogma } from '../../../neo4j';
+import moment from 'moment';
 
 
 export async function handleChannelEntry(data: spy.Channel & spy.Packet, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
@@ -36,7 +37,7 @@ export async function addSubsCount(data: spy.Channel, addToCreated: (instance: N
 	const subs = addToCreated(
 		await ChannelSubs.createOne({
 			count: data.subs,
-			date: Date.now(),
+			date: moment().unix(),
 			uuid: uuidv4(),
 		}))
 

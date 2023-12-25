@@ -6,6 +6,7 @@ import { PostViews } from '../../../models/post_views';
 import { Channel } from '../../../models/channel';
 import { User } from '../../../models/user';
 import { spy } from '../../../types/spy_packet';
+import moment from 'moment';
 
 export async function createChannelPost(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
 	const chan = await Channel.findOne({
@@ -141,7 +142,7 @@ async function createViews(data: spy.Post, addToCreated: (instance: NeogmaInstan
 	const views = addToCreated(
 		await PostViews.createOne({
 			views: data.views,
-			date: Date.now(),
+			date: moment().unix(),
 			uuid: uuidv4(),
 		}))
 

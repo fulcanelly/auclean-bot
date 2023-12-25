@@ -5,6 +5,7 @@ import { Session, SessionInstance } from '../models/session';
 import { ChannelScanStatus } from '../types/channel_scan_status';
 import { py_chanscan_request } from '../types/py_chanscan_request';
 import { logger } from '@/utils/logger';
+import moment from 'moment';
 
 
 export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string, is_regular?: boolean): Promise<ChannelScanLogInstance> {
@@ -18,7 +19,7 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 	const log = await ChannelScanLog.createOne({
 		attempts: 0,
 		uuid: uuidv4(),
-		enrolled_at: Date.now(),
+		enrolled_at: moment().unix(),
 		status: 'INIT' as ChannelScanStatus,
 		request: JSON.stringify(request),
 		started_at: 0,
