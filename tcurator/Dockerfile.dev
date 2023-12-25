@@ -21,4 +21,4 @@ COPY --chown=node:node ./yarn.lock .
 
 USER root
 
-CMD yarn && yarn run nodemon ./src/main.ts
+CMD yarn && yarn dev
