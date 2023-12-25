@@ -44,7 +44,7 @@ services:
 
       - TG_API_ID
       - TG_API_HASH
-      
+
       - SENTRY_DSN=$PROCSPACK_SENTRY_DSN
 
       - ENV=$ENV
@@ -77,6 +77,7 @@ services:
       - NEO4J_HOST
       - NEO4J_USERNAME
       - NEO4J_PASSWORD
+      - NEO4J_DATABASE
 
       - SENTRY_DSN=$TCURATOR_SENTRY_DSN
 
