@@ -16,6 +16,7 @@ import { spy } from '../src/types/spy_packet'
 import { schanChanHandle } from '../src/ampq/chanscan/chan_handle';
 import { randUUID } from './randUUID';
 import { getMostViewedPostsTests } from './getMostViewedPosts';
+import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
 
 type AnyObj = Record<string, any>
 
@@ -762,6 +763,6 @@ describe('schanChanHandle', () => {
   })
 
   getMostViewedPostsTests()
-
+  getChannelNotScannedForTests()
 })
 

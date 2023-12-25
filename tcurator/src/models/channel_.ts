@@ -10,10 +10,32 @@ import { Date, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
 import { recordToObject } from "../utils/record_to_object";
 import moment from 'moment';
+import { logger } from "@/utils/logger";
+
+function f<T>() {
+
+}
 
 
 export const channelStaticMethods = {
-    ...baseStaticMethods
+    ...baseStaticMethods,
+
+    async getChannelNotScannedFor(time: moment.Duration): Promise<ChannelInstance | undefined> {
+        const params = new BindParam({
+            noScansFrom: moment().subtract(time).unix(),
+            limit: Integer.fromNumber(1)
+        })
+
+        const result = await new QueryBuilder(params)
+            .raw(await queires.notScanedFor())
+            .run(neogma.queryRunner)
+
+        // console.log(result.records)
+        // logger.error(result.records.map(recordToObject))
+        return result.records.map(recordToObject)
+            .map(it => it.c)
+            .map(Channel.buildFromRecord)[0]
+    }
 }
 
 export const channelInstanceMethods = {

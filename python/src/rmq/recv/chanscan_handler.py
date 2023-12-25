@@ -40,7 +40,6 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
         handler.job = enrolled_job(test_load)
 
     if request_type == 'recent_scan':
-        recent_scan_channel
         handler.job = enrolled_job(recent_scan_channel, identifier = identifier, log_id = log_id, days = data.get('days'))
 
     print("\n\n\n\n\n\n\n")
