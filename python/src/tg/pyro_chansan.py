@@ -9,7 +9,6 @@ from telethon.tl.types import Message
 from telethon.hints import Entity
 from telethon.functions import channels
 from pika.adapters.blocking_connection import BlockingChannel
-# from datetime import datetime as s
 import datetime
 from pyrogram import Client
 

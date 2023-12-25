@@ -23,8 +23,6 @@ async function main() {
         await setupScheduledJobs(rmq)
         logger.info('start jobs')
 
-        await setupNextJs()
-
     } catch (e) {
         logger.error(e)
         sentry.captureException(e)

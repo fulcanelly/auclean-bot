@@ -12,6 +12,7 @@ declare module '@/config' {
     interface JobConfigs {
       regular_channel_scan: DefaultModuleSettings & {
         rescan_interval: Interval
+        days_to_check: number
       }
     }
   }

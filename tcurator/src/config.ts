@@ -58,7 +58,8 @@ export namespace config {
         run_at_start: true,
         interval: duration(10, 'seconds'),
         name: 'regular scan',
-        rescan_interval: duration(6, 'hours')
+        rescan_interval: duration(6, 'hours'),
+        days_to_check: 30,
       }
     },
     modules: {

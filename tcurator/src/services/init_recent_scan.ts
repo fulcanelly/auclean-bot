@@ -5,6 +5,7 @@ import { ChannelScanLog } from '@/models/channel_scan_log';
 import { SessionInstance } from '@/models/session';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/utils/logger';
+import { config } from '@/config';
 
 export async function initRecentScan(channelToScan: ChannelInstance, session: SessionInstance, amqpChannel: amqplib.Channel) {
   const log = await ChannelScanLog.createOne({
@@ -22,17 +23,17 @@ export async function initRecentScan(channelToScan: ChannelInstance, session: Se
     session: session.session_name!,
     identifier: channelToScan.username!,
     log_id: log.uuid,
-    days: 30,
+    days: config.appConfig.jobs.regular_channel_scan.days_to_check
   };
 
   log.request = JSON.stringify(scanRequest);
 
   await session?.relateTo({
-		alias: 'scan_logs',
-		where: {
-			uuid: log.uuid
-		}
-	});
+    alias: 'scan_logs',
+    where: {
+      uuid: log.uuid
+    }
+  });
   await log.save()
 
   logger.verbose("sending to py:chanscan", scanRequest)
