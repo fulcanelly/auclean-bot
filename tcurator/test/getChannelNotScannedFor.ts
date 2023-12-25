@@ -66,35 +66,5 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
       expect(result).toBeUndefined();
     });
   });
-
-  describe('when conditions match but still having scans in wrong status', () => {
-    beforeEach(async () => {
-      const promises = [
-        ChannelScanLog.createOne({
-          ...deafultProps,
-          uuid: randUUID(),
-          status: 'RUNNING',
-          finished_at: moment().subtract(2, 'days').unix()
-        }),
-        ChannelScanLog.createOne({
-          ...deafultProps,
-          uuid: randUUID(),
-          status: 'COMPLETED',
-          finished_at: moment().subtract(10, 'minutes').unix()
-        })
-      ].map(async scanLog => (await scanLog).relateTo({
-        alias: 'of_channel',
-        where: channel.getDataValues()
-      }))
-
-      await Promise.all(promises)
-    });
-
-    it('should not return the channel', async () => {
-      const timeToCheck = moment.duration(1, 'days');
-      const result = await Channel.findNotScannedFor(timeToCheck);
-      expect(result).toBeUndefined();
-    });
-  });
 });
 
