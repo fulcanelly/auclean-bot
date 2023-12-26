@@ -20,13 +20,13 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20' # Specify the version of Node.js you want to use
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: '20' # Specify the version of Node.js you want to use
 
-      - name: Install dependencies
-        run: yarn
+      # - name: Install dependencies
+      #   run: yarn
 
       - name: Run ESLint
         uses: reviewdog/action-eslint@v1.21
@@ -34,4 +34,5 @@ jobs:
           eslint_flags: 'src' # Update with your file patterns
           reporter: github-pr-review
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_error: 'true'
           # Optionally, you can add eslint_version, eslint_config, or eslint_ignore
