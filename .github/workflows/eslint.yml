@@ -29,9 +29,9 @@ jobs:
         run: yarn
 
       - name: Run ESLint
-        uses: reviewdog/action-eslint@v1
+        uses: reviewdog/action-eslint@v1.21
         with:
           eslint_flags: 'src' # Update with your file patterns
           reporter: github-pr-review
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           # Optionally, you can add eslint_version, eslint_config, or eslint_ignore
