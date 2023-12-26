@@ -36,8 +36,9 @@ module.exports = {
     'rules': {
         'indent': [
             'error',
-            4
+            2
         ],
+        "no-multi-spaces": "error",
         '@typescript-eslint/no-floating-promises': ['error'],
         'linebreak-style': [
             'error',
