@@ -1,0 +1,37 @@
+name: ESLint
+
+on: [push]
+
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened]
+#     paths:
+#       - '**/*.js'
+#       - '**/*.jsx'
+#       - '**/*.ts'
+#       - '**/*.tsx'
+
+jobs:
+  eslint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20' # Specify the version of Node.js you want to use
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run ESLint
+        uses: reviewdog/action-eslint@v1
+        with:
+          eslint_flags: 'src' # Update with your file patterns
+          reporter: github-pr-review
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Optionally, you can add eslint_version, eslint_config, or eslint_ignore
