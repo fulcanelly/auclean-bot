@@ -2686,6 +2686,11 @@ escodegen@^2.1.0:
   optionalDependencies:
     source-map "~0.6.1"
 
+eslint-formatter-rdjson@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-rdjson/-/eslint-formatter-rdjson-1.0.6.tgz#c680387f0764b5a00e5f0e843923924340ec4074"
+  integrity sha512-RiBsXfe340Mof5pVkg7u0UXiLTm3cRhF9XYUf4hVHEzpIwk5jAIbkifugPpn51CeNxj00RkJU1MfJYoHbUwLFg==
+
 eslint-plugin-react@^7.33.2:
   version "7.33.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.33.2.tgz#69ee09443ffc583927eafe86ffebb470ee737608"
