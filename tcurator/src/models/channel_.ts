@@ -139,7 +139,6 @@ export const channelInstanceMethods = {
      *
      */
 
-
     async getPostsPerLastDays(days: number = 30) {
         const params = new BindParam({ days })
         const result = await new FixedQueryBuilder(params)
@@ -181,6 +180,73 @@ export const channelInstanceMethods = {
             date.toStandardDate().toLocaleDateString(),
             Integer.toNumber(count)
         ]) as [string, number][]
+    },
+
+    /**
+ *
+ *
+WITh 5 AS daysAgo
+WITH daysAgo, date() - duration({days: daysAgo}) AS targetDay
+MATCH (c:`Channel` { id: -1001003313758 })
+OPTIONAL MATCH (c)-[:POST_OF]->(p:`ChannelPost`)
+WHERE date(datetime({epochSeconds:toInteger(p.created_at) })) = targetDay
+RETURN date(targetDay) AS Day, count(p) AS PostCount
+
+
+WITH date() - duration({days: $dayAgo}) AS targetDay
+MATCH (c:`Channel` { id: $id })
+OPTIONAL MATCH (c)-[:POST_OF]->(p:`ChannelPost`)
+WHERE date(datetime({epochSeconds:toInteger(p.created_at) })) = targetDay
+RETURN date(targetDay) AS Day, count(p) AS PostCount
+ *  */
+
+    //     async getPostAtDayAgo(dayAgo) {
+    // //TODO, implement based on string above
+    //     },
+
+    async getPostAtDayAgo(dayAgo: number): Promise<[string, number]> {
+        const params = new BindParam({
+            dayAgo
+        });
+
+        const result = await new QueryBuilder(params)
+            .with('date() - duration({days: $dayAgo}) AS targetDay')
+            .match({
+                model: Channel,
+                where: {
+                    id: this.self().id,
+                },
+                identifier: 'c'
+            })
+            .match({
+                optional: true,
+                related: [
+                    { identifier: 'c' },
+                    Channel.getRelationshipByAlias('posts'),
+                    {
+                        model: ChannelPost,
+                        identifier: 'p'
+                    }
+                ]
+            })
+            .where('date(datetime({epochSeconds:toInteger(p.created_at) })) = targetDay')
+            .return(['date(targetDay) AS Day', 'count(p) AS PostCount'])
+            .orderBy({
+                direction: 'DESC',
+                identifier: 'Day'
+            })
+            .run(neogma.queryRunner);
+
+        // Convert the result to a friendly format
+        const list= result.records.map(record => {
+            const [day, postCount] = (record as any)._fields;
+            return [
+                day.toStandardDate().toLocaleDateString() as string, // Ensure this method exists or transform the date accordingly
+                Integer.toNumber(postCount) // Ensure this method exists or transform the number accordingly
+            ] as [string, number];
+
+        });
+        return list[0]
     },
 
     async getMostViewedPosts(limit: number = 10, daysAgo?: number | undefined): Promise<{ post_id: number, views: number }[]> {

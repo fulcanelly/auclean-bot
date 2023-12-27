@@ -24,6 +24,7 @@ const PostItem = ({ post_id, views, text, date, author, telegramLink }: ViewInfo
 );
 
 
+
 function makeLinkToPost(username, id) {
     return `https://t.me/${username}/${id}`
 }
@@ -36,13 +37,12 @@ type ViewInfo = {
     author?: string;
 };
 
-export default function TopPosts({ views, username }: { views: ViewInfo[] | null, username: string }) {
+export default function TopPosts({ views, username }: { views: ViewInfo[] | undefined, username: string }) {
     if (!views) {
-        return <div>No data available.</div>;
+        return
     }
 
     return (
-
         <div className="container mx-auto p-4">
             <h2 className="text-2xl font-bold mb-4">Top Posts</h2>
             <div className="border p-4 rounded-lg">
