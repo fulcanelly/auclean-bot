@@ -58,7 +58,7 @@ export async function setupIndexes() {
         'CREATE INDEX channel_id_index IF NOT EXISTS FOR (n:Channel) ON (n.id)',
         'CREATE INDEX channel_post_ids_index IF NOT EXISTS FOR (n:ChannelPost) ON (n.id, n.channel_id)',
         'CREATE INDEX post_views_uuid_index IF NOT EXISTS FOR (n:PostViews) ON (n.uuid)',
-
+        'CREATE RANGE INDEX post_views_date_index IF NOT EXISTS FOR (n:PostViews) ON (n.date)',
         'CREATE INDEX channel_post_uuid_index IF NOT EXISTS FOR (n:ChannelPost) ON (n.uuid)',
         'CREATE INDEX channel_scan_log_uuid_index IF NOT EXISTS FOR (n:ChannelScanLog) ON (n.uuid)',
 

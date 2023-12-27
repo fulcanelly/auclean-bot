@@ -1,7 +1,7 @@
-export function recordToObject(record: any): any {
+export function recordToObject<T>(record: any): T {
     let obj = {};
     record.keys.forEach((key, index) => {
         obj[key] = record._fields[index];
     });
-    return obj;
+    return obj as T;
 }

@@ -1,6 +1,5 @@
-'use client';
+// 'use client';
 
-import { server } from "typescript";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MicIcon from '@mui/icons-material/Mic';
 
@@ -36,6 +35,7 @@ type ViewInfo = {
     date?: string;
     author?: string;
 };
+
 
 export default function TopPosts({ views, username }: { views: ViewInfo[] | undefined, username: string }) {
     if (!views) {

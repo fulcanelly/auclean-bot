@@ -56,7 +56,7 @@ export namespace scan_timout {
         .return('c')
         .run(neogma.queryRunner)
 
-      const scanLogs = result.records.map(recordToObject).map(it => it.c).map(ChannelScanLog.buildFromRecord).map(disable)
+      const scanLogs = result.records.map(recordToObject<{c: any}>).map(it => it.c).map(ChannelScanLog.buildFromRecord).map(disable)
 
       logger.warn('found records count: ', { count: scanLogs.length })
     }

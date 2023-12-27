@@ -2,12 +2,15 @@
 import { Chart } from 'react-google-charts';
 import { optionsBase } from '@/components/optionsBase';
 
-export const AverageReachChart: React.FC = () => {
+
+type Reach = [string, number, number][]
+export const AverageReachChart = ({reach}: {reach?: Reach | undefined}) => {
   const data = [
-    ['Hours', 'Reach'],
-    ['12', 120],
-    ['24', 130],
-    ['48', 125],
+    ['Hours', 'Avg Reach', 'Mean Reacg'],
+    ...reach ?? []
+    // ['12', 120],
+    // ['24', 130],
+    // ['48', 125],
   ];
 
   const options = {
@@ -31,3 +34,5 @@ export const AverageReachChart: React.FC = () => {
     </div>
   );
 };
+
+

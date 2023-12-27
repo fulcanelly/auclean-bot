@@ -32,7 +32,8 @@ const fakeInfo: ui.ChannelInfo = {
   username: '@qweyres',
   country: 'Ukraine',
   ageDays: 2,
-  postsCount: 1
+  postsCount: 1,
+  id: null,
 }
 
 export default function Home() {
