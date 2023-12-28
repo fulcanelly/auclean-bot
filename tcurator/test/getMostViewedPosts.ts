@@ -3,6 +3,7 @@ import { ChannelPost } from "@/models/channel_post";
 import { PostViews } from "@/models/post_views";
 import moment from "moment";
 import { randUUID } from "./randUUID";
+import { relateTo } from "@/utils/patch";
 
 export const getMostViewedPostsTests = () =>
   describe('Channel Model - getMostViewedPosts method', () => {
@@ -32,10 +33,12 @@ export const getMostViewedPostsTests = () =>
           created_at: moment().subtract(31, 'days').unix()
         });
 
-        await channel.relateTo({
+        await relateTo({
+          from: channel,
           alias: 'posts',
           where: { id: oldPost.id },
-        });
+          merge: true,
+        })
 
         const view = await PostViews.createOne({
           views: 50,
@@ -43,13 +46,14 @@ export const getMostViewedPostsTests = () =>
           uuid: randUUID()
         });
 
-
-        await oldPost.relateTo({
+        await relateTo({
+          merge: true,
+          from: oldPost,
           alias: 'view_hisotry',
           where: {
             uuid: view.uuid
           }
-        });
+        })
       });
 
       it('should exclude old stats', async () => {
@@ -71,9 +75,11 @@ export const getMostViewedPostsTests = () =>
             created_at: today
           });
 
-          await channel.relateTo({
+          await relateTo({
+            merge: true,
+            from: channel,
             alias: 'posts',
-            where: { id: post.id },
+            target: post,
           });
 
           const view = await PostViews.createOne({
@@ -82,12 +88,12 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          await post.relateTo({
+          await relateTo({
+            merge: true,
+            from: post,
             alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+            target: view
+          })
         })
 
         await Promise.all(createPostsAndViews)
@@ -111,10 +117,12 @@ export const getMostViewedPostsTests = () =>
             created_at: postDate
           });
 
-          await channel.relateTo({
+          await relateTo({
+            merge: true,
+            from: channel,
             alias: 'posts',
-            where: { id: post.id },
-          });
+            target: post,
+          })
 
           const view = await PostViews.createOne({
             views: i * 100, // Increasing view count for each post
@@ -122,12 +130,12 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          await post.relateTo({
+          await relateTo({
+            from: post,
             alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+            merge: true,
+            target: view,
+          })
         })
         await Promise.all(createPostsAndViews)
       });
@@ -152,10 +160,12 @@ export const getMostViewedPostsTests = () =>
             created_at: today
           });
 
-          await channel.relateTo({
+          await relateTo({
+            from: channel,
             alias: 'posts',
-            where: { id: post.id },
-          });
+            target: post,
+            merge: true
+          })
 
           // Create multiple views for each post
           const viewsPromises = Array.from({ length: 3 }, async (__, j) =>
@@ -163,11 +173,11 @@ export const getMostViewedPostsTests = () =>
               views: (j + 1) * 100, // Different view counts
               date: today + j * 1000, // Incrementing the date to simulate different times
               uuid: randUUID()
-            }).then(view => post.relateTo({
+            }).then(view => relateTo({
+              from: post,
               alias: 'view_hisotry',
-              where: {
-                uuid: view.uuid
-              }
+              target: view,
+              merge: true
             }))
           );
 
@@ -200,10 +210,12 @@ export const getMostViewedPostsTests = () =>
             created_at: postDate
           });
 
-          await channel.relateTo({
+          await relateTo({
+            from: channel,
             alias: 'posts',
-            where: { id: post.id },
-          });
+            target: post,
+            merge: true
+          })
 
           const view = await PostViews.createOne({
             views: i * 100, // Increasing view count for each post
@@ -211,12 +223,12 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          return post.relateTo({
+          await relateTo({
+            merge: true,
+            from: post,
             alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+            target: view
+          })
         });
 
         await Promise.all(createMixedPosts);

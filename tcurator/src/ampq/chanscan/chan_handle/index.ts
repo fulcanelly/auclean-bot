@@ -7,6 +7,7 @@ import { createChannelPost } from './handle_post';
 import { handleFinish } from './handle_finish';
 import { handleChannelEntry } from './handle_channel';
 import { handleStart } from './handle_start';
+import { relateTo } from '@/utils/patch';
 
 
 const RETRY_ATTEMPTS = 2
@@ -40,18 +41,19 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 		}, RETRY_ATTEMPTS)
 
 	} finally {
-		const boundTo = {
-			alias: 'added_by_log',
-			where: {
-				uuid: data.log_id
-			}
-		}
 		await retry(async () => {
-			await Promise.all(createdByLog.map(model => model.relateTo(boundTo)))
-		}, RETRY_ATTEMPTS)
+			await Promise.all(createdByLog.map(model => relateTo({
+				merge: true,
+				from: model,
+				alias: 'added_by_log',
+				where: {
+					uuid: data.log_id
+				},
+			})))
+	}, RETRY_ATTEMPTS)
 
-		channel.ack(msg, false)
-	}
+	channel.ack(msg, false)
+}
 
 }
 

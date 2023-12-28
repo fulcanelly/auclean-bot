@@ -9,6 +9,7 @@ import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
 import { logger } from './utils/logger';
 import { config } from '@/config';
+import { relateTo } from './utils/patch';
 
 declare module "./config" {
     namespace config {
@@ -86,14 +87,18 @@ export async function setupRmq() {
                     uuid: uuidv4(),
                 })
 
-                await onlineLog.relateTo({
+                await relateTo({
+                    merge: true,
+                    from: onlineLog,
                     alias: 'belong_to',
                     where: {
                         user_id: subject_user_id
                     }
                 })
 
-                await onlineLog.relateTo({
+                await relateTo({
+                    merge: true,
+                    from: onlineLog,
                     alias: 'reported_by',
                     where: {
                         user_id: reporter_user_id

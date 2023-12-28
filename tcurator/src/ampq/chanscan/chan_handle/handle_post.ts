@@ -7,6 +7,7 @@ import { Channel } from '../../../models/channel';
 import { User } from '../../../models/user';
 import { spy } from '../../../types/spy_packet';
 import moment from 'moment';
+import { relateTo } from '@/utils/patch';
 
 export async function createChannelPost(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
 	const chan = await Channel.findOne({
@@ -59,17 +60,21 @@ export async function createChannelPost(data: spy.Post, addToCreated: (instance:
 				})
 			)
 
-		await user.relateTo({
+		await relateTo({
+			merge: true,
+			from: user,
 			alias: 'appears_in_posts',
 			where: {
 				id: data.id,
-				channel_id: data.channel_id
+				channl_id: data.channel_id
 			}
 		})
 
 	}
 
-	await chan.relateTo({
+	await relateTo({
+		merge: true,
+		from: chan,
 		alias: 'posts',
 		where: {
 			id: data.id,
@@ -117,7 +122,9 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 				})
 			)
 
-		await chan.relateTo({
+		await relateTo({
+			from: chan,
+			merge: true,
 			alias: 'posts',
 			where: {
 				id: fwd.channel_post_id,
@@ -125,7 +132,9 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 			}
 		})
 
-		await post.relateTo({
+		await relateTo({
+			from: post,
+			merge: true,
 			alias: 'forwarded_from',
 			where: {
 				id: fwd.channel_post_id,
@@ -147,7 +156,10 @@ async function createViews(data: spy.Post, addToCreated: (instance: NeogmaInstan
 		}))
 
 
-	await views.relateTo({
+	await
+	relateTo({
+		merge: true,
+		from: views,
 		alias: 'of_post',
 		where: {
 			id: data.id,

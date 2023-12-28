@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChannelScanLog } from '../../../models/channel_scan_log';
 import { neogma } from '../../../neo4j';
 import moment from 'moment';
+import { relateTo } from '@/utils/patch';
 
 
 export async function handleChannelEntry(data: spy.Channel & spy.Packet, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
@@ -42,10 +43,12 @@ export async function addSubsCount(data: spy.Channel, addToCreated: (instance: N
 		}))
 
 
-	await subs.relateTo({
+	await relateTo({
+		from: subs,
+		merge: true,
 		alias: 'of_channel',
 		where: {
-			id: data.id,
+			idk: data.id,
 		}
 	})
 }
@@ -81,7 +84,9 @@ async function relateToMainChannel(channel_id: number, log_id: string) {
 		}
 	})
 
-	await scan?.relateTo({
+	await relateTo({
+		merge: true,
+		from: scan!,
 		alias: 'of_channel',
 		where: {
 			id: channel_id

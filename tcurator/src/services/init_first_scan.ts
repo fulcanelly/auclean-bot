@@ -6,6 +6,7 @@ import { ChannelScanStatus } from '../types/channel_scan_status';
 import { py_chanscan_request } from '../types/py_chanscan_request';
 import { logger } from '@/utils/logger';
 import moment from 'moment';
+import { relateTo } from '@/utils/patch';
 
 
 export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string, is_regular?: boolean): Promise<ChannelScanLogInstance> {
@@ -27,7 +28,9 @@ export async function initFirstScan(channel: amqplib.Channel, session: SessionIn
 	});
 
 
-	await session?.relateTo({
+	await relateTo({
+		merge: true,
+		from: session,
 		alias: 'scan_logs',
 		where: {
 			uuid: log.uuid
