@@ -4,12 +4,13 @@ import { NeogmaInstance } from 'neogma';
 import { ChannelPost, ChannelPostInstance } from '../../../models/channel_post';
 import { PostViews } from '../../../models/post_views';
 import { Channel } from '../../../models/channel';
-import { User } from '../../../models/user';
+import { User, UserInstance } from '../../../models/user';
 import { spy } from '../../../types/spy_packet';
 import moment from 'moment';
 import { relateTo } from '@/utils/patch';
+import { TypeErrasedAdder } from '.';
 
-export async function createChannelPost(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+export async function createChannelPost(data: spy.Post, adder: TypeErrasedAdder) {
 	const chan = await Channel.findOne({
 		where: {
 			id: data.channel_id
@@ -28,10 +29,10 @@ export async function createChannelPost(data: spy.Post, addToCreated: (instance:
 			channel_id: data.channel_id
 		},
 	})) {
-		return void await createViews(data, addToCreated)
+		return void await createViews(data, adder)
 	}
 
-	const post = addToCreated(
+	const post: ChannelPostInstance = adder.addToCreated(
 		await ChannelPost.createOne({
 			uuid: uuidv4(),
 			id: data.id,
@@ -44,16 +45,16 @@ export async function createChannelPost(data: spy.Post, addToCreated: (instance:
 
 	// CONNECT TO SOURSE IF IT's FORWAREDED
 	if (data.fwd_from_channel) {
-		await handleForwardFromChannel(post, data, addToCreated)
+		await handleForwardFromChannel(post, data, adder)
 	}
 
 	//CREATE OF FIND USER AND MARK AS POST IS QUOTE
 	if (data.fwd_from_user) {
 		const user_id = String(data.fwd_from_user.user_id)
 
-		const user =
+		const user: UserInstance =
 			await User.findOne({ where: { user_id } }) ||
-			addToCreated(
+			adder.addToCreated(
 				await User.createOne({
 					uuid: uuidv4(),
 					user_id
@@ -66,7 +67,7 @@ export async function createChannelPost(data: spy.Post, addToCreated: (instance:
 			alias: 'appears_in_posts',
 			where: {
 				id: data.id,
-				channl_id: data.channel_id
+				channel_id: data.channel_id
 			}
 		})
 
@@ -82,12 +83,12 @@ export async function createChannelPost(data: spy.Post, addToCreated: (instance:
 		},
 	})
 
-	await createViews(data, addToCreated)
+	await createViews(data, adder)
 }
 
 
 
-async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Post, adder: TypeErrasedAdder) {
 
     const fwd = data.fwd_from_channel!
 
@@ -97,7 +98,7 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 					id: fwd.channel_id
 				}
 			}) ||
-			addToCreated(
+			adder.addToCreated(
 				await Channel.createOne({
 					id: fwd.channel_id,
 					title: fwd.title,
@@ -113,7 +114,7 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 				channel_id: fwd.channel_id
 			}
 		}) ||
-			addToCreated(
+		    adder.addToCreated(
 				await ChannelPost.createOne({
 					uuid: uuidv4(),
 					id: fwd.channel_post_id,
@@ -143,21 +144,19 @@ async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Pos
 		})
 }
 
-async function createViews(data: spy.Post, addToCreated: (instance: NeogmaInstance<any, any>) => any) {
+async function createViews(data: spy.Post, adder: TypeErrasedAdder) {
 	if (!data.views) {
 		return
 	}
 	// may be there is a need to restrict how often this need to be updated
-	const views = addToCreated(
+	const views = adder.addToCreated(
 		await PostViews.createOne({
 			views: data.views,
 			date: moment().unix(),
 			uuid: uuidv4(),
 		}))
 
-
-	await
-	relateTo({
+	await relateTo({
 		merge: true,
 		from: views,
 		alias: 'of_post',

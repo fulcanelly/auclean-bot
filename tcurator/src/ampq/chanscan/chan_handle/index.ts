@@ -12,11 +12,21 @@ import { relateTo } from '@/utils/patch';
 
 const RETRY_ATTEMPTS = 2
 
+
+export class TypeErrasedAdder {
+
+	constructor(readonly adder: (elm: any) => void) {}
+
+	addToCreated<T>(element: T): T {
+		this.adder(element)
+		return element
+	}
+}
+
 export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 	const data = JSON.parse(msg!.content.toString()) as spy.Packet
 	const createdByLog: NeogmaInstance<{}, { [k: string]: any }>[] = []
-	const addToCreated: (instance: NeogmaInstance<any, any>) => any = (instance: NeogmaInstance<any, any>) =>
-		R.tap((instance: NeogmaInstance<any, any>) => createdByLog.push(instance), instance)
+	const adder = new TypeErrasedAdder(it => createdByLog.push(it))
 
 	console.log(data)
 
@@ -27,11 +37,11 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 			}
 
 			if (data.type == 'channel') {
-				return await handleChannelEntry(data, addToCreated)
+				return await handleChannelEntry(data, adder)
 			}
 
 			if (data.type == 'post') {
-				return await createChannelPost(data, addToCreated)
+				return await createChannelPost(data, adder)
 			}
 
 			if (data.type == 'finish_event') {
