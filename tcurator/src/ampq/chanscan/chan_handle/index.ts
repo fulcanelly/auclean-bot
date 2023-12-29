@@ -34,33 +34,35 @@ export async function schanChanHandle(channel: amqplib.Channel, msg: any) {
 
 	try {
 		if (data.type == 'start_event') {
-			return await handleStart(data)
+			await handleStart(data)
 		}
 
 		if (data.type == 'channel') {
-			return await handleChannelEntry(data, adder)
+			await handleChannelEntry(data, adder)
 		}
 
 		if (data.type == 'post') {
-			return await createChannelPost(data, adder)
+			await createChannelPost(data, adder)
 		}
 
 		if (data.type == 'finish_event') {
-			return await handleFinish(channel, data)
+			await handleFinish(channel, data)
 		}
 
-		await Promise.all(createdByLog.map(model => relateTo({
+		const added = createdByLog.map(model => relateTo({
 			merge: true,
 			from: model,
 			alias: 'added_by_log',
 			where: {
-				uuid: (data as any).log_id
+				uuid: data.log_id
 			},
-		})))
+		}))
+		await Promise.all(added)
 	} catch (e) {
 		sentry.captureException(e)
 		logger.error(e)
 	}
+
 	channel.ack(msg, false)
 }
 
