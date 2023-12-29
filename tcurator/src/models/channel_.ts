@@ -64,13 +64,7 @@ export const channelInstanceMethods = {
             .run(neogma.queryRunner);
 
 
-        const channel = getQueryResult(queryResult, Channel, 'c')
-
-        if (!channel.length) {
-            return;
-        }
-
-        return channel[0]
+        return getQueryResult(queryResult, Channel, 'c')[0]
     },
 
 
