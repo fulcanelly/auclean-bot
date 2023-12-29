@@ -10,6 +10,7 @@ import { setupChanSpy } from './ampq/chanscan/setup';
 import { logger } from './utils/logger';
 import { config } from '@/config';
 import { relate, relateTo } from './utils/patch';
+import { getQueryResult } from './utils/getQueryResult';
 
 declare module "./config" {
     namespace config {
@@ -186,7 +187,8 @@ async function sendAllSessions(channel: amqplib.Channel) {
                 .limit(PAGE_SIZE)
                 .run(neogma.queryRunner)
 
-        const sessions = QueryRunner.getResultProperties<SessionProps>(sessionsResult, 's')
+
+        const sessions = getQueryResult(sessionsResult, Session, 's')
 
         console.log(sessions)
 

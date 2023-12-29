@@ -6,6 +6,7 @@ import amqplib from 'amqplib';
 import { logger } from "../utils/logger";
 import { config } from "../config";
 import { defaultSetup } from ".";
+import { getQueryResult } from "@/utils/getQueryResult";
 
 declare module "../config" {
     namespace config {
@@ -60,14 +61,5 @@ async function getPublicChannelNeverScanned(): Promise<ChannelInstance | undefin
         .limit(1)
         .run(neogma.queryRunner);
 
-    const channels = QueryRunner.getResultProperties<ChannelProps>(queryResult, 'a')
-
-    if (!channels.length) {
-        return
-    }
-
-    return Channel.buildFromRecord({
-        properties: channels[0],
-        labels: [Channel.getLabel()]
-    })
+    return getQueryResult(queryResult, Channel, 'a')[0]
 }

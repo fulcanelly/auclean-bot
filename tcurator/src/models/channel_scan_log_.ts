@@ -4,6 +4,7 @@ import { QueryBuilder, QueryRunner } from "neogma";
 import { Session, SessionProps } from "./session";
 import { neogma } from "../neo4j";
 import { Channel, ChannelProps } from "./channel";
+import { getQueryResult } from "@/utils/getQueryResult";
 
 export const channelScanLogStaticMethods = {
     ...baseStaticMethods
@@ -34,12 +35,7 @@ export const channelScanLogInstanceMethods = {
             .return('s')
             .run(neogma.queryRunner);
 
-        return Channel.buildFromRecord({
-            properties: QueryRunner.getResultProperties<ChannelProps>(queryResult, 's')[0],
-            labels: [
-                Channel.getLabel()
-            ],
-        });
+        return getQueryResult(queryResult, Channel, 's')[0]
     },
 
     async getSession() {
@@ -62,15 +58,6 @@ export const channelScanLogInstanceMethods = {
             .return('s')
             .run(neogma.queryRunner);
 
-        const entry = QueryRunner.getResultProperties<SessionProps>(queryResult, 's')[0]
-        if (!entry) {
-            return
-        }
-        return Session.buildFromRecord({
-            properties: entry,
-            labels: [
-                Session.getLabel()
-            ],
-        });
+        return getQueryResult(queryResult, Session, 's')[0]
     }
 };
