@@ -188,7 +188,7 @@ async function sendAllSessions(channel: amqplib.Channel) {
                 .run(neogma.queryRunner)
 
 
-        const sessions = getQueryResult(sessionsResult, Session, 's')
+        const sessions = getQueryResult(sessionsResult, Session, 's').map(it => it.dataValues)
 
         console.log(sessions)
 
