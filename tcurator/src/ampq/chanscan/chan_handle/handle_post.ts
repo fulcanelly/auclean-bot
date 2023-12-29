@@ -7,7 +7,7 @@ import { Channel } from '../../../models/channel';
 import { User, UserInstance } from '../../../models/user';
 import { spy } from '../../../types/spy_packet';
 import moment from 'moment';
-import { relateTo } from '@/utils/patch';
+import { relate, relateTo } from '@/utils/patch';
 import { TypeErrasedAdder } from '.';
 
 export async function createChannelPost(data: spy.Post, adder: TypeErrasedAdder) {
@@ -61,27 +61,21 @@ export async function createChannelPost(data: spy.Post, adder: TypeErrasedAdder)
 				})
 			)
 
-		await relateTo({
-			merge: true,
-			from: user,
-			alias: 'appears_in_posts',
-			where: {
+		await relate(user)
+			.appears_in_posts
+			.where({
 				id: data.id,
 				channel_id: data.channel_id
-			}
-		})
-
+			})
+			.save()
 	}
 
-	await relateTo({
-		merge: true,
-		from: chan,
-		alias: 'posts',
-		where: {
+	await relate(chan)
+		.posts.where({
 			id: data.id,
 			channel_id: data.channel_id
-		},
-	})
+		})
+		.save()
 
 	await createViews(data, adder)
 }
@@ -90,58 +84,54 @@ export async function createChannelPost(data: spy.Post, adder: TypeErrasedAdder)
 
 async function handleForwardFromChannel(post: ChannelPostInstance, data: spy.Post, adder: TypeErrasedAdder) {
 
-    const fwd = data.fwd_from_channel!
+	const fwd = data.fwd_from_channel!
 
-		const chan =
-			await Channel.findOne({
-				where: {
-					id: fwd.channel_id
-				}
-			}) ||
-			adder.addToCreated(
-				await Channel.createOne({
-					id: fwd.channel_id,
-					title: fwd.title,
-					username: fwd.username,
-					created_at: fwd.date,
-					need_to_scan: false,
-				})
-			)
-
-		await ChannelPost.findOne({
+	const chan =
+		await Channel.findOne({
 			where: {
-				id: fwd.channel_post_id,
-				channel_id: fwd.channel_id
+				id: fwd.channel_id
 			}
 		}) ||
-		    adder.addToCreated(
-				await ChannelPost.createOne({
-					uuid: uuidv4(),
-					id: fwd.channel_post_id,
-					channel_id: fwd.channel_id,
-					created_at: fwd.date
-				})
-			)
+		adder.addToCreated(
+			await Channel.createOne({
+				id: fwd.channel_id,
+				title: fwd.title,
+				username: fwd.username,
+				created_at: fwd.date,
+				need_to_scan: false,
+			})
+		)
 
-		await relateTo({
-			from: chan,
-			merge: true,
-			alias: 'posts',
-			where: {
+	await ChannelPost.findOne({
+		where: {
+			id: fwd.channel_post_id,
+			channel_id: fwd.channel_id
+		}
+	}) ||
+		adder.addToCreated(
+			await ChannelPost.createOne({
+				uuid: uuidv4(),
 				id: fwd.channel_post_id,
-				channel_id: fwd.channel_id
-			}
-		})
+				channel_id: fwd.channel_id,
+				created_at: fwd.date
+			})
+		)
 
-		await relateTo({
-			from: post,
-			merge: true,
-			alias: 'forwarded_from',
-			where: {
-				id: fwd.channel_post_id,
-				channel_id: fwd.channel_id
-			}
+	await relate(chan)
+		.posts
+		.where({
+			id: fwd.channel_post_id,
+			channel_id: fwd.channel_id
 		})
+		.save()
+
+	await relate(post)
+		.forwarded_from
+		.where({
+			id: fwd.channel_post_id,
+			channel_id: fwd.channel_id
+		})
+		.save()
 }
 
 async function createViews(data: spy.Post, adder: TypeErrasedAdder) {
@@ -156,13 +146,11 @@ async function createViews(data: spy.Post, adder: TypeErrasedAdder) {
 			uuid: uuidv4(),
 		}))
 
-	await relateTo({
-		merge: true,
-		from: views,
-		alias: 'of_post',
-		where: {
+	await relate(views)
+		.of_post
+		.where({
 			id: data.id,
 			channel_id: data.channel_id
-		}
-	})
+		})
+		.save()
 }

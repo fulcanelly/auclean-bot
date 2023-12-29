@@ -7,7 +7,7 @@ import { createChannelPost } from './handle_post';
 import { handleFinish } from './handle_finish';
 import { handleChannelEntry } from './handle_channel';
 import { handleStart } from './handle_start';
-import { relateTo } from '@/utils/patch';
+import { relate, relateTo } from '@/utils/patch';
 
 
 const RETRY_ATTEMPTS = 2

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChannelScanLog } from '../../../models/channel_scan_log';
 import { neogma } from '../../../neo4j';
 import moment from 'moment';
-import { relateTo } from '@/utils/patch';
+import { relate, relateTo } from '@/utils/patch';
 import { TypeErrasedAdder } from '.';
 
 
@@ -43,14 +43,10 @@ export async function addSubsCount(data: spy.Channel, adder: TypeErrasedAdder) {
 			uuid: uuidv4(),
 		}))
 
-		await relateTo({
-			from: subs,
-			merge: true,
-			alias: 'of_channel',
-			where: {
-				id: data.id,
-			}
-		})
+	await relate(subs)
+		.of_channel
+		.where({ id: data.id })
+		.save()
 }
 
 
@@ -84,12 +80,8 @@ async function relateToMainChannel(channel_id: number, log_id: string) {
 		}
 	})
 
-	await relateTo({
-		merge: true,
-		from: scan!,
-		alias: 'of_channel',
-		where: {
-			id: channel_id
-		}
-	})
+	await relate(scan!)
+		.of_channel
+		.where({ id: channel_id })
+		.save()
 }

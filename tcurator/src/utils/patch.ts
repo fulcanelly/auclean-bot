@@ -14,17 +14,17 @@ type TransactionConfig = Parameters<func>[2]
 type Result<T extends RecordShape> = ReturnType<typeof originalRun<T>>
 
 async function patchedRun<R extends RecordShape = RecordShape>(this, query: Query, parameters?: any, transactionConfig?: TransactionConfig): Promise<Result<R>> {
-    const startTime = Date.now()
-    const result = await originalRun.bind(this)(query, parameters, transactionConfig)
-    const executionTime = Date.now() - startTime; // Calculate elapsed time
+  const startTime = Date.now()
+  const result = await originalRun.bind(this)(query, parameters, transactionConfig)
+  const executionTime = Date.now() - startTime; // Calculate elapsed time
 
-    logger.debug('Query: ' + query, {
-        tookMs: executionTime,
-        parameters
-    })
+  logger.debug('Query: ' + query, {
+    tookMs: executionTime,
+    parameters
+  })
 
-    processTransaction(query, executionTime, parameters)
-    return result
+  processTransaction(query, executionTime, parameters)
+  return result
 }
 
 neo4j.Session.prototype.run = patchedRun as any
@@ -115,4 +115,46 @@ export async function relateTo<
       }
     ]
   }).run(neogma.queryRunner)
+}
+
+
+type WhereParamsOf<T> = Partial<OmitProps<OmitFunctions<NonFunctionProps<T>>, ServiceParams>>
+
+type SaverObject = { save: (args?: { merge?: boolean }) => Promise<void> }
+
+export function relate<
+  P extends Neo4jSupportedProperties,
+  R extends AnyObject,
+  M extends AnyObject,
+  I extends keyof R = keyof R,
+>(
+  from: NeogmaInstance<P, R, M>,
+): {
+    [K in I]: {
+      (args: R[K]['Instance']): SaverObject
+      where: (args: WhereParamsOf<R[K]['Instance']>) => SaverObject
+    }
+  } {
+  type Instance = R[I]['Instance']
+  type Where = WhereParamsOf<R[I]['Instance']>
+
+  const fromModel = neogma.modelsByName[from.labels[0]] as NeogmaModel<any, any>;
+  const keys = Object.keys(fromModel.relationships)
+
+  const regular = keys
+    .map(alias => {
+      const saveTarget = (target: Instance) => ({
+        save: ({ merge } = { merge: true}) => relateTo({ from, alias, target, merge })
+      })
+
+      const saveWhere = (where: Where) => ({
+        save: ({ merge } = { merge: true}) => relateTo({ from, alias, where, merge })
+      })
+
+      saveTarget.where = saveWhere
+
+      return [alias, saveTarget]
+    })
+
+  return Object.fromEntries(regular)
 }
