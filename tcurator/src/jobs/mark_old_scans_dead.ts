@@ -55,7 +55,7 @@ export namespace scan_timout {
             },
           }
         })
-        .where('$now - c.enrolled_at > $maxTimeout')
+        .raw('AND $now - c.enrolled_at > $maxTimeout')
         .return('c')
         .limit(1000)
         .run(neogma.queryRunner)
