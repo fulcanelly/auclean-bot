@@ -11,6 +11,7 @@ import { defaultSetup } from ".";
 import { ChannelScanStatus } from "@/types/channel_scan_status";
 import { py_chanscan_request } from "@/types/py_chanscan_request";
 import moment from "moment";
+import { getQueryResult } from "@/utils/getQueryResult";
 
 
 declare module '@/config' {
@@ -47,12 +48,7 @@ export namespace scan_retry {
 
 
         for await (let queryResult of iterateQueryBuilder(qb, 1)) {
-
-          const result = QueryRunner.getResultProperties<ChannelScanLogProps>(queryResult, 'c')
-            .map(it => ChannelScanLog.buildFromRecord({
-              properties: it,
-              labels: [ChannelScanLog.getLabel()]
-            }))
+          const result = getQueryResult(queryResult, ChannelScanLog, 'c')
             .map(queueIfSessionAvailable)
 
           await Promise.all(result)

@@ -30,19 +30,19 @@ async function patchedRun<R extends RecordShape = RecordShape>(this, query: Quer
 neo4j.Session.prototype.run = patchedRun as any
 
 
-type AnyObject = Record<string, any>
+export type AnyObject = Record<string, any>
 
-type OmitProps<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+export type OmitProps<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 
-type OmitFunctions<T> = {
+export type OmitFunctions<T> = {
   [P in keyof T as T[P] extends Function ? never : P]: T[P];
 }
 
-type NonFunctionProps<T> = {
+export type NonFunctionProps<T> = {
   [K in keyof T]: T[K] extends Function ? never : T[K];
 }
 
-type ServiceParams = '__existsInDatabase' | 'dataValues' | 'changed' | 'labels';
+export type ServiceParams = '__existsInDatabase' | 'dataValues' | 'changed' | 'labels';
 
 export async function relateTo<
   P extends Neo4jSupportedProperties,

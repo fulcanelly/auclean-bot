@@ -10,6 +10,7 @@ import { Date, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
 import { recordToObject } from "../utils/record_to_object";
 import moment from 'moment';
+import { getQueryResult } from "@/utils/getQueryResult";
 
 
 export const channelStaticMethods = {
@@ -63,16 +64,13 @@ export const channelInstanceMethods = {
             .run(neogma.queryRunner);
 
 
-        const channel = QueryRunner.getResultProperties<ChannelProps>(queryResult, 'c');
+        const channel = getQueryResult(queryResult, Channel, 'c')
 
         if (!channel.length) {
             return;
         }
 
-        return Channel.buildFromRecord({
-            properties: channel[0],
-            labels: [Session.getLabel()]
-        })
+        return channel[0]
     },
 
 
@@ -101,15 +99,10 @@ export const channelInstanceMethods = {
             .return('s')
             .run(neogma.queryRunner);
 
-        const session = QueryRunner.getResultProperties<SessionProps>(queryResult, 's');
+        return queryResult.records.map<{s: any}>(recordToObject)
+            .map(it => it.s)
+            .map(Session.buildFromRecord)[0]
 
-        if (!session.length) {
-            return;
-        }
-        return Session.buildFromRecord({
-            properties: session[0],
-            labels: [Session.getLabel()]
-        })
     },
 
 

@@ -4,9 +4,13 @@ import { sentry } from "./sentry";
 import "./models/__relations"
 import { setupRmq } from "./rmq";
 import { setupScheduledJobs } from "./jobs";
-import { setupNextJs } from "./next";
 import { logger } from "./utils/logger";
 
+
+//TODO
+
+//never use QueryRunner.getResultProperties<SessionProps>
+/// use =>.record.map(it=recordToObject(it.c))
 
 async function main() {
     try {

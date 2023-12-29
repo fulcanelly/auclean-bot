@@ -8,6 +8,7 @@ import { neogma } from '../../../neo4j';
 import moment from 'moment';
 import { relate, relateTo } from '@/utils/patch';
 import { TypeErrasedAdder } from '.';
+import { getQueryResult } from '@/utils/getQueryResult';
 
 
 export async function handleChannelEntry(data: spy.Channel & spy.Packet, adder: TypeErrasedAdder) {
@@ -70,7 +71,8 @@ async function relateToMainChannel(channel_id: number, log_id: string) {
 		.return('s')
 		.run(neogma.queryRunner);
 
-	if (QueryRunner.getResultProperties<ChannelProps>(queryResult, 's').length) {
+
+	if (getQueryResult(queryResult, Channel, 's').length) {
 		return
 	}
 
