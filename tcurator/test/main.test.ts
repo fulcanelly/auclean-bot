@@ -6,7 +6,7 @@ import { OnlineLog } from '../src/models/online_log'
 import { Neo4jSupportedProperties, NeogmaModel, QueryBuilder, QueryRunner } from "neogma";
 import { neogma } from "../src/neo4j";
 import { QueryResult, RecordShape } from "neo4j-driver";
-import { Channel, ChannelProps } from '../src/models/channel'
+import { Channel, ChannelInstance, ChannelProps } from '../src/models/channel'
 import { ChannelPost } from '../src/models/channel_post'
 import { ChannelSubs, ChannelSubsProps } from '../src/models/channel_subs'
 import { PostViews, PostViewsProps } from '../src/models/post_views'
@@ -19,22 +19,11 @@ import { getMostViewedPostsTests } from './getMostViewedPosts';
 import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
 import moment from 'moment';
 import { relate, relateTo } from '@/utils/patch';
+import { recordToObject } from '@/utils/record_to_object';
+import { getQueryResult } from '@/utils/getQueryResult';
 
-type AnyObj = Record<string, any>
 
-function obtainResult<T extends Neo4jSupportedProperties, D extends AnyObj, K extends AnyObj, J extends AnyObj>(
-  model: NeogmaModel<T, D, K, J>,
-  identifier: string,
-  data: QueryResult<RecordShape>
-) {
-  return QueryRunner.getResultProperties<T>(data, identifier)
-    .map(it => model.buildFromRecord({
-      properties: it,
-      labels: [
-        model.getLabel()
-      ]
-    }))
-}
+
 
 const now = () => moment().unix()
 
@@ -121,7 +110,8 @@ describe('models ::', () => {
         .run(neogma.queryRunner);
 
       // Verify that the OnlineLog entry is related to the User
-      expect(obtainResult(OnlineLog, 'reportedLogs', result).length).toEqual(1);
+
+      expect(getQueryResult(result, OnlineLog, 'reportedLogs').length).toEqual(1);
     });
     it('.reported :: User relates to OnlineLog', async () => {
       const user = await User.createOne({
@@ -161,7 +151,7 @@ describe('models ::', () => {
         .return('reportingUsers')
         .run(neogma.queryRunner);
 
-      expect(obtainResult(User, 'reportingUsers', result).length).toEqual(1);
+      expect(getQueryResult(result, User, 'reportingUsers').length).toEqual(1);
     });
 
   })
@@ -206,7 +196,7 @@ describe('models ::', () => {
         .return('users')
         .run(neogma.queryRunner);
 
-      expect(obtainResult(User, 'users', result).length).toEqual(1);
+      expect(getQueryResult(result, User, 'users').length).toEqual(1);
     });
 
     it('.belong_to', async () => {
@@ -246,7 +236,7 @@ describe('models ::', () => {
         .return('logs')
         .run(neogma.queryRunner)
 
-      expect(obtainResult(OnlineLog, 'logs', result).length).toEqual(1)
+      expect(getQueryResult(result, OnlineLog, 'logs').length).toEqual(1)
     })
   })
 
@@ -344,7 +334,10 @@ describe('schanChanHandle', () => {
         .return('log')
         .run(neogma.queryRunner);
 
-      const relatedLogs = QueryRunner.getResultProperties<ChannelScanLogProps>(result, 'log');
+      const relatedLogs = result.records.map<{ log: any }>(recordToObject)
+        .map(it => it.log)
+        .map(ChannelScanLog.buildFromRecord)
+
       expect(relatedLogs.length).toBe(1);
       expect(relatedLogs[0].uuid).toBe(log1.uuid); // Check if related to log1
       expect(relatedLogs[0].uuid).not.toBe(log2.uuid); // Check if not related to log2
@@ -392,7 +385,9 @@ describe('schanChanHandle', () => {
       .return('log')
       .run(neogma.queryRunner)
 
-    const log = QueryRunner.getResultProperties<ChannelScanLogProps>(result, 'log')
+    const log = result.records.map<{ log: any }>(recordToObject)
+      .map(it => it.log)
+      .map(ChannelScanLog.buildFromRecord)
 
     expect(log.length).toBe(1)
 
@@ -484,7 +479,10 @@ describe('schanChanHandle', () => {
         .return('views')
         .run(neogma.queryRunner)
 
-      const res = QueryRunner.getResultProperties<ChannelSubsProps>(result, 'views')
+      const res = result.records.map<{ views: any }>(recordToObject)
+        .map(it => it.views)
+        .map(ChannelSubs.buildFromRecord)
+
       expect(res.length).toBe(1)
       expect(res[0].count).toBe(packet.subs)
     })
@@ -575,7 +573,10 @@ describe('schanChanHandle', () => {
           .return('ch')
           .run(neogma.queryRunner)
 
-        const res = QueryRunner.getResultProperties<ChannelProps>(result, 'ch')
+
+        const res = result.records.map<{ ch: any }>(recordToObject)
+          .map(it => it.ch)
+          .map(Channel.buildFromRecord)
 
         expect(res.length).toBe(1)
         expect(res[0].id).toBe(packet.fwd_from_channel?.channel_id)
@@ -747,7 +748,10 @@ describe('schanChanHandle', () => {
         .return('views')
         .run(neogma.queryRunner)
 
-      const res = QueryRunner.getResultProperties<PostViewsProps>(result, 'views')
+      const res = result.records.map<{ views: any }>(recordToObject)
+        .map(it => it.views)
+        .map(PostViews.buildFromRecord)
+
       expect(res.length).toBe(1)
       expect(res[0].views).toBe(packet.views)
 
