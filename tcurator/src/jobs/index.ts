@@ -5,6 +5,7 @@ import { config } from '../config';
 import { logger } from '@/utils/logger';
 import { scan_timout } from './mark_old_scans_dead';
 import { regular_scan } from './view_scan';
+import { sentry } from '@/sentry';
 
 type JobType<T = any> = (_: amqplib.Channel) => Promise<T>
 
@@ -35,5 +36,13 @@ export async function defaultSetup(job: JobType, defaultConfig: config.DefaultMo
     const interval = config.extractDurationFromInterval(defaultConfig.interval)
 
     logger.silly('Setup interval', { name: defaultConfig.name, interval: interval.humanize() })
-    setInterval(job, interval.asMilliseconds(), channel)
+    setInterval((c) => {
+        try {
+            job(c)
+        } catch(e) {
+            sentry.captureException(e)
+            logger.error(e)
+            throw e
+        }
+    }, interval.asMilliseconds(), channel)
 }
