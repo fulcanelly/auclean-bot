@@ -9,6 +9,7 @@ import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
 import { logger } from './utils/logger';
 import { config } from '@/config';
+import { relate, relateTo } from './utils/patch';
 
 declare module "./config" {
     namespace config {
@@ -86,19 +87,19 @@ export async function setupRmq() {
                     uuid: uuidv4(),
                 })
 
-                await onlineLog.relateTo({
-                    alias: 'belong_to',
-                    where: {
+                await relate(onlineLog)
+                    .belong_to
+                    .where({
                         user_id: subject_user_id
-                    }
-                })
+                    })
+                    .save()
 
-                await onlineLog.relateTo({
-                    alias: 'reported_by',
-                    where: {
+                await relate(onlineLog)
+                    .reported_by
+                    .where({
                         user_id: reporter_user_id
-                    }
-                })
+                    })
+                    .save()
 
                 channel.ack(msg, false)
 

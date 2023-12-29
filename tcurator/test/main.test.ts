@@ -18,6 +18,7 @@ import { randUUID } from './randUUID';
 import { getMostViewedPostsTests } from './getMostViewedPosts';
 import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
 import moment from 'moment';
+import { relate, relateTo } from '@/utils/patch';
 
 type AnyObj = Record<string, any>
 
@@ -92,12 +93,9 @@ describe('models ::', () => {
       });
 
       // Relate the OnlineLog entry to the User
-      await log.relateTo({
-        alias: "reported_by",
-        where: {
-          uuid: user.uuid
-        }
-      });
+      await relate(log)
+        .reported_by(user)
+        .save()
 
       // Query to verify the relationship is created
       const result = await new QueryBuilder()
@@ -137,12 +135,9 @@ describe('models ::', () => {
         uuid: randUUID()
       });
 
-      await user.relateTo({
-        alias: 'reported',
-        where: {
-          uuid: log.uuid
-        }
-      });
+      await relate(user)
+        .reported(log)
+        .save()
 
       const result = await new QueryBuilder()
         .match({
@@ -185,12 +180,9 @@ describe('models ::', () => {
         uuid: randUUID()
       });
 
-      await user.relateTo({
-        alias: 'online_logs',
-        where: {
-          uuid: log.uuid
-        }
-      });
+      await relate(user)
+        .online_logs(log)
+        .save()
 
       const result = await new QueryBuilder()
         .match({
@@ -228,12 +220,9 @@ describe('models ::', () => {
         uuid: randUUID(),
       })
 
-      await log.relateTo({
-        alias: "belong_to",
-        where: {
-          uuid: user.uuid
-        }
-      })
+      await relate(log)
+        .belong_to(user)
+        .save()
 
       const result = await new QueryBuilder()
         .match({

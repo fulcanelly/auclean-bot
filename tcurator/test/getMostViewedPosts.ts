@@ -3,6 +3,7 @@ import { ChannelPost } from "@/models/channel_post";
 import { PostViews } from "@/models/post_views";
 import moment from "moment";
 import { randUUID } from "./randUUID";
+import { relate, relateTo } from "@/utils/patch";
 
 export const getMostViewedPostsTests = () =>
   describe('Channel Model - getMostViewedPosts method', () => {
@@ -32,10 +33,9 @@ export const getMostViewedPostsTests = () =>
           created_at: moment().subtract(31, 'days').unix()
         });
 
-        await channel.relateTo({
-          alias: 'posts',
-          where: { id: oldPost.id },
-        });
+        await relate(channel)
+          .posts(oldPost)
+          .save()
 
         const view = await PostViews.createOne({
           views: 50,
@@ -43,13 +43,10 @@ export const getMostViewedPostsTests = () =>
           uuid: randUUID()
         });
 
+        await relate(oldPost)
+          .view_hisotry(view)
+          .save()
 
-        await oldPost.relateTo({
-          alias: 'view_hisotry',
-          where: {
-            uuid: view.uuid
-          }
-        });
       });
 
       it('should exclude old stats', async () => {
@@ -71,10 +68,9 @@ export const getMostViewedPostsTests = () =>
             created_at: today
           });
 
-          await channel.relateTo({
-            alias: 'posts',
-            where: { id: post.id },
-          });
+          await relate(channel)
+            .posts(post)
+            .save()
 
           const view = await PostViews.createOne({
             views: i * 100, // Increasing view count for each post
@@ -82,12 +78,9 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          await post.relateTo({
-            alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+          await relate(post)
+            .view_hisotry(view)
+            .save()
         })
 
         await Promise.all(createPostsAndViews)
@@ -111,10 +104,9 @@ export const getMostViewedPostsTests = () =>
             created_at: postDate
           });
 
-          await channel.relateTo({
-            alias: 'posts',
-            where: { id: post.id },
-          });
+          await relate(channel)
+            .posts(post)
+            .save()
 
           const view = await PostViews.createOne({
             views: i * 100, // Increasing view count for each post
@@ -122,12 +114,9 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          await post.relateTo({
-            alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+          await relate(post)
+            .view_hisotry(view)
+            .save()
         })
         await Promise.all(createPostsAndViews)
       });
@@ -152,10 +141,10 @@ export const getMostViewedPostsTests = () =>
             created_at: today
           });
 
-          await channel.relateTo({
-            alias: 'posts',
-            where: { id: post.id },
-          });
+          await relate(channel)
+            .posts(post)
+            .save()
+
 
           // Create multiple views for each post
           const viewsPromises = Array.from({ length: 3 }, async (__, j) =>
@@ -163,12 +152,9 @@ export const getMostViewedPostsTests = () =>
               views: (j + 1) * 100, // Different view counts
               date: today + j * 1000, // Incrementing the date to simulate different times
               uuid: randUUID()
-            }).then(view => post.relateTo({
-              alias: 'view_hisotry',
-              where: {
-                uuid: view.uuid
-              }
-            }))
+            }).then(view => relate(post)
+              .view_hisotry(view)
+              .save())
           );
 
           return Promise.all(viewsPromises);
@@ -200,10 +186,9 @@ export const getMostViewedPostsTests = () =>
             created_at: postDate
           });
 
-          await channel.relateTo({
-            alias: 'posts',
-            where: { id: post.id },
-          });
+          await relate(channel)
+            .posts(post)
+            .save()
 
           const view = await PostViews.createOne({
             views: i * 100, // Increasing view count for each post
@@ -211,12 +196,9 @@ export const getMostViewedPostsTests = () =>
             uuid: randUUID()
           });
 
-          return post.relateTo({
-            alias: 'view_hisotry',
-            where: {
-              uuid: view.uuid
-            }
-          });
+          await relate(post)
+            .view_hisotry(view)
+            .save()
         });
 
         await Promise.all(createMixedPosts);
