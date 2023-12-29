@@ -32,9 +32,10 @@ def hanscan_handler(ch: BlockingChannel, method: DeliveryMode, properties: Basic
         job = dispatch_scan_job(handler.client_type())
         handler.job = enrolled_job(job, identifier = identifier, log_id = log_id)
 
-    if request_type == 'remove_job':
+    if request_type == 'remove_job' and handler.job:
         handler.job = None
         handler.kill()
+        handler.request_restart()
 
     if request_type == 'test_load':
         handler.job = enrolled_job(test_load)

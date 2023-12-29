@@ -60,17 +60,20 @@ class session_handler:
     def kill(self):
         self.stop_event.set()
 
+    def request_restart(self):
+        with self.ensured_channel as ch:
+            curator_notifier_t(ch).request_sessions()
+
     async def wait_for_stop_event(self):
         await self.stop_event.wait()
         await self.restart()
 
     async def restart(self):
-        self.job = None
         del get_session_store()[self.session_name]
+        self.request_restart()
+        self.job = None
         await self.stop()
         asyncio.get_event_loop().stop()
-        with self.ensured_channel as ch:
-            curator_notifier_t(ch).request_sessions()
 
     async def test(self):
         asyncio.get_event_loop().create_task(self.wait_for_stop_event())

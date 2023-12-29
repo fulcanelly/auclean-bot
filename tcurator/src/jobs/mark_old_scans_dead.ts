@@ -4,7 +4,7 @@ import { logger } from "@/utils/logger";
 import { ChannelScanLog, ChannelScanLogInstance } from "../models/channel_scan_log";
 import { Session } from "@/models/session";
 import moment, { duration } from "moment";
-import { BindParam, QueryBuilder } from "neogma";
+import { BindParam, Op, QueryBuilder } from "neogma";
 import { recordToObject } from "@/utils/record_to_object";
 import amqplib from 'amqplib';
 import { ChannelScanStatus } from "@/types/channel_scan_status";
@@ -31,7 +31,7 @@ export namespace scan_timout {
 
       const params = new BindParam({
         now: moment().unix(),
-        maxTimeout: config.extractDurationFromInterval(myConfig.max_timeout).asMilliseconds()
+        maxTimeout: config.extractDurationFromInterval(myConfig.max_timeout).asSeconds(),
       })
 
       const result = await new QueryBuilder(params)
@@ -45,15 +45,19 @@ export namespace scan_timout {
             {
               model: ChannelScanLog,
               identifier: 'c',
-              where: {
-                status: 'RUNNING'
-              }
             },
-
           ]
+        })
+        .where({
+          c: {
+            status: {
+              [Op.in]: ['RUNNING', 'INIT']
+            },
+          }
         })
         .where('$now - c.enrolled_at > $maxTimeout')
         .return('c')
+        .limit(1000)
         .run(neogma.queryRunner)
 
       const scanLogs = result.records.map(recordToObject).map(it => it.c).map(ChannelScanLog.buildFromRecord).map(disable)
