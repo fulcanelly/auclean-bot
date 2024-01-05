@@ -6,7 +6,7 @@ import { BindParam, QueryBuilder, QueryRunner } from "neogma";
 import { ChannelScanLog } from "../models/channel_scan_log";
 import { Session, SessionInstance, SessionProps } from "../models/session";
 import { ChannelPost } from "./channel_post";
-import { Date, Integer } from "neo4j-driver";
+import { Date, DateTime, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
 import { recordToObject } from "../utils/record_to_object";
 import moment from 'moment';
@@ -26,7 +26,7 @@ export const channelStaticMethods = {
             .raw(await queires.notScanedFor())
             .run(neogma.queryRunner)
 
-        return result.records.map(recordToObject)
+        return result.records.map(recordToObject<{ c: any }>)
             .map(it => it.c)
             .map(Channel.buildFromRecord)[0]
     }
@@ -66,8 +66,6 @@ export const channelInstanceMethods = {
 
         return getQueryResult(queryResult, Channel, 'c')[0]
     },
-
-
 
     async getSessionAddedBy(): Promise<SessionInstance | undefined> {
         const queryResult = await new QueryBuilder()
@@ -157,7 +155,7 @@ export const channelInstanceMethods = {
             .where('date(datetime({epochSeconds:toInteger(p.created_at) })) = targetDay')
             .return(['date(targetDay) AS Day', 'count(p) AS PostCount'])
             .orderBy({
-                direction: 'DESC',
+                direction: 'ASC',
                 identifier: 'Day'
             })
             .run(neogma.queryRunner)
@@ -181,7 +179,26 @@ export const channelInstanceMethods = {
             .raw(await queires.topPopularPosts())
             .run(neogma.queryRunner)
 
-        return result.records.map(recordToObject)
-    }
+        return result.records.map(recordToObject<{ post_id: number, views: number }>)
+    },
 
+    async getAvgCoverage(step: moment.Duration, daysAgo: moment.Duration, precisionLoss: number = 1) {
+        const items = daysAgo.asSeconds() / step.asSeconds()
+        const params = new BindParam({
+            id: this.self().id,
+            step: step.asSeconds(),
+            items,
+            precisionLoss
+        })
+        // console.log(params)
+
+        const result = await new QueryBuilder(params)
+            .raw(await queires.avgCoverage())
+            .run(neogma.queryRunner)
+
+
+            // console.log(result.records.map(recordToObject<{ date: DateTime, coverage: number, avg: number }>))
+        return result.records.map(recordToObject<{ date: DateTime, coverage: number, avg: number }>)
+            .map(({ date, coverage, avg }) => ({ date: date.toStandardDate(), coverage, avg }))
+    }
 }

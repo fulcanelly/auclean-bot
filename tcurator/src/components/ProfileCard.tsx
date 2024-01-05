@@ -7,6 +7,7 @@ export namespace ui {
     country: string
     ageDays: number
     postsCount: number
+    id: any
   }
 }
 
