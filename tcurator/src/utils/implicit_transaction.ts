@@ -9,9 +9,7 @@ export class TransactionManager {
 
   constructor() { }
 
-  startTransaction() {
-
-  }
+  startTransaction() { }
 
   getCurrentTransaction() {
     return asyncLocalStorage.getStore();
@@ -26,7 +24,7 @@ export class TransactionManager {
   }
 }
 
-export async function transactionWrapper(callback) {
+export async function transactionWrapper<T>(callback: () => Promise<T> | T) {
   const transactionManager = new TransactionManager();
 
   let currentTransaction = {
@@ -36,7 +34,7 @@ export async function transactionWrapper(callback) {
   await asyncLocalStorage.run(currentTransaction, async () => {
     try {
       transactionManager.startTransaction();
-      await callback();
+      return await callback();
       await transactionManager.commit();
     } catch (error) {
       await transactionManager.rollback();

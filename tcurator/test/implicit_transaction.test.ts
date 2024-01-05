@@ -22,14 +22,14 @@ describe('Transaction Manager', () => {
         transactionWrapper(() => {
           b = transactionManager.getCurrentTransaction();
         })
-
       ])
-      expect(a).not.toStrictEqual(b) //toStrictEqual({})
 
+      expect(a).not.toStrictEqual(b)
     })
 
     it('transactions from different transaction wrappers not same', async () => {
       let a, b
+
       await transactionWrapper(() => {
         a = transactionManager.getCurrentTransaction();
       })
@@ -38,7 +38,7 @@ describe('Transaction Manager', () => {
         b = transactionManager.getCurrentTransaction();
       })
 
-      expect(a).not.toStrictEqual(b) //toStrictEqual({})
+      expect(a).not.toStrictEqual(b)
     })
   })
 });
