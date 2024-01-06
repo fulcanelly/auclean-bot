@@ -6,7 +6,7 @@ import amqplib from 'amqplib';
 import { logger } from "../utils/logger";
 import { config } from "../config";
 import { defaultSetup } from ".";
-import { getQueryResult } from "@/utils/getQueryResult";
+import { getQueryResult } from "@/utils/neo4j/getQueryResult";
 
 declare module "../config" {
     namespace config {

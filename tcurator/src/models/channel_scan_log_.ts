@@ -4,7 +4,7 @@ import { QueryBuilder, QueryRunner } from "neogma";
 import { Session, SessionProps } from "./session";
 import { neogma } from "../neo4j";
 import { Channel, ChannelProps } from "./channel";
-import { getQueryResult } from "@/utils/getQueryResult";
+import { getQueryResult } from "@/utils/neo4j/getQueryResult";
 
 export const channelScanLogStaticMethods = {
     ...baseStaticMethods

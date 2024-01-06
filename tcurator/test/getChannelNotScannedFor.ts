@@ -2,7 +2,7 @@ import { Channel, ChannelInstance } from "@/models/channel";
 import { ChannelScanLog } from "@/models/channel_scan_log";
 import moment from "moment";
 import { randUUID } from "./randUUID";
-import { relateTo } from "@/utils/patch";
+import { relateTo } from '@/utils/neo4j/relateTo';
 
 
 export const getChannelNotScannedForTests = () => describe('Channel Model - getChannelNotScannedFor method', () => {
@@ -57,7 +57,7 @@ export const getChannelNotScannedForTests = () => describe('Channel Model - getC
         status: 'COMPLETED',
         finished_at: moment().subtract(10, 'minutes').unix(),
       });
-      
+
       await relateTo({
         merge: true,
         from: scanLog,

@@ -7,7 +7,8 @@ import { Channel } from '../../../models/channel';
 import { User, UserInstance } from '../../../models/user';
 import { spy } from '../../../types/spy_packet';
 import moment from 'moment';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 import { TypeErrasedAdder } from '.';
 
 export async function createChannelPost(data: spy.Post, adder: TypeErrasedAdder) {

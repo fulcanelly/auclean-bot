@@ -9,8 +9,9 @@ import { Session, SessionProps } from './models/session';
 import { setupChanSpy } from './ampq/chanscan/setup';
 import { logger } from './utils/logger';
 import { config } from '@/config';
-import { relate, relateTo } from './utils/patch';
-import { getQueryResult } from './utils/getQueryResult';
+import { relate } from './utils/neo4j/relate';
+import { relateTo } from './utils/neo4j/relateTo';
+import { getQueryResult } from './utils/neo4j/getQueryResult';
 
 declare module "./config" {
     namespace config {

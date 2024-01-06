@@ -7,7 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/utils/logger';
 import { config } from '@/config';
 import moment from 'moment';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 
 export async function initRecentScan(channelToScan: ChannelInstance, session: SessionInstance, amqpChannel: amqplib.Channel) {
   const log = await ChannelScanLog.createOne({
@@ -34,7 +35,7 @@ export async function initRecentScan(channelToScan: ChannelInstance, session: Se
     .scan_logs
     .where({ uuid: log.uuid })
     .save()
-  
+
   await log.save()
 
   logger.verbose("sending to py:chanscan", scanRequest)

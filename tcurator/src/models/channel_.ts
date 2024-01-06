@@ -1,6 +1,5 @@
 import { Channel, ChannelInstance, ChannelProps, ChannelRelatedNodesI } from "./channel"
 import { baseInstanceMethods, baseStaticMethods } from "./__base"
-import { FixedQueryBuilder } from "../utils/fixed_query_builder";
 import { neogma } from "../neo4j";
 import { BindParam, QueryBuilder, QueryRunner } from "neogma";
 import { ChannelScanLog } from "../models/channel_scan_log";
@@ -8,9 +7,9 @@ import { Session, SessionInstance, SessionProps } from "../models/session";
 import { ChannelPost } from "./channel_post";
 import { Date, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
-import { recordToObject } from "../utils/record_to_object";
+import { recordToObject } from "../utils/neo4j/record_to_object";
 import moment from 'moment';
-import { getQueryResult } from "@/utils/getQueryResult";
+import { getQueryResult } from "@/utils/neo4j/getQueryResult";
 
 
 export const channelStaticMethods = {
@@ -129,7 +128,7 @@ export const channelInstanceMethods = {
 
     async getPostsPerLastDays(days: number = 30) {
         const params = new BindParam({ days })
-        const result = await new FixedQueryBuilder(params)
+        const result = await new QueryBuilder(params)
             .with(`range(0, $days) AS daysAgoList`)
             .unwind({
                 value: 'daysAgoList',
