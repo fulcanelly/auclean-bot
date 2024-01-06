@@ -40,5 +40,18 @@ describe('Transaction Manager', () => {
 
       expect(a).not.toStrictEqual(b)
     })
+
+    it('nested transactions not the same', async () => {
+      let a, b
+
+      await transactionWrapper(async () => {
+        a = transactionManager.getCurrentTransaction();
+        await transactionWrapper(() => {
+          b = transactionManager.getCurrentTransaction();
+        })
+      })
+
+      expect(a).not.toStrictEqual(b)
+    })
   })
 });
