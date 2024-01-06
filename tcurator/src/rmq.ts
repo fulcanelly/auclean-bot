@@ -11,7 +11,7 @@ import { logger } from './utils/logger';
 import { config } from '@/config';
 import { relate } from './utils/neo4j/relate';
 import { relateTo } from './utils/neo4j/relateTo';
-import { getQueryResult } from './utils/getQueryResult';
+import { getQueryResult } from './utils/neo4j/getQueryResult';
 
 declare module "./config" {
     namespace config {

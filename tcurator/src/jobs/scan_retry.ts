@@ -1,5 +1,5 @@
 
-import { iterateQueryBuilder } from "../utils/iterate"
+import { iterateQueryBuilder } from "../utils/neo4j/iterate"
 import amqplib from 'amqplib';
 import * as R from 'ramda'
 import { BindParam, QueryBuilder, QueryRunner } from 'neogma';
@@ -11,7 +11,7 @@ import { defaultSetup } from ".";
 import { ChannelScanStatus } from "@/types/channel_scan_status";
 import { py_chanscan_request } from "@/types/py_chanscan_request";
 import moment from "moment";
-import { getQueryResult } from "@/utils/getQueryResult";
+import { getQueryResult } from "@/utils/neo4j/getQueryResult";
 
 
 declare module '@/config' {

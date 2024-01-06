@@ -8,9 +8,9 @@ import { Session, SessionInstance, SessionProps } from "../models/session";
 import { ChannelPost } from "./channel_post";
 import { Date, Integer } from "neo4j-driver";
 import { queires } from "../queries/all";
-import { recordToObject } from "../utils/record_to_object";
+import { recordToObject } from "../utils/neo4j/record_to_object";
 import moment from 'moment';
-import { getQueryResult } from "@/utils/getQueryResult";
+import { getQueryResult } from "@/utils/neo4j/getQueryResult";
 
 
 export const channelStaticMethods = {

@@ -1,5 +1,5 @@
 import neo4j, { RecordShape } from 'neo4j-driver';
-import { logger } from './logger';
+import { logger } from '../logger';
 import { processTransaction } from '@/sentry';
 
 
@@ -14,7 +14,7 @@ type Result<T extends RecordShape> = ReturnType<typeof originalRun<T>>
 async function patchedRun<R extends RecordShape = RecordShape>(this, query: Query, parameters?: any, transactionConfig?: TransactionConfig): Promise<Result<R>> {
   const startTime = Date.now()
   const result = await originalRun.bind(this)(query, parameters, transactionConfig)
-  const executionTime = Date.now() - startTime; // Calculate elapsed time
+  const executionTime = Date.now() - startTime;
 
   logger.debug('Query: ' + query, {
     tookMs: executionTime,

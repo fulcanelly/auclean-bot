@@ -5,7 +5,7 @@ import { ChannelScanLog, ChannelScanLogInstance } from "../models/channel_scan_l
 import { Session } from "@/models/session";
 import moment, { duration } from "moment";
 import { BindParam, Op, QueryBuilder } from "neogma";
-import { recordToObject } from "@/utils/record_to_object";
+import { recordToObject } from "@/utils/neo4j/record_to_object";
 import amqplib from 'amqplib';
 import { ChannelScanStatus } from "@/types/channel_scan_status";
 import { config } from "@/config";

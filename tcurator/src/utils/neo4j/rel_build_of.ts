@@ -93,9 +93,7 @@ export function rel_build_of<
       build: R.always(currentPath)
     });
 
-    for (const alias in model.relationships) {
-      const rel = model.relationships[alias] as any;
-
+    const defineRelationshipGetter = ({ rel, alias }) =>
       Object.defineProperty(res, alias, {
         get: () => buildRels(rel.model,
           currentPath.concat({
@@ -105,7 +103,10 @@ export function rel_build_of<
         enumerable: true,
         configurable: true
       })
-    }
+
+    Object.keys(model.relationships)
+      .map(alias => ({ alias, rel: model.relationships[alias]! }))
+      .forEach(defineRelationshipGetter)
 
     return res as any as RecursiveRelsOf<any>;
   };
