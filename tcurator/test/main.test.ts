@@ -20,8 +20,8 @@ import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
 import moment from 'moment';
 import { relate } from '@/utils/neo4j/relate';
 import { relateTo } from '@/utils/neo4j/relateTo';
-import { recordToObject } from '@/utils/record_to_object';
-import { getQueryResult } from '@/utils/getQueryResult';
+import { recordToObject } from '@/utils/neo4j/record_to_object';
+import { getQueryResult } from '@/utils/neo4j/getQueryResult';
 
 
 
