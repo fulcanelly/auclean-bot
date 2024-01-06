@@ -4,7 +4,7 @@ import * as R from 'ramda'
 
 import { neogma } from "@/neo4j";
 import { Neo4jSupportedProperties, NeogmaInstance, NeogmaModel } from "neogma";
-import { AnyObject } from './types';
+import { AnyObject, WhereParamsOf } from './types';
 
 
 type ExtractTypesOfInstance<T> = T extends NeogmaInstance<infer P, infer R, infer M> ? [P, R, M] : never;
@@ -30,6 +30,13 @@ type RecursiveRelsOf<R extends AnyObject> = {
     RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]>[C]
   } & {
     build: BuildType,
+
+    where: (args: WhereParamsOf<ExtractTypesOfInstance<InstanceType>[0]>)
+      => RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]> & { build: BuildType },
+
+    exact: (instance: ExtractTypesOfInstance<InstanceType>[0])
+      => RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]> & { build: BuildType },
+
     (args?: {
       nodeIdentifier?: string,
       relIdentifier?: string
@@ -91,7 +98,9 @@ export function rel_build_of<
     };
 
     Object.assign(res, {
-      build: R.always(currentPath)
+      build: R.always(currentPath),
+      where: null,
+      exact: null,
     });
 
     const defineRelationshipGetter = ({ rel, alias }) =>
