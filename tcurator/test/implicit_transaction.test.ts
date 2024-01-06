@@ -1,4 +1,4 @@
-import { transactionManager, transactionWrapper } from "@/utils/implicit_transaction";
+import { transactionManager, transactionWrapper } from "@/utils/neo4j/implicit_transaction";
 
 describe('Transaction Manager', () => {
   describe('transaction provisoning', () => {
