@@ -58,9 +58,10 @@ export function rel_build_of<
   P extends Neo4jSupportedProperties,
   R extends AnyObject,
   M extends AnyObject
->({ fromI, fromM }: {
+>({ fromI, fromM, identifier }: {
   fromI?: NeogmaInstance<P, R, M> | undefined,
   fromM?: NeogmaModel<P, R, M> | undefined,
+  identifier?: string,
 }): RecursiveRelsOf<R> {
   const startModel = getModelFrom({ fromI, fromM }) as NeogmaModel<P, R, M>
 
@@ -111,6 +112,6 @@ export function rel_build_of<
     return res as any as RecursiveRelsOf<any>;
   };
 
-  return buildRels(startModel as any);
+  return buildRels(startModel as any, [], identifier);
 }
 
