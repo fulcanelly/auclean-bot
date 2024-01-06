@@ -1,5 +1,6 @@
 import { Channel } from "@/models/channel";
 import { rel_build_of } from "@/utils/neo4j/rel_build_of";
+import { QueryBuilder } from "neogma";
 
 describe('rel_build_of function', () => {
   it('builds relationships from an instance', async () => {
@@ -86,4 +87,5 @@ describe('rel_build_of function', () => {
       rel_build_of({});
     }).toThrow('Either fromI or fromM must be provided');
   });
+
 });

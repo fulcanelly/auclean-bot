@@ -18,7 +18,8 @@ import { randUUID } from './randUUID';
 import { getMostViewedPostsTests } from './getMostViewedPosts';
 import { getChannelNotScannedForTests } from './getChannelNotScannedFor';
 import moment from 'moment';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 import { recordToObject } from '@/utils/record_to_object';
 import { getQueryResult } from '@/utils/getQueryResult';
 

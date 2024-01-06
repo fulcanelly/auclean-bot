@@ -6,7 +6,8 @@ import { ChannelScanStatus } from '../types/channel_scan_status';
 import { py_chanscan_request } from '../types/py_chanscan_request';
 import { logger } from '@/utils/logger';
 import moment from 'moment';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 
 
 export async function initFirstScan(channel: amqplib.Channel, session: SessionInstance, identifier: string, is_regular?: boolean): Promise<ChannelScanLogInstance> {

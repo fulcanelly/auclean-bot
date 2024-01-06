@@ -3,7 +3,8 @@ import { ChannelPost } from "@/models/channel_post";
 import { PostViews } from "@/models/post_views";
 import moment from "moment";
 import { randUUID } from "./randUUID";
-import { relate, relateTo } from "@/utils/patch";
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 
 export const getMostViewedPostsTests = () =>
   describe('Channel Model - getMostViewedPosts method', () => {

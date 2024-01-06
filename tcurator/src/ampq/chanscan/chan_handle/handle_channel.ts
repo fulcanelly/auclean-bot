@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChannelScanLog } from '../../../models/channel_scan_log';
 import { neogma } from '../../../neo4j';
 import moment from 'moment';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 import { TypeErrasedAdder } from '.';
 import { getQueryResult } from '@/utils/getQueryResult';
 

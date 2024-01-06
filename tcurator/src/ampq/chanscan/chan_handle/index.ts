@@ -7,7 +7,8 @@ import { createChannelPost } from './handle_post';
 import { handleFinish } from './handle_finish';
 import { handleChannelEntry } from './handle_channel';
 import { handleStart } from './handle_start';
-import { relate, relateTo } from '@/utils/patch';
+import { relate } from '@/utils/neo4j/relate';
+import { relateTo } from '@/utils/neo4j/relateTo';
 import { sentry } from '@/sentry';
 import { logger } from '@/utils/logger';
 

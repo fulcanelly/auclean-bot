@@ -1,7 +1,7 @@
 import { Neo4jSupportedProperties, NeogmaModel } from "neogma";
 import { QueryResult } from "neo4j-driver";
 import { recordToObject } from '@/utils/record_to_object';
-import { AnyObject } from "./patch";
+import { AnyObject } from './neo4j/types';
 
 
 export function getQueryResult<
