@@ -1,5 +1,7 @@
 
 import { AsyncLocalStorage } from 'async_hooks';
+import { QueryBuilder } from 'neogma';
+import { logger } from '../logger';
 const asyncLocalStorage = new AsyncLocalStorage();
 
 let counter = 1
@@ -47,3 +49,14 @@ export async function transactionWrapper<T>(callback: () => Promise<T> | T) {
 export const transactionManager = new TransactionManager()
 
 
+const origianlQueryyBuilderRun = QueryBuilder.prototype.run
+
+QueryBuilder.prototype.run = function(this, a, b) {
+  // TODO add asyncLocalStorage
+  // asyncLocalStorage.enterWith
+  // asyncLocalStorage.exit()
+  const sessiong = asyncLocalStorage.getStore() ?? b
+
+  logger.silly({ b })
+  return origianlQueryyBuilderRun.bind(this)(a, b)
+}
