@@ -1,6 +1,7 @@
 import { Channel } from "@/models/channel";
 import { rel_build_of } from "@/utils/neo4j/rel_build_of";
 import { QueryBuilder } from "neogma";
+import { Add, IsNegative, IsOdd, Multiply, Pow } from "ts-arithmetic";
 
 describe('rel_build_of function', () => {
   it('builds relationships from an instance', async () => {
@@ -88,4 +89,26 @@ describe('rel_build_of function', () => {
     }).toThrow('Either fromI or fromM must be provided');
   });
 
+
 });
+
+type x = Multiply<Pow<2, 34>,2>
+
+type FunctionThatTakesOnlyOddNumbers<T extends number> =
+   IsOdd<T> extends 1 ?
+   (num: T) => void : never
+
+function test<T extends number>() {
+  return ((a: T) => {
+
+  }) as FunctionThatTakesOnlyOddNumbers<T>
+}
+
+function add<A extends number, B extends number>(t: A, b: B): Add<A, B> {
+
+  test<3>()(3)
+
+  add(1, 4)
+
+  throw ''
+}

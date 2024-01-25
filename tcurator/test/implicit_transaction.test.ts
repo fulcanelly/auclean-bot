@@ -1,4 +1,6 @@
 import { transactionManager, transactionWrapper } from "@/utils/neo4j/implicit_transaction";
+import { ValueOf } from "next/dist/shared/lib/constants";
+import { Add, Subtract, Multiply, Divide, Pow, Compare, Mod } from 'ts-arithmetic'
 
 describe('Transaction Manager', () => {
   describe('transaction provisoning', () => {
@@ -55,3 +57,53 @@ describe('Transaction Manager', () => {
     })
   })
 });
+
+type MeterString = `${number} m`;
+
+function loh(it: MeterString) {
+
+}
+function add(a: number): Add<typeof a, 1> {
+  throw ''
+}
+
+function ok<T extends string>(...a: T[]): typeof a {
+  throw ''
+}
+
+
+class StringBuilder<C = {}> {
+  add<T extends string>(c: T): StringBuilder<C | T> {
+    throw ''
+  }
+
+  build(): { identifier: C }[] {
+    throw ''
+  }
+}
+
+function test() {
+
+  const shit = new StringBuilder()
+    .add('sdfsd')
+    .add('fsdfsd')
+    .add('kmkmkm')
+    .add('sdfsd sdkfm skmkdsf')
+    .add('sdfksd smdkfmskdm msdfmk')
+    .build()
+
+  for (let x of shit) {
+    if (x.identifier == '') {
+
+    }
+  }
+
+  ok(' ', 'b', 'kkmk')
+
+
+  loh('10 m')
+
+  const c = add(1 as const)
+}
+
+
