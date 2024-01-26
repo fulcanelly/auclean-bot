@@ -38,12 +38,13 @@ export namespace config {
         interval: duration(10, 'seconds'),
         name: 'scan retry',
         max_attempts: 10,
-        max_timout: duration(5, 'seconds'),  
+        max_timout: duration(5, 'seconds'),
       },
       scan_recursivelly: {
-        enabled: false,
-        run_at_start: false,
-        interval: duration(1, 'minute'),
+        strategy: 'least_referenced',
+        enabled: true,
+        run_at_start: true,
+        interval: duration(1, 'seconds'),
         name: 'recursive chan scan'
       },
       scan_timout_job: {
@@ -59,7 +60,7 @@ export namespace config {
         interval: duration(10, 'seconds'),
         name: 'regular scan',
         rescan_interval: duration(6, 'hours'),
-        days_to_check: 30,
+        days_to_check: 5,
       }
     },
     modules: {
