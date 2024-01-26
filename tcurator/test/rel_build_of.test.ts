@@ -64,7 +64,7 @@ describe('rel_build_of function', () => {
 
   it('builds relationships from a model with identifiers', async () => {
     const expectedOutputFromModel = [
-      { label: 'Channel' },
+      { label: 'Channel', identifier: 'x' },
       { direction: 'out', name: 'BELONGS_TO_LOG', identifier: 'a' },
       { label: 'ChannelScanLog', identifier: 'b' },
       { direction: 'out', name: 'HANDLED_BY' },
@@ -73,7 +73,7 @@ describe('rel_build_of function', () => {
       { label: 'ChannelScanLog', identifier: 'd' }
     ];
 
-    const resultFromModel = rel_build_of({ fromM: Channel })
+    const resultFromModel = rel_build_of({ fromM: Channel, identifier: 'x' })
       .added_by_log({ relIdentifier: 'a', nodeIdentifier: 'b' })
       .handled_by
       .scan_logs({ relIdentifier: 'c', nodeIdentifier: 'd' })

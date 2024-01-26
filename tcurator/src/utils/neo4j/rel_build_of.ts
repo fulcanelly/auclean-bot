@@ -4,7 +4,7 @@ import * as R from 'ramda'
 
 import { neogma } from "@/neo4j";
 import { Neo4jSupportedProperties, NeogmaInstance, NeogmaModel } from "neogma";
-import { AnyObject } from './types';
+import { AnyObject, WhereParamsOf } from './types';
 
 
 type ExtractTypesOfInstance<T> = T extends NeogmaInstance<infer P, infer R, infer M> ? [P, R, M] : never;
@@ -21,23 +21,46 @@ type NodeType
     label: string;
   }
 
-type BuildType = () => (RelationType | NodeType)[]
 
-type RecursiveRelsOf<R extends AnyObject> = {
-  [K in keyof R]: R[K] extends { Instance: infer InstanceType }
-  ? {
-    [C in keyof RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]>]:
-    RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]>[C]
-  } & {
-    build: BuildType,
-    (args?: {
-      nodeIdentifier?: string,
-      relIdentifier?: string
-    }): RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1]> & { build: BuildType };
-  }
+type RelOrNode = (RelationType | NodeType)
 
-  : never;
-};
+type BuildType<I extends any | undefined = undefined> = () =>
+  I extends undefined ?
+  RelOrNode[] :
+  (RelOrNode & { identifier: I })[]
+
+type NonNullUndefined<T> = NonNullable<T> extends never ? undefined : NonNullable<T>
+
+type RecursiveRelsOf<
+  R extends AnyObject,
+  I extends any | undefined,
+> = {
+    [K in keyof R]: R[K] extends { Instance: infer InstanceType }
+    ? {
+      [C in keyof RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1], I>]:
+      RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1], I>[C]
+    } & {
+      build: BuildType<I>,
+
+      where: (args: WhereParamsOf<ExtractTypesOfInstance<InstanceType>[0]>)
+        => RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1], I> & { build: BuildType<I> },
+
+      exact: (instance: ExtractTypesOfInstance<InstanceType>[0])
+        => RecursiveRelsOf<ExtractTypesOfInstance<InstanceType>[1], I> & { build: BuildType<I> },
+
+      <
+        N extends string | undefined = undefined,
+        R extends string | undefined = undefined
+      >(args?: {
+        nodeIdentifier?: N,
+        relIdentifier?: R
+      }): RecursiveRelsOf<
+        ExtractTypesOfInstance<InstanceType>[1], NonNullUndefined<I | N | R | undefined>
+      > & { build: BuildType<NonNullUndefined<I | N | R>> };
+    }
+
+    : never;
+  };
 
 
 function getModelFrom(args: {
@@ -57,15 +80,17 @@ function getModelFrom(args: {
 export function rel_build_of<
   P extends Neo4jSupportedProperties,
   R extends AnyObject,
-  M extends AnyObject
->({ fromI, fromM }: {
+  M extends AnyObject,
+  I extends string
+>({ fromI, fromM, identifier }: {
   fromI?: NeogmaInstance<P, R, M> | undefined,
   fromM?: NeogmaModel<P, R, M> | undefined,
-}): RecursiveRelsOf<R> {
+  identifier?: I,
+}): RecursiveRelsOf<R, I> {
   const startModel = getModelFrom({ fromI, fromM }) as NeogmaModel<P, R, M>
 
   type PathType = (RelationType | NodeType) & { identifier?: string }
-  const buildRels = (model: NeogmaModel<any, any, any>, path: PathType[] = [], nodeIdentifier?: string): RecursiveRelsOf<any> => {
+  const buildRels = (model: NeogmaModel<any, any, any>, path: PathType[] = [], nodeIdentifier?: string): RecursiveRelsOf<any, any> => {
     const currentPath = path
       .concat({
         label: model.getModelName()
@@ -90,7 +115,9 @@ export function rel_build_of<
     };
 
     Object.assign(res, {
-      build: R.always(currentPath)
+      build: R.always(currentPath),
+      where: null,
+      exact: null,
     });
 
     const defineRelationshipGetter = ({ rel, alias }) =>
@@ -108,9 +135,9 @@ export function rel_build_of<
       .map(alias => ({ alias, rel: model.relationships[alias]! }))
       .forEach(defineRelationshipGetter)
 
-    return res as any as RecursiveRelsOf<any>;
+    return res as any as RecursiveRelsOf<any, any>;
   };
 
-  return buildRels(startModel as any);
+  return buildRels(startModel as any, [], identifier);
 }
 
