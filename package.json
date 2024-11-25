@@ -1,0 +1,11 @@
+{
+  "name": "auclean-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:fulcanelly/auclean-bot.git",
+  "author": "fulcanelly <dallasxfulcanelly@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "pm2": "^5.3.0"
+  }
+}
